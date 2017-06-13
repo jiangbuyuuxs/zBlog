@@ -1,0 +1,165 @@
+a {
+    text-decoration: none;
+    color: #2f2f2f;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #ff5442;
+}
+body{
+    background: #353535;
+}
+
+.head-bar{
+    min-height: 50px;
+    border:none;
+    margin-bottom: 0;
+}
+.hide-header{
+    min-height: 50px;
+}
+
+
+
+.hide-header{
+    display: none;
+}
+.pc .head-bar,.mobile #head-bar-container{
+    position: fixed;
+    top:0;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+    opacity: 0.8;
+    height: 40px;
+    transition: all 0.2s;
+    -webkit-transition: all 0.2s;
+    border-radius: 0;
+}
+.pc .hide-header{
+    display: block;
+}
+
+.mobile .hide-header {
+    display: block;
+}
+.mobile .head-bar .nav{
+    top:50px;
+}
+
+
+
+
+.head-bar .navbar-nav > li > a{
+    border-bottom: solid 4px #ffffff;
+    padding-bottom: 0;
+    height: 50px;
+}
+.head-bar .navbar-nav > li > a:hover{
+    border-bottom: solid 4px #ff5442;
+    background: rgba(206, 206, 206, 0.5);
+    color:#ffffff;
+}
+
+
+.right-panel{
+    padding: 0 40px;
+}
+
+.right-panel .right-container{
+    width:90%;
+}
+
+.padding2px {
+    padding: 2px;
+}
+
+.index-head-img {
+    line-height: 200px;
+    margin: 10px 0px;
+    border: 1px solid #aaaaaa;
+    background-image: url("/resources/img/index.jpg");
+    transition: -ms-transform 0.2s ease-out;
+}
+
+.index-head-img:hover {
+    transform: rotateY(180deg);
+}
+
+.head-img-container {
+    width: 125px;
+    height: 125px;
+    margin: 0 auto;
+    background: url("/resources/img/head.jpg") center no-repeat;;
+}
+
+.blog-list {
+    min-height: 378px;
+}
+
+.blog-list .row {
+    margin: 10px 0px;
+    padding: 2px;
+    border-bottom:1px dotted #2f2f2f;
+}
+
+.blog-panel{
+    padding:0 30px;
+}
+
+.blog-list-head {
+    margin: 5px 0 0 0;
+}
+
+.user-name {
+    text-align: center;
+}
+
+.sp25 {
+    height: 25px;
+}
+
+.column-title {
+    font-weight: bold;
+    border-bottom: 3px solid #ff5442;
+}
+
+.blog-tag {
+    padding: 8px;
+}
+
+.blog-tag a {
+    color: #1b0f0d;
+    font: 13px "微软雅黑";
+    border-radius: 5px;
+    border: solid 1px #cea885;
+    word-break: keep-all;
+    padding: 2px;
+    margin: 0 2px 3px 0;
+    display: inline-block;
+}
+.blog-tag a:hover{
+    background: #ff5442;
+    transform:scaleX(1.2) scaleY(1.2);
+}
+
+.remark {
+    margin: 0 10px;
+}
+
+.top-blog-list {
+    padding-left: 2px;
+}
+
+.top-blog-list p {
+    margin: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size:12px ;
+    border-bottom: 1px solid #AF6180;
+}
+.page-bar .pagination{
+    margin:5px 0;
+}

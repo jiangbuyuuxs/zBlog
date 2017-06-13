@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.dao.VisitDao">
+    <select id="getHotBlog" resultType="Visit">
+        select *
+        from visit
+        order by num desc
+        limit 0,#{num}
+    </select>
+    <select id="getVisitByBlogid" resultType="Visit">
+        select *
+        from visit
+        where blogid=#{blogid}
+    </select>
+    <update id="updateVisit">
+        update visit
+          set num = #{visit.num}
+        where blogid=#{visit.blogid}
+    </update>
+    <select id="getAllVisitSum" resultType="int">
+        select sum(num) as num
+        from visit
+   </select>
+    <delete id="deleteById">
+        delete
+        from visit
+        where blogid=#{id}
+   </delete>
+</mapper>

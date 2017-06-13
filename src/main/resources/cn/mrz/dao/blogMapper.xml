@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.dao.BlogDao">
+    <sql id="cols">
+        title,cdate,edate,texts,imgid,classtype
+    </sql>
+
+
+
+    <select id="getBlogsWithoutContent" resultType="Blog">
+        select id,title,cdate,edate,imgid,classtype
+        from blogs
+        <if test="sort!=null">
+            order by ${sort}
+        </if>
+        limit #{start},#{num}
+    </select>
+
+    <select id="getBlogs" resultType="Blog">
+        select *
+        from blogs
+        <if test="sort!=null">
+            order by ${sort}
+        </if>
+        limit #{start},#{num}
+    </select>
+    <select id="selectCount" resultType="int">
+        select count(id)
+        from blogs
+    </select>
+    <select id="selectById" resultType="Blog">
+        select *
+        from blogs
+        where id = #{id}
+    </select>
+    <insert id="insertBlog" parameterType="Blog" useGeneratedKeys="true" keyProperty="id">
+        insert into
+        blogs(<include refid="cols"></include>)
+        values(#{title},#{cdate},#{edate},#{texts},#{imgid},#{classtype})
+    </insert>
+    <delete id="deleteById">
+        delete
+        from blogs
+        where id = #{id}
+    </delete>
+</mapper>

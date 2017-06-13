@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.dao.CyDao">
+    <select id="getCyByPyfirst" resultType="Cy">
+        select *
+        from cy
+        where pyfirst=#{pyfirst}
+    </select>
+    <select id="getCyByPyend" resultType="Cy">
+        select *
+        from cy
+      where pyend = #{pyend}
+    </select>
+    <select id="getCy" resultType="Cy">
+        select *
+        from cy
+        where cy=#{cy}
+    </select>
+</mapper>

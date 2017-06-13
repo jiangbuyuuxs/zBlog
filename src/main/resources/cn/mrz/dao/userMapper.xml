@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.dao.UserDao">
+    <select id="getUserByUsername" resultType="User">
+        select *
+        from users
+        where username = #{username}
+    </select>
+
+    <select id="getUsers" resultType="User">
+        select *
+        from users
+        <if test="sort!=null">
+            order by ${sort}
+        </if>
+        limit #{start},#{num}
+    </select>
+
+    <select id="findRoles" resultType="Role">
+        select b.id,b.name
+        from users a,role b,user_role C
+        where a.id = c.uid and c.rid = b.id and a.username=#{username}
+    </select>
+
+    <select id="findPermissions" resultType="Permission">
+        select d.id,d.permission
+        from users a,role b,user_role C,permission d,role_permission e
+        where a.id = c.uid and c.uid = b.id and d.id = e.pid and e.rid = b.id
+          and a.username=#{username}
+    </select>
+</mapper>
