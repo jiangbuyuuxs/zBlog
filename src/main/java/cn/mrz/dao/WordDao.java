@@ -21,5 +21,5 @@ public interface WordDao extends BaseMapper<Word> {
 
     int delWordsByBlogId(long blogId);
 
-    List<Word> getWordsByWordHash(@Param("hashcode")String hashcode);
+    List<Word> getWordsByWordHash(Pagination page,@Param("hashcode")String hashcode);
 }

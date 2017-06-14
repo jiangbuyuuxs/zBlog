@@ -198,6 +198,7 @@
         }
         })
         ;
+        var blogPageSize = 10;
         Vue.component('blogManagerPanel', {
             template: '#blog-manager-template',
             data: function () {
@@ -215,13 +216,13 @@
                         if (page < 1 || page > this.pageNum || page === this.curPage)
                             return;
                     this.loading = true;
-                    var url = '/admin/blog/' + page + '/page';
+                    var url = '/admin/blog/' + page + '/page/'+ blogPageSize + '/pagesize';
                     this.$http.get(url).then(function (data) {
                         BlogTool.checkLogin(data);
                         this.loading = false;
                         this.blogList = data.data.blogList;
                         this.blogCountNum = data.data.blogCountNum;
-                        this.pageNum = Math.ceil(this.blogCountNum / 10);
+                        this.pageNum = Math.ceil(this.blogCountNum / blogPageSize);
                         this.curPage = page;
                     }, function (response) {
                         this.loading = false;

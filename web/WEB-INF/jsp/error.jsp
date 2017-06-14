@@ -20,14 +20,21 @@
 </head>
 <body>
 <div class="container">
-  <h3>别搞事~~~</h3>
   <div>
     <a class="btn btn-default" href="/">首页</a>
-    <a class="btn btn-default back" href="#">上一页</a>
+    <a class="btn btn-default back" href="#">返回</a>
   </div>
   <div class="has-error">
-    ${ex}
-    ${message}
+    <table class="table table-bordered">
+      <tr>
+        <td>目标</td>
+        <td>消息</td>
+      </tr>
+      <tr class="danger">
+        <td>${url}</td>
+        <td>${message}</td>
+      </tr>
+    </table>
   </div>
 </div>
 </body>

@@ -17,17 +17,17 @@
             }
 
             $(window).on('scroll', function () {
-                changeHeadBarPostionByScroll();
+                changeHeadBarPositionByScroll();
             });
 
             $(window).on('resize', function () {
                 isMobile = checkMobile();
                 changeHeadBarPosition();
-                changeHeadBarPostionByScroll();
+                changeHeadBarPositionByScroll();
             });
             changeHeadBarPosition();
 
-            function changeHeadBarPostionByScroll(){
+            function changeHeadBarPositionByScroll(){
                 if($('body').scrollTop()>0&&!isMobile){
                     $('.head-panel').addClass('pc');
                 }else if(!isMobile){
@@ -73,11 +73,10 @@
                     },
                     _changePage: function (page) {
                         if (page < 1 || page > pageNum || page === this.curPage)
-                            return;
-                        var order = 0;//TODO 获取排序条件
-                        var url = 'blog/' + page + '/page/' + order + '/order';
+                            return
+                        var url = 'admin/blog/' + page + '/page/'+pageSize+'/pagesize';
                         this.$http.get(url).then(function(data){
-                            this.blogList = data.data.data;
+                            this.blogList = data.data.blogList;
                             this.curPage = page;
                         },function(data){
                             console.log(data.msg);

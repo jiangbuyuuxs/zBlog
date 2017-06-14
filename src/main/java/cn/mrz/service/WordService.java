@@ -2,6 +2,7 @@ package cn.mrz.service;
 
 import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
+import com.baomidou.mybatisplus.plugins.Page;
 
 import java.util.List;
 
@@ -22,5 +23,5 @@ public interface WordService extends BaseService<Word,Long> {
     void getBlogWords(List<Blog> blogList);
     void getBlogWords(Blog blog);
 
-    List<Word> getWordsByWordHash(String hashcode);
+    public Page<Word> getWordsByWordHash(Page<Word> page,String hashcode);
 }

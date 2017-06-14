@@ -60,8 +60,10 @@ public class WordServiceImpl implements WordService {
     }
 
     @Override
-    public List<Word> getWordsByWordHash(String hashcode) {
-        return wordDao.getWordsByWordHash(hashcode);
+    public Page<Word> getWordsByWordHash(Page<Word> page,String hashcode) {
+
+        page.setRecords(wordDao.getWordsByWordHash(page,hashcode));
+        return page;
     }
 
     @Override
@@ -116,7 +118,7 @@ public class WordServiceImpl implements WordService {
 
     @Override
     public List<Word> getTopHotWordList(int num) {
-        return getHotWordList(0,num);
+        return getHotWordList(1,num);
     }
 
     @Override

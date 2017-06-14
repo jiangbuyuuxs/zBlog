@@ -3,6 +3,7 @@ package cn.mrz.controller;
 import cn.mrz.pojo.Blog;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
+import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Controller;
@@ -32,11 +33,14 @@ public class BlogController {
     private WordService wordService;
 
     @ResponseBody
-    @RequestMapping(value = {"/admin/blog/{page}/page"}, produces = {"application/json;charset=UTF-8"})
-    public String getBlogList(@PathVariable int page) {
-        int start = (page - 1) * pageSize;
-        List<Blog> blogList = blogService.getBlogList(start, pageSize, "create_date",false, false);
-        int blogCountNum = blogService.getBlogCountNum();
+    @RequestMapping(value = {"/admin/blog/{page}/page/{pageSize}/pagesize"}, produces = {"application/json;charset=UTF-8"})
+    public String getBlogList(@PathVariable Integer page,@PathVariable Integer pageSize) {
+        if(pageSize==null)
+            pageSize = this.pageSize;
+        Page<Blog> pagination = new Page<Blog>(page,pageSize,"create_date");
+        pagination = blogService.getBlogList(pagination, false, false);
+        List<Blog> blogList = pagination.getRecords();
+        int blogCountNum = pagination.getTotal();//blogService.getBlogCountNum();
 
         String blogListJson = "{\"success\": false,\"msg\",\"获取失败\"}";
         ObjectMapper mapper = new ObjectMapper();
@@ -117,13 +121,14 @@ public class BlogController {
     @RequiresRoles("admin")
     @ResponseBody
     @RequestMapping(value = "/admin/blog/{id}/del/{page}/page", produces = {"application/json;charset=UTF-8"})
-    public String delBlog(@PathVariable("id")Long id,@PathVariable("page") int page) {
+    public String delBlog(@PathVariable("id")Long id,@PathVariable("page") Integer page) {
         String blogListJson = "{\"success\": false,\"msg\",\"操作失败\"}";
         boolean isDelete = blogService.deleteBlogById(id);
         if(isDelete){
-            int start = (page - 1) * pageSize;
-            List<Blog> blogList = blogService.getBlogList(start, pageSize, "CDATE", false, false);
-            int blogCountNum = blogService.getBlogCountNum();
+            Page<Blog> pagination = new Page<Blog>(page,pageSize,"create_date");
+            pagination= blogService.getBlogList(pagination, false, false);
+            List<Blog> blogList = pagination.getRecords();
+            int blogCountNum = pagination.getTotal();//blogService.getBlogCountNum();
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
             HashMap hashMap = new HashMap();
