@@ -1,7 +1,7 @@
 package cn.mrz.controller;
 
 import cn.mrz.pojo.Blog;
-import cn.mrz.service.BlogsService;
+import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -27,7 +27,7 @@ public class BlogController {
     final int pageSize = 10;
 
     @Resource
-    private BlogsService blogsService;
+    private BlogService blogService;
     @Resource
     private WordService wordService;
 
@@ -35,16 +35,16 @@ public class BlogController {
     @RequestMapping(value = {"/admin/blog/{page}/page"}, produces = {"application/json;charset=UTF-8"})
     public String getBlogList(@PathVariable int page) {
         int start = (page - 1) * pageSize;
-        List<Blog> blogs = blogsService.getBlogs(start, pageSize, " cdate desc", false);
-        int blogNums = blogsService.getBlogNums();
+        List<Blog> blogList = blogService.getBlogList(start, pageSize, "create_date",false, false);
+        int blogCountNum = blogService.getBlogCountNum();
 
         String blogListJson = "{\"success\": false,\"msg\",\"获取失败\"}";
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
 
         HashMap hashMap = new HashMap();
-        hashMap.put("blogs", blogs);
-        hashMap.put("blogNums", blogNums);
+        hashMap.put("blogList", blogList);
+        hashMap.put("blogCountNum", blogCountNum);
         try {
             blogListJson = mapper.writeValueAsString(hashMap);
         } catch (IOException e) {
@@ -53,8 +53,6 @@ public class BlogController {
         return blogListJson;
 
     }
-
-
 
     @RequiresRoles("admin")
     @RequestMapping(value = {"/admin/blog/go/add"})
@@ -66,7 +64,7 @@ public class BlogController {
     @RequiresRoles("admin")
     @RequestMapping(value = {"/admin/blog/{id}/edit"})
     public String goEditBlog(ModelMap map, @PathVariable Long id) {
-        Blog blog = blogsService.getById(id);
+        Blog blog = blogService.getById(id);
         map.addAttribute("oper", "修改博文");
         map.addAttribute("blog", blog);
         return "/admin/blog/edit";
@@ -75,13 +73,13 @@ public class BlogController {
     @RequiresRoles("admin")
     @ResponseBody
     @RequestMapping(value = "/admin/blog/add")
-    public String addBlogs(Blog blog) {
+    public String addBlog(Blog blog) {
         Date now = new Date(System.currentTimeMillis());
-        blog.setCdate(now);
-        blog.setEdate(now);
+        blog.setCreateDate(now);
+        blog.setEditDate(now);
         if (blog.getTitle() == null || "".equals(blog.getTitle().trim()))
             blog.setTitle(new SimpleDateFormat("yyyy年MM月dd日HH时m分ss秒").format(now) + "写下的博客");
-        blogsService.addBlog(blog);
+        blogService.addBlog(blog);
         final Blog blog2 = blog;
         new Thread(new Runnable() {
             @Override
@@ -96,16 +94,16 @@ public class BlogController {
     @RequiresRoles("admin")
     @ResponseBody
     @RequestMapping(value = "/admin/blog/edit")
-    public String editBlogs(Blog blog) {
+    public String editBlog(Blog blog) {
         if (null == blog) {
             return "{\"success\": false}";
         }
-        Blog oldBlog = blogsService.getById(blog.getId());
+        Blog oldBlog = blogService.getById(blog.getId());
         if (null == oldBlog) {
             return "{\"success\": false}";
         }
-        blog.setEdate(new Date(System.currentTimeMillis()));
-        blogsService.update(blog);
+        blog.setEditDate(new Date(System.currentTimeMillis()));
+        blogService.update(blog);
         final Blog blog2 = blog;
         new Thread(new Runnable() {
             @Override
@@ -121,16 +119,16 @@ public class BlogController {
     @RequestMapping(value = "/admin/blog/{id}/del/{page}/page", produces = {"application/json;charset=UTF-8"})
     public String delBlog(@PathVariable("id")Long id,@PathVariable("page") int page) {
         String blogListJson = "{\"success\": false,\"msg\",\"操作失败\"}";
-        boolean isDelete = blogsService.deleteBlogById(id);
+        boolean isDelete = blogService.deleteBlogById(id);
         if(isDelete){
             int start = (page - 1) * pageSize;
-            List<Blog> blogList = blogsService.getBlogs(start, pageSize, " cdate desc", false);
-            int blogNums = blogsService.getBlogNums();
+            List<Blog> blogList = blogService.getBlogList(start, pageSize, "CDATE", false, false);
+            int blogCountNum = blogService.getBlogCountNum();
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
             HashMap hashMap = new HashMap();
-            hashMap.put("blogs", blogList);
-            hashMap.put("blogNums", blogNums);
+            hashMap.put("blogList", blogList);
+            hashMap.put("blogCountNum", blogCountNum);
             try {
                 blogListJson = mapper.writeValueAsString(hashMap);
             } catch (IOException e) {

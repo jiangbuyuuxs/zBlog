@@ -24,22 +24,22 @@ public class Cy {
         this.cy = cy;
     }
 
-    public String getPyfirst() {
-        return pyfirst;
+    public String getPyFirst() {
+        return pyFirst;
     }
 
-    public void setPyfirst(String pyfirst) {
-        this.pyfirst = pyfirst;
+    public void setPyFirst(String pyFirst) {
+        this.pyFirst = pyFirst;
     }
 
-    public String getPyend() {
-        return pyend;
+    public String getPyEnd() {
+        return pyEnd;
     }
 
-    public void setPyend(String pyend) {
-        this.pyend = pyend;
+    public void setPyEnd(String pyEnd) {
+        this.pyEnd = pyEnd;
     }
 
-    private String pyfirst;
-    private String pyend;
+    private String pyFirst;
+    private String pyEnd;
 }

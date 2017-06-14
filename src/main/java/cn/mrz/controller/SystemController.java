@@ -2,11 +2,8 @@ package cn.mrz.controller;
 
 import cn.mrz.dao.VisitDao;
 import cn.mrz.pojo.User;
-import cn.mrz.pojo.Visit;
-import cn.mrz.service.BlogsService;
-import cn.mrz.service.UsersService;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.sun.org.glassfish.gmbal.ParameterNames;
+import cn.mrz.service.BlogService;
+import cn.mrz.service.UserService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -23,9 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,11 +31,11 @@ import java.util.Map;
 public class SystemController {
 
     @Autowired
-    private BlogsService blogsService;
+    private BlogService blogService;
     @Autowired
     private VisitDao visitDao;
     @Autowired
-    private UsersService userService;
+    private UserService userService;
 
     @RequestMapping(value = {"/admin/go/{page}"})
     public String goAdminPage(@PathVariable String page) {
@@ -50,16 +45,16 @@ public class SystemController {
     @ResponseBody
     @RequestMapping(value = {"/admin/blogInfo"}, produces = {"application/json;charset=UTF-8"})
     public String getBlogInfo() {
-        Map<String, Object> infos = new HashMap();
-        int blogNums = blogsService.getBlogNums();
+        Map<String, Object> info = new HashMap();
+        int blogCountNum = blogService.getBlogCountNum();
         int visitCount = visitDao.getAllVisitSum();
-        infos.put("blogsCount", blogNums);
-        infos.put("visitCount", visitCount);
+        info.put("blogCountNum", blogCountNum);
+        info.put("visitCount", visitCount);
 
         String infoJson = "{\"success\": false}";
         ObjectMapper mapper = new ObjectMapper();
         try {
-            infoJson = mapper.writeValueAsString(infos);
+            infoJson = mapper.writeValueAsString(info);
         } catch (IOException e) {
             e.printStackTrace();
         }

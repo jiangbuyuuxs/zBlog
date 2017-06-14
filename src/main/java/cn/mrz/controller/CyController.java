@@ -39,16 +39,16 @@ public class CyController {
         if (cy != null && cy.trim().length() > 2) {
             Cy chenyu = cyDao.getCy(cy);
             if (chenyu != null) {
-                String pyend = chenyu.getPyend();
-                List<Cy> cyByPyfirst = cyDao.getCyByPyfirst(pyend);
+                String pyEnd = chenyu.getPyEnd();
+                List<Cy> cyByPyFirst = cyDao.getCyByPyFirst(pyEnd);
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> map = new HashMap();
                 map.put("success", true);
                 map.put("cy", chenyu);
                 map.put("num", 0);
-                if (cyByPyfirst != null && cyByPyfirst.size() > 0) {
-                    map.put("num", cyByPyfirst.size());
-                    map.put("nextcy", cyByPyfirst);
+                if (cyByPyFirst != null && cyByPyFirst.size() > 0) {
+                    map.put("num", cyByPyFirst.size());
+                    map.put("nextcy", cyByPyFirst);
                 }
                 try {
                     json = mapper.writeValueAsString(map);

@@ -2,6 +2,8 @@ package cn.mrz.dao;
 
 import cn.mrz.pojo.Visit;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.plugins.pagination.Pagination;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +14,9 @@ import java.util.List;
  */
 @Repository
 public interface VisitDao  extends BaseMapper<Visit> {
-    List<Visit> getHotBlog(int num);
+
+    List<Visit> selectVisitList(Pagination page);
+
     Visit getVisitByBlogid(Long blogid);
     int updateVisit(@Param("visit")Visit visit);
     int getAllVisitSum();

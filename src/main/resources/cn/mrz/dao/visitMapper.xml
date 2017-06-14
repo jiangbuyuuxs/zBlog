@@ -2,29 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.mrz.dao.VisitDao">
-    <select id="getHotBlog" resultType="Visit">
-        select *
-        from visit
-        order by num desc
-        limit 0,#{num}
+    <select id="selectVisitList" resultType="Visit">
+        select * from visit
     </select>
+
     <select id="getVisitByBlogid" resultType="Visit">
         select *
         from visit
-        where blogid=#{blogid}
+        where blog_id=#{blogId}
     </select>
+
     <update id="updateVisit">
         update visit
           set num = #{visit.num}
-        where blogid=#{visit.blogid}
+        where blog_id=#{visit.blogId}
     </update>
+
     <select id="getAllVisitSum" resultType="int">
         select sum(num) as num
         from visit
    </select>
+
     <delete id="deleteById">
         delete
         from visit
-        where blogid=#{id}
+        where blog_id=#{id}
    </delete>
 </mapper>

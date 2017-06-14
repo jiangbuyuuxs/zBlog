@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.mrz.dao.WordDao">
-    <select id="getWords" resultType="Word">
+    <select id="getWordList" resultType="Word">
         select
           remark,
           hashcode,
@@ -10,7 +10,6 @@
         from words
         group by remark
         order by num desc
-        limit #{start},#{num}
     </select>
 
     <delete id="delAll">
@@ -20,7 +19,7 @@
     <select id="getWordByName" resultType="Word">
         select *
         from words
-        where name=#{name}
+        where name = #{name}
     </select>
 
     <select id="getWordsByWordHash" resultType="Word">
@@ -29,9 +28,9 @@
         where hashcode = #{hashcode}
     </select>
 
-    <delete id="delWordsByBlogid">
+    <delete id="delWordsByBlogId">
         delete from words
-        where blogid = #{blogid}
+        where blog_id = #{blogId}
     </delete>
 
 </mapper>

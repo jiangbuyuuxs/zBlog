@@ -4,6 +4,7 @@ import cn.mrz.dao.WordDao;
 import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.WordService;
+import com.baomidou.mybatisplus.plugins.Page;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.recognition.impl.StopRecognition;
@@ -64,10 +65,10 @@ public class WordServiceImpl implements WordService {
     }
 
     @Override
-    public void getBlogsWords(List<Blog> blogs) {
+    public void getBlogWords(List<Blog> blogList) {
         StopRecognition filter = new StopRecognition();
         filter.insertStopRegexes(".");
-        for (Blog blog : blogs) {
+        for (Blog blog : blogList) {
             getBlogWords(blog, filter);
         }
     }
@@ -96,17 +97,17 @@ public class WordServiceImpl implements WordService {
         saveWords(blog.getId(), termNumMap);
     }
 
-    private void saveWords(long blogid, Map<String, TermWarp> termNumMap) {
-        wordDao.delWordsByBlogid(blogid);
+    private void saveWords(long blogId, Map<String, TermWarp> termNumMap) {
+        wordDao.delWordsByBlogId(blogId);
         Set<Map.Entry<String, TermWarp>> entries = termNumMap.entrySet();
         for (Map.Entry<String, TermWarp> wordTerm : entries) {
             String name = wordTerm.getKey();
             TermWarp termWarp = wordTerm.getValue();
             Word word = new Word();
-            word.setBlogid(blogid);
+            word.setBlogId(blogId);
             word.setNum(termWarp.num);
             word.setRemark(name);
-            word.setType(termWarp.term.getNatureStr());
+            word.setWordType(termWarp.term.getNatureStr());
             word.setHashcode("" + name.hashCode());
             wordDao.insert(word);
         }
@@ -114,8 +115,13 @@ public class WordServiceImpl implements WordService {
 
 
     @Override
-    public List<Word> getHotWords(int start, int num) {
-        List<Word> words = wordDao.getWords(start, num);
+    public List<Word> getTopHotWordList(int num) {
+        return getHotWordList(0,num);
+    }
+
+    @Override
+    public List<Word> getHotWordList(int current, int pageSize) {
+        List<Word> words = wordDao.getWordList(new Page<Word>(current, pageSize));
         return words;
     }
 }

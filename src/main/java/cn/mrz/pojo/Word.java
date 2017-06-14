@@ -9,11 +9,11 @@ import com.baomidou.mybatisplus.annotations.TableName;
 @TableName("words")
 public class Word {
     private long id;
-    private long blogid;
+    private long blogId;
     private String remark;
     private String hashcode;
     private long num;
-    private String type;
+    private String wordType;
 
     public Word() {
     }
@@ -24,12 +24,12 @@ public class Word {
         this.hashcode = hashcode;
     }
 
-    public long getBlogid() {
-        return blogid;
+    public long getBlogId() {
+        return blogId;
     }
 
-    public void setBlogid(long blogid) {
-        this.blogid = blogid;
+    public void setBlogId(long blogId) {
+        this.blogId = blogId;
     }
     public long getId() {
         return id;
@@ -63,11 +63,11 @@ public class Word {
         this.num = num;
     }
 
-    public String getType() {
-        return type;
+    public String getWordType() {
+        return wordType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setWordType(String wordType) {
+        this.wordType = wordType;
     }
 }

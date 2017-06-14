@@ -17,26 +17,26 @@
     <script>
         $(function () {
             var nexted = [];
-            $(".cy").on("keydown", function (e) {
+            $('.cy').on('keydown', function (e) {
                 if (e.keyCode == 13) {
                     initNextCy();
                     var cy = $(this).val();
                     getNextCy(cy);
                 }
             });
-            $(".next-cy-btn").on("click", function () {
+            $('.next-cy-btn').on('click', function () {
                 initNextCy();
-                var cy = $(".cy").val();
+                var cy = $('.cy').val();
                 getNextCy(cy);
             });
 
-            $(document).on("click", ".next-cy-item", function () {
+            $(document).on('click', '.next-cy-item', function () {
                 var cy = $(this).text();
                 $(".cy").val(cy);
                 getNextCy(cy);
             });
 
-            $(".export-cy").on("click", exportCy);
+            $('.export-cy').on('click', exportCy);
 
             /**
             *开始新一轮的游戏
@@ -45,15 +45,15 @@
                 nexted = [];
                 $(".next-cy").empty();
                 exportCy();
-                $(".nexted-cy").empty();
+                $('.nexted-cy').empty();
             }
 
             function getNextCy(cy) {
                 var data = {cy: cy};
                 if (cy && cy.length > 2) {
                     $.ajax("/cy/cy/cy", {
-                        type: "POST",
-                        dataType: "json",
+                        type: 'POST',
+                        dataType: 'json',
                         data: data,
                         success: function (data) {
                             $(".next-cy").empty();
@@ -66,24 +66,24 @@
                                     if (nextcy) {
                                         var i = 0, j = nextcy.length;
                                         for (; i < j; i++) {
-                                            $("<li class='list-group-item'><span class='next-cy-item' cyid='"+nextcy[i].id+"' pyend='" + nextcy[i].pyend + "'>" + nextcy[i].cy+"</span>("+nextcy[i].pyend + ")</li>").appendTo($(".next-cy"));
+                                            $('<li class="list-group-item"><span class="next-cy-item" cyid="'+nextcy[i].id+'" pyEnd="' + nextcy[i].pyEnd + '">' + nextcy[i].cy+'</span>('+nextcy[i].pyEnd + ')</li>').appendTo($('.next-cy'));
                                         }
                                     }
                                 }
-                                $(".nexted-cy").append($("<li class='list-group-item text-success'>"+data.cy.cy+"("+data.cy.pyend+")</li>"));
+                                $('.nexted-cy').append($('<li class="list-group-item text-success">'+data.cy.cy+'('+data.cy.pyEnd+')</li>'));
                                 dangerUsedCy();
                             }else{
-                                fail("这个程序未收录~~");
+                                fail('这个程序未收录~~');
                             }
                         }
                     });
                 }else{
-                    fail("是在下输了,您得输入完整的成语");
+                    fail('是在下输了,您得输入完整的成语');
                 }
             }
 
             function fail(msg){
-                msg = msg||"是在下输了~~, "+$(".cy").val()+" 下面没有了.";
+                msg = msg||'是在下输了~~, '+$('.cy').val()+'下面没有了.';
                 alert(msg);
                 initNextCy();
             }
@@ -91,17 +91,17 @@
             function dangerUsedCy(){
                 var i= 0,j=nexted.length;
                 for(;i<j;i++){
-                    var next_item = $("[cyid="+nexted[i]+"]");
+                    var next_item = $('[cyid='+nexted[i]+']');
                     next_item.parent().addClass("hidden");
                 }
             }
 
             function exportCy(){
-                var cy_linked = "";
-                $(".nexted-cy li").each(function () {
-                    cy_linked += $(this).text()+"->";
+                var cy_linked = '';
+                $('.nexted-cy li').each(function () {
+                    cy_linked += $(this).text()+'->';
                 });
-                console.log(cy_linked+"囧");
+                console.log(cy_linked+'囧');
             }
         });
     </script>

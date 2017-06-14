@@ -2,15 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.mrz.dao.CyDao">
-    <select id="getCyByPyfirst" resultType="Cy">
+    <select id="getCyByPyFirst" resultType="Cy">
         select *
         from cy
-        where pyfirst=#{pyfirst}
+        where py_first=#{pyFirst}
     </select>
-    <select id="getCyByPyend" resultType="Cy">
+    <select id="getCyByPynd" resultType="Cy">
         select *
         from cy
-      where pyend = #{pyend}
+      where py_end = #{pyEnd}
     </select>
     <select id="getCy" resultType="Cy">
         select *

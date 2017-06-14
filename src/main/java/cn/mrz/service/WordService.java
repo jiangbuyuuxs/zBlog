@@ -9,10 +9,18 @@ import java.util.List;
  * Created by Administrator on 2017/3/16.
  */
 public interface WordService extends BaseService<Word,Long> {
-    List<Word> getHotWords(int start, int num);
 
-    void getBlogsWords(List<Blog> blogs);
-    void getBlogWords(Blog blogs);
+    /**
+     * 使用次数最高的词汇
+     * @param num
+     * @return
+     */
+    List<Word> getTopHotWordList(int num);
+
+    List<Word> getHotWordList(int current, int pageSize);
+
+    void getBlogWords(List<Blog> blogList);
+    void getBlogWords(Blog blog);
 
     List<Word> getWordsByWordHash(String hashcode);
 }

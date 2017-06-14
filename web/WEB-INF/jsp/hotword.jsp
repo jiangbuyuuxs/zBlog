@@ -17,12 +17,12 @@
         <div class="col-lg-3 col-md-3 col-sm-3 col-xs-4">发布时间</div>
     </div>
     <div class="blog-list">
-        <c:forEach items="${blogs}" var="blog">
+        <c:forEach items="${blogList}" var="blog">
             <div class="row">
                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8 title"><a title="${blog.title}"
                                                                           href="/detail/${blog.id}/id">${blog.title}</a>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-4"><fmt:formatDate value="${blog.cdate}"
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-4"><fmt:formatDate value="${blog.createDate}"
                                                                                  pattern="yyyy-MM-dd HH:mm:ss"/>
                 </div>
             </div>

@@ -12,22 +12,22 @@ public class Blog {
 
     private long id;
     private String title;
-    private Date cdate;
-    private Date edate;
+    private Date createDate;
+    private Date editDate;
     private String texts;
-    private long imgid;
-    private int classtype;
+    private long imageId;
+    private int classType;
 
     public long getId() {
         return id;
     }
 
-    public int getClasstype() {
-        return classtype;
+    public int getClassType() {
+        return classType;
     }
 
-    public void setClasstype(int classtype) {
-        this.classtype = classtype;
+    public void setClassType(int classType) {
+        this.classType = classType;
     }
 
     public void setId(long id) {
@@ -42,20 +42,20 @@ public class Blog {
         this.title = title;
     }
 
-    public Date getCdate() {
-        return cdate;
+    public Date getCreateDate() {
+        return createDate;
     }
 
-    public void setCdate(Date cdate) {
-        this.cdate = cdate;
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
-    public Date getEdate() {
-        return edate;
+    public Date getEditDate() {
+        return editDate;
     }
 
-    public void setEdate(Date edate) {
-        this.edate = edate;
+    public void setEditDate(Date editDate) {
+        this.editDate = editDate;
     }
 
     public String getTexts() {
@@ -66,11 +66,11 @@ public class Blog {
         this.texts = texts;
     }
 
-    public long getImgid() {
-        return imgid;
+    public long getImageId() {
+        return imageId;
     }
 
-    public void setImgid(long imgid) {
-        this.imgid = imgid;
+    public void setImageId(long imageId) {
+        this.imageId = imageId;
     }
 }

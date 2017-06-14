@@ -45,18 +45,18 @@
             }
 
 
-            var pageSize = ${pageNum};//TODO 从后端取
-            var pageNum = ${blogNums};
-            pageNum = Math.ceil(pageNum / pageSize);
+            var pageSize = ${pageSize};
+            var blogCountNum = ${blogCountNum};
+            var pageNum = Math.ceil(blogCountNum / pageSize);
 
             var blogPanel = new Vue({
                 el: '.main-panel',
                 data: {
-                    blogs:${blogs},
+                    blogList:${blogList},
                     pageNum: pageNum,
                     curPage: 1,
-                    hotBlogs:${hotBlogs},
-                    hotWords:${hotWords}
+                    hotBlogList:${hotBlogList},
+                    hotWordList:${hotWordList}
                 },
 
                 methods: {
@@ -75,9 +75,9 @@
                         if (page < 1 || page > pageNum || page === this.curPage)
                             return;
                         var order = 0;//TODO 获取排序条件
-                        var url = "blog/" + page + "/page/" + order + "/order";
+                        var url = 'blog/' + page + '/page/' + order + '/order';
                         this.$http.get(url).then(function(data){
-                            this.blogs = data.data.data;
+                            this.blogList = data.data.data;
                             this.curPage = page;
                         },function(data){
                             console.log(data.msg);
@@ -121,11 +121,11 @@
                 <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4">发布时间</div>
             </div>
             <div class="blog-list">
-                <div v-for="(blog,index) in blogs" class="row">
+                <div v-for="(blog,index) in blogList" class="row">
                     <div class="col-lg-10 col-md-9 col-sm-9 col-xs-8 padding2px"><a :title="blog.title"
                                                                                    :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
                     </div>
-                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 padding2px">{{blog.cdate}}</div>
+                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 padding2px">{{blog.createDate}}</div>
                 </div>
             </div>
             <div class="page-bar" :style="{visibility:pageNum>1?'visible':'hidden'}">
@@ -161,7 +161,7 @@
             </div>
             <div class="row">
                 <div class="blog-tag">
-                    <a v-for="hotword in hotWords" :href="'/hotword/'+hotword.hashcode+'/id'">{{hotword.remark}}</a>
+                    <a v-for="hotword in hotWordList" :href="'/hotword/'+hotword.hashcode+'/id'">{{hotword.remark}}</a>
                 </div>
             </div>
             <div class="row sp25"></div>
@@ -171,7 +171,7 @@
             <div class="row">
                 <div class="top-blog">
                     <div class="top-blog-list">
-                        <p v-for="hotBlog in hotBlogs"><a :href="'/detail/'+hotBlog.id+'/id'">{{hotBlog.title}}</a></p>
+                        <p v-for="hotBlog in hotBlogList"><a :href="'/detail/'+hotBlog.id+'/id'">{{hotBlog.title}}</a></p>
                     </div>
                 </div>
             </div>

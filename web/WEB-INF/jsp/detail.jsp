@@ -35,7 +35,7 @@
       <a class="btn btn-default" href="/">首页</a>
     </div>
   <div class="main-panel">
-    <h2 class="blog-title">${blog.title}<small>${blog.cdate}</small></h2>
+    <h2 class="blog-title">${blog.title}<small>${blog.createDate}</small></h2>
     <div class="highlight">${blog.texts}</div>
 
   </div>

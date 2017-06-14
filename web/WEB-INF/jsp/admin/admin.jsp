@@ -42,13 +42,13 @@
             <tbody>
             <tr>
                 <td>博文总数</td>
-                <td>{{info.blogsCount}}</td>
+                <td>{{info.blogCountNum}}</td>
                 <td>总访问人数</td>
                 <td>{{info.visitCount}}</td>
             </tr>
             <tr>
                 <td>xxxx</td>
-                <td>{{info.blogsCount}}</td>
+                <td>{{info.blogCountNum}}</td>
                 <td>yyyy</td>
                 <td>{{info.visitCount}}</td>
             </tr>
@@ -99,7 +99,7 @@
                         <th width="70%">标题</th>
                         <th width="20%">最后修改时间</th>
                     </tr>
-                    <tr v-for="blog of blogs">
+                    <tr v-for="blog of blogList">
                         <td>
                             <shiro:hasRole name="admin">
                                 <a class="btn btn-default btn-xs" href="#" @click.prevent="deleteBlog(blog.id)">删除</a>
@@ -111,7 +111,7 @@
                             </shiro:lacksRole>
                         </td>
                         <td><a :href="'/detail/'+blog.id+'/id'" target="_blank">{{blog.title}}</a></td>
-                        <td>{{blog.edate}}</td>
+                        <td>{{blog.editDate}}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -129,8 +129,8 @@
     <script>
         $(function () {
 
-            Vue.component("infoPanel", {
-                template: "#blog-info-template",
+            Vue.component('infoPanel', {
+                template: '#blog-info-template',
                 data: function () {
                     return {
                         info: {},
@@ -140,7 +140,7 @@
                 methods: {
                     fetchData: function (page) {
                         this.loading = true;
-                        var url = "/admin/blogInfo";
+                        var url = '/admin/blogInfo';
                         this.$http.get(url).then(function (data) {
                             BlogTool.checkLogin(data);
                             this.info = data.data;
@@ -157,8 +157,8 @@
             }
         });
 
-        Vue.component("userManagerPanel", {
-            template: "#user-manager-template",
+        Vue.component('userManagerPanel', {
+            template: '#user-manager-template',
             data: function () {
                 return {
                     users: [],
@@ -169,7 +169,7 @@
             methods: {
                 fetchData: function (page) {
                     this.loading = true;
-                    var url = "/admin/user/" + page + "/page";
+                    var url = '/admin/user/' + page + '/page';
                     this.$http.get(url).then(function (data) {
                         BlogTool.checkLogin(data);
                         this.loading = false;
@@ -181,9 +181,9 @@
                     });
                 },
                 deleteUser: function (username) {
-                    var sure = confirm("是否删除该用户(" + username + ")");
+                    var sure = confirm('是否删除该用户(' + username + ')');
                     if (sure) {
-                        var url = "/admin/user/" + username + "/del/" + this.curPage + "/page";
+                        var url = '/admin/user/' + username + '/del/' + this.curPage + '/page';
                         this.$http.get(url).then(function (data) {
                             this.users = data.data;
                         }, function (response) {
@@ -198,12 +198,12 @@
         }
         })
         ;
-        Vue.component("blogManagerPanel", {
-            template: "#blog-manager-template",
+        Vue.component('blogManagerPanel', {
+            template: '#blog-manager-template',
             data: function () {
                 return {
-                    blogs: [],
-                    blogNums: 0,
+                    blogList: [],
+                    blogCountNum: 0,
                     pageNum: 0,
                     curPage: 0,
                     loading: false
@@ -215,13 +215,13 @@
                         if (page < 1 || page > this.pageNum || page === this.curPage)
                             return;
                     this.loading = true;
-                    var url = "/admin/blog/" + page + "/page";
+                    var url = '/admin/blog/' + page + '/page';
                     this.$http.get(url).then(function (data) {
                         BlogTool.checkLogin(data);
                         this.loading = false;
-                        this.blogs = data.data.blogs;
-                        this.blogNums = data.data.blogNums;
-                        this.pageNum = Math.ceil(this.blogNums / 10);
+                        this.blogList = data.data.blogList;
+                        this.blogCountNum = data.data.blogCountNum;
+                        this.pageNum = Math.ceil(this.blogCountNum / 10);
                         this.curPage = page;
                     }, function (response) {
                         this.loading = false;
@@ -229,13 +229,13 @@
                     });
                 },
                 deleteBlog: function (id) {
-                    var sure = confirm("是否删除该博文(id为:" + id + ")");
+                    var sure = confirm('是否删除该博文(id为:' + id + ')');
                     if (sure) {
-                        var url = "/admin/blog/" + id + "/del/" + this.curPage + "/page";
+                        var url = '/admin/blog/' + id + '/del/' + this.curPage + '/page';
                         this.$http.get(url).then(function (data) {
-                            this.blogs = data.data.blogs;
-                            this.pageNum = Math.ceil(this.blogNums / 10);
-                            if(this.blogs.length==0){
+                            this.blogList = data.data.blogList;
+                            this.pageNum = Math.ceil(this.blogCountNum / 10);
+                            if(this.blogList.length==0){
                                 this.fetchData(this.curPage-1, false);
                             }
                         }, function (response) {

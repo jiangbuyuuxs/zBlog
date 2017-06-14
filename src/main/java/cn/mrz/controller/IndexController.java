@@ -1,9 +1,8 @@
 package cn.mrz.controller;
 
-import cn.mrz.exception.ParamException;
 import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
-import cn.mrz.service.BlogsService;
+import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Controller;
@@ -21,40 +20,40 @@ import java.util.List;
 @Controller
 public class IndexController {
 
-    private final int pageNum = 15;
+    private final int pageSize = 15;
 
     @Resource
-    private BlogsService blogsService;
+    private BlogService blogService;
 
     @Resource
     private WordService wordService;
 
     @RequestMapping(value = {"/", "index", "home"})
     public String goIndex(ModelMap map) {
-        List<Blog> blogs = blogsService.getBlogs(0, pageNum, " cdate desc", false);
-        int blogNums = blogsService.getBlogNums();
-        List<Blog> hotBlogs = blogsService.getHotBlogs(5);
-        List<Word> hotWords = wordService.getHotWords(0, 15);
+        List<Blog> blogList = blogService.getBlogList(1, pageSize, "create_date", false, false);
+        int blogCountNum = blogService.getBlogCountNum();
+        List<Blog> hotBlogList = blogService.getHotBlogList(5);
+        List<Word> hotWordList = wordService.getTopHotWordList(15);
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
-        String blogsJson;
-        String hotBlogsJson;
-        String hotWordsJson;
+        String blogListJson;
+        String hotBlogListJson;
+        String hotWordListJson;
         try {
-            blogsJson = mapper.writeValueAsString(blogs);
-            hotBlogsJson = mapper.writeValueAsString(hotBlogs);
-            hotWordsJson = mapper.writeValueAsString(hotWords);
+            blogListJson = mapper.writeValueAsString(blogList);
+            hotBlogListJson = mapper.writeValueAsString(hotBlogList);
+            hotWordListJson = mapper.writeValueAsString(hotWordList);
         } catch (IOException e) {
-            blogsJson = "{\"success\": false,\"msg\",\"获取信息失败\"}";
-            hotBlogsJson = "{\"success\": false,\"msg\",\"获取热门博文失败\"}";
-            hotWordsJson = "{\"success\": false,\"msg\",\"获取热词失败\"}";
+            blogListJson = "{\"success\": false,\"msg\",\"获取信息失败\"}";
+            hotBlogListJson = "{\"success\": false,\"msg\",\"获取热门博文失败\"}";
+            hotWordListJson = "{\"success\": false,\"msg\",\"获取热词失败\"}";
         }
-        map.addAttribute("blogs", blogsJson);
-        map.addAttribute("blogNums", blogNums);
-        map.addAttribute("hotBlogs", hotBlogsJson);
-        map.addAttribute("hotWords", hotWordsJson);
-        map.addAttribute("pageNum", pageNum);
+        map.addAttribute("blogList", blogListJson);
+        map.addAttribute("blogCountNum", blogCountNum);
+        map.addAttribute("hotBlogList", hotBlogListJson);
+        map.addAttribute("hotWordList", hotWordListJson);
+        map.addAttribute("pageSize", pageSize);
         return "/index";
     }
 
@@ -65,20 +64,13 @@ public class IndexController {
 
     @ResponseBody
     @RequestMapping(value = "/blog/{page}/page/{order}/order", produces = {"application/json;charset=UTF-8"})
-    public String blogs(@PathVariable String page, @PathVariable String order) {
-        int pageI = 0;
-        try {
-            pageI = Integer.parseInt(page);
-        } catch (NumberFormatException e) {
-            return "{\"success\": false,\"msg\",\"页码非法\"}";
-        }
-        int start = (pageI - 1) * pageNum;
-        List<Blog> blogs = blogsService.getBlogs(start, pageNum, null, false);
+    public String getBlogListJson(@PathVariable int page, @PathVariable String order) {
+        List<Blog> blogList = blogService.getBlogList(page, pageSize, null, null, false);
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
-        String blogData = null;
+        String blogData = "";
         try {
-            blogData = mapper.writeValueAsString(blogs);
+            blogData = mapper.writeValueAsString(blogList);
         } catch (IOException e) {
             return "{\"success\": false,\"msg\",\"转换失败\"}";
         }
@@ -86,15 +78,8 @@ public class IndexController {
     }
 
     @RequestMapping(value = "/detail/{id}/id")
-    public String goDetail(@PathVariable String id, ModelMap map) {
-        long idL = 0;
-        try {
-            idL = Long.parseLong(id);
-        } catch (NumberFormatException e) {
-            throw new ParamException("博客编号非法", e);
-        }
-        Blog blog = blogsService.getById(idL);
-        //TODO 当前用户是否有权限查看该博文
+    public String goDetail(@PathVariable Long id, ModelMap map) {
+        Blog blog = blogService.getById(id);
 
         if (blog == null)
             return "redirect:/go/error";
@@ -103,20 +88,20 @@ public class IndexController {
     }
 
     @RequestMapping(value = {"/hotword/{hashcode}/id"})
-    public String hotwords(ModelMap map,@PathVariable String hashcode) {
+    public String getHotWordList(ModelMap map,@PathVariable String hashcode) {
         List<Word> wordsByWordHash = wordService.getWordsByWordHash(hashcode);
-        List<Blog> blogs = new ArrayList<Blog>();
-        for(Word word:wordsByWordHash){
-            blogs.add(blogsService.getById(word.getBlogid()));
+        List<Blog> blogList = new ArrayList<Blog>();
+        for(Word word : wordsByWordHash){
+            blogList.add(blogService.getById(word.getBlogId()));
         }
-        map.addAttribute("blogs",blogs);
+        map.addAttribute("blogList",blogList);
         return "/hotword";
     }
 
     @ResponseBody
-    @RequestMapping(value = {"/visitblog/{blogid}"}, produces = "application/javascript")
-    public String visitBlog(@PathVariable int blogid) {
-        blogsService.addVisit(blogid);
-        return "console.log(\"visit successed\");";
+    @RequestMapping(value = {"/visitblog/{blogId}"}, produces = "application/javascript")
+    public String visitBlog(@PathVariable int blogId) {
+        blogService.addVisit(blogId);
+        return "console.log(\"visit success\");";
     }
 }

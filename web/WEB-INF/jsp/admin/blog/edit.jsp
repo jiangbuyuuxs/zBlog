@@ -18,71 +18,71 @@
         $(function () {
             var ue = UE.getEditor('editor');
             ue.ready(function () {
-                ue.setContent($("#blogtexts").html(), true);
+                ue.setContent($('#blogtexts').html(), true);
             });
             function saveBlog() {
-                $(this).addClass("disable");
-                $(this).unbind("click");
+                $(this).addClass('disable');
+                $(this).off('click');
                 var content = ue.getContent();
                 if (content !== "") {
-                    var blogid = $(".blogid").val(),
-                            titleVal = $(".title").val();
-                    if (isNaN(parseInt(blogid))) {
+                    var blogId = $('.blogId').val(),
+                            titleVal = $('.title').val();
+                    if (isNaN(parseInt(blogId))) {
                         var data = {
                             title: titleVal,
                             texts: content
                         };
-                        $.ajax("/admin/blog/add", {
-                            type: "POST",
-                            dataType: "json",
+                        $.ajax('/admin/blog/add', {
+                            type: 'POST',
+                            dataType: 'json',
                             data: data,
                             success: function (data) {
                                 console.log(data);
                                 if (data.success) {
-                                    alert("写了一篇~~~~~");
+                                    alert('写了一篇~~~~~');
                                     window.location.href = "/";
                                 }
                             }
                         });
                     } else {
                         var data = {
-                            id: blogid,
+                            id: blogId,
                             title: titleVal,
                             texts: content
                         };
-                        $.ajax("/admin/blog/edit", {
-                            type: "POST",
-                            dataType: "json",
+                        $.ajax('/admin/blog/edit', {
+                            type: 'POST',
+                            dataType: 'json',
                             data: data,
                             success: function (data) {
                                 console.log(data);
                                 if (data.success) {
-                                    alert("修改了一篇~~~~~");
-                                    window.location.href = "/detail/" + blogid + "/id";
+                                    alert('修改了一篇~~~~~');
+                                    window.location.href = '/detail/' + blogId + '/id';
                                 }
                             },
                             error: function (XMLHttpRequest, textStatus) {
                                 alert(textStatus);
-                                $(".send").bind("click", saveBlog);
+                                $('.send').on('click', saveBlog);
                             }
                         });
                     }
                 }
             }
 
-            $(".send").bind("click", saveBlog);
+            $('.send').bind('click', saveBlog);
         });
     </script>
 </head>
 <body>
 <div class="container">
-    <input type="hidden" id="blogid" class="blogid form-control" name="blogid" placeholder="编号"
+    <input type="hidden" id="blogId" class="blogId form-control" name="blogId" placeholder="编号"
            value="${blog.id}">
 
     <div class="form-group">
-        <label for="classtype">分类</label>
-        <input type="text" id="classtype" class="classtype form-control" name="classtype" placeholder="类型"
-               value="${blog.classtype}">
+        <label for="classType">分类</label>
+        <input type="text" id="classType" class="classType form-control" name="classType" placeholder="类型"
+               value="${blog.classType}">
     </div>
     <div class="form-group">
         <label for="title">标题</label>
@@ -93,7 +93,6 @@
     </div>
     <input type="button" class="send button btn-success" value="发布"/>
     <script id="blogtexts" type="text/html">${blog.texts}</script>
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 </div>
 <%@include file="../../comm/footer.jsp" %>
 </body>

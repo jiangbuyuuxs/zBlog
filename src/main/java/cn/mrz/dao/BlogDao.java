@@ -2,16 +2,18 @@ package cn.mrz.dao;
 
 import cn.mrz.pojo.Blog;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Param;
+import com.baomidou.mybatisplus.plugins.pagination.Pagination;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 /**
  * Created by Administrator on 2016/12/1.
  */
+@Repository
 public interface BlogDao extends BaseMapper<Blog> {
-    List<Blog> getBlogs(@Param("start")int start, @Param("num")int num, @Param("sort")String sort);
-    List<Blog> getBlogsWithoutContent(@Param("start")int start, @Param("num")int num, @Param("sort")String sort);
+    List<Blog> selectBlogList(Pagination page);
+    List<Blog> selectBlogListWithoutContent(Pagination page);
     int selectCount();
     int deleteById(Long id);
     Long insertBlog(Blog blog);

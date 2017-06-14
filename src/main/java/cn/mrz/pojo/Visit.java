@@ -12,16 +12,25 @@ import java.io.Serializable;
 @TableName("visit")
 public class Visit implements Serializable{
 
-    private long blogid;
+    private long blogId;
     private long num;
+    public Visit(){}
 
-    public long getBlogid() {
-        return blogid;
+    public Visit(long blogId, long num) {
+        this.blogId = blogId;
+        this.num = num;
     }
 
-    public void setBlogid(long blogid) {
-        this.blogid = blogid;
+    public long getBlogId() {
+        return blogId;
     }
+
+    public void setBlogId(long blogId) {
+        this.blogId = blogId;
+    }
+
+
+
 
     public long getNum() {
         return num;

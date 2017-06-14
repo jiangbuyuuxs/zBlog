@@ -1,6 +1,7 @@
 package cn.mrz.dao;
 
 import cn.mrz.pojo.User;
+import com.baomidou.mybatisplus.plugins.Page;
 import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,16 +34,16 @@ public class UserDaoTest extends TestCase {
 
     @Test
     public void testGetUsers() throws Exception {
-        List<User> users = userDao.getUsers(0, 10, "username desc");
+        List<User> users = userDao.getUserList(new Page<User>(1, 10, "username"));
         for (User user : users) {
             System.out.println(user.getUsername());
         }
         //assertEquals("admin", users.get(0).getUsername());
-        users = userDao.getUsers(0, 10, "username asc");
+        users = userDao.getUserList(new Page<User>(1, 10, "username"));
         for (User user : users) {
             System.out.println(user.getUsername());
         }
-        users = userDao.getUsers(0, 10,null);
+        users = userDao.getUserList(new Page<User>(1, 10));
         for (User user : users) {
             System.out.println(user.getUsername());
         }

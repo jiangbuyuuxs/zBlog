@@ -5,5 +5,12 @@
 <configuration>
     <settings>
         <setting name="logImpl" value="LOG4J"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"></setting>
     </settings>
+    <plugins>
+        <plugin interceptor="com.baomidou.mybatisplus.plugins.PaginationInterceptor">
+            <property name="dialectType" value="mysql" />
+            <!--<property name="optimizeType" value="aliDruid" />-->
+        </plugin>
+    </plugins>
 </configuration>

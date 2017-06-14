@@ -1,7 +1,7 @@
 package cn.mrz.controller;
 
 import cn.mrz.pojo.User;
-import cn.mrz.service.UsersService;
+import cn.mrz.service.UserService;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +19,7 @@ import java.util.List;
 public class UserController {
 
     @Resource
-    private UsersService usersService;
+    private UserService usersService;
 
     @ResponseBody
     @RequestMapping(value = "/admin/user/{page}/page", produces = {"application/json;charset=UTF-8"})

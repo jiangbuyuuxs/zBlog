@@ -12,7 +12,7 @@
   <%@include file="comm/jscss.jsp" %>
   <script>
     $(function(){
-      $(".back").bind("click",function(){
+      $('.back').on('click',function(){
         window.history.go(-1);
       })
     });

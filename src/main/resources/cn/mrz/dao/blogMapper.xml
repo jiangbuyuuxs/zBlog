@@ -3,31 +3,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.mrz.dao.BlogDao">
     <sql id="cols">
-        title,cdate,edate,texts,imgid,classtype
+        title,create_date,edit_date,texts,image_id,class_type
     </sql>
 
 
 
-    <select id="getBlogsWithoutContent" resultType="Blog">
-        select id,title,cdate,edate,imgid,classtype
-        from blogs
-        <if test="sort!=null">
-            order by ${sort}
-        </if>
-        limit #{start},#{num}
+    <select id="selectBlogListWithoutContent" resultType="Blog">
+        select id,title,create_date,edit_date,image_id,class_type from blogs
     </select>
 
-    <select id="getBlogs" resultType="Blog">
-        select *
-        from blogs
-        <if test="sort!=null">
-            order by ${sort}
-        </if>
-        limit #{start},#{num}
+    <select id="selectBlogList" resultType="Blog">
+        select * from blogs
     </select>
     <select id="selectCount" resultType="int">
-        select count(id)
-        from blogs
+        select count(id) from blogs
     </select>
     <select id="selectById" resultType="Blog">
         select *
@@ -37,7 +26,7 @@
     <insert id="insertBlog" parameterType="Blog" useGeneratedKeys="true" keyProperty="id">
         insert into
         blogs(<include refid="cols"></include>)
-        values(#{title},#{cdate},#{edate},#{texts},#{imgid},#{classtype})
+        values(#{title},#{createDate},#{editDate},#{texts},#{imageId},#{classType})
     </insert>
     <delete id="deleteById">
         delete
