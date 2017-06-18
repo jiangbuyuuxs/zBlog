@@ -93,9 +93,13 @@ public class IndexController {
         Page<Word> pagination = wordService.getWordsByWordHash(new Page<Word>(1,pageSize), hashcode);
         List<Word> records = pagination.getRecords();
         int blogCountNum = pagination.getTotal();
-        List<Blog> blogList = new ArrayList<Blog>();
+        List<Blog> blogList = blogService.getBlogListByWordList(records);
+        String hotWord = "";
         for(Word word : records){
-            blogList.add(blogService.getById(word.getBlogId()));
+            if("".equals(hotWord)) {
+                hotWord = word.getRemark();
+                break;
+            }
         }
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
@@ -111,18 +115,17 @@ public class IndexController {
         map.addAttribute("blogCountNum",blogCountNum);
         map.addAttribute("pageSize",pageSize);
         map.addAttribute("hashcode",hashcode);
+        map.addAttribute("hotWord",hotWord);
         return "/hotword";
     }
 
     @ResponseBody
     @RequestMapping(value = {"/hotword/{hashcode}/id/{page}/page/{pageSize}/pagesize"}, produces = {"application/json;charset=UTF-8"})
     public String getHotWordList(@PathVariable String hashcode,@PathVariable Integer page,@PathVariable Integer pageSize) {
-        Page<Word> pagination = wordService.getWordsByWordHash(new Page<Word>(page,pageSize), hashcode);
+
+        Page<Word> pagination = wordService.getWordsByWordHash(new Page<Word>(page, pageSize), hashcode);
         List<Word> records = pagination.getRecords();
-        List<Blog> blogList = new ArrayList<Blog>();
-        for(Word word : records){
-            blogList.add(blogService.getById(word.getBlogId()));
-        }
+        List<Blog> blogList = blogService.getBlogListByWordList(records);
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
         HashMap hashMap = new HashMap();
@@ -133,7 +136,6 @@ public class IndexController {
         } catch (IOException e) {
             logger.info("获取热词对应的博客列表时,转换失败 :"+e.getLocalizedMessage());
             return "[]";
-
         }
         return blogListJson;
     }

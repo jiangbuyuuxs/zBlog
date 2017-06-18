@@ -1,6 +1,6 @@
 package cn.mrz.controller;
 
-import cn.mrz.dao.CyDao;
+import cn.mrz.mapper.CyMapper;
 import cn.mrz.pojo.Cy;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Controller;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class CyController {
 
     @Resource
-    private CyDao cyDao;
+    private CyMapper cyDao;
 
     @RequestMapping(value = {"/cy/cyjl"})
     public String goCyPage() {

@@ -2,13 +2,14 @@ package cn.mrz.pojo;
 
 import com.baomidou.mybatisplus.annotations.TableName;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by Administrator on 2016/12/1.
  */
 @TableName("blogs")
-public class Blog {
+public class Blog  implements Serializable {
 
     private long id;
     private String title;

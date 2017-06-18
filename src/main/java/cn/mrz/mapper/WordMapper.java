@@ -1,4 +1,4 @@
-package cn.mrz.dao;
+package cn.mrz.mapper;
 
 import cn.mrz.pojo.Word;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
@@ -12,7 +12,7 @@ import java.util.List;
  * Created by Administrator on 2017/3/16.
  */
 @Repository
-public interface WordDao extends BaseMapper<Word> {
+public interface WordMapper extends BaseMapper<Word> {
     List<Word> getWordList(Pagination page);
 
     int delAll();

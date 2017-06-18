@@ -3,11 +3,13 @@ package cn.mrz.pojo;
 
 import com.baomidou.mybatisplus.annotations.TableName;
 
+import java.io.Serializable;
+
 /**
  * 每一篇文章对应一些词汇,分开统计这些词汇,方便编辑时重新获取这些词汇.
  */
 @TableName("words")
-public class Word {
+public class Word implements Serializable {
     private long id;
     private long blogId;
     private String remark;

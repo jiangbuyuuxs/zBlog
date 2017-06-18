@@ -1,4 +1,4 @@
-package cn.mrz.dao;
+package cn.mrz.mapper;
 
 import cn.mrz.pojo.Visit;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
@@ -13,7 +13,7 @@ import java.util.List;
  * Created by Administrator on 2017/3/15.
  */
 @Repository
-public interface VisitDao  extends BaseMapper<Visit> {
+public interface VisitMapper extends BaseMapper<Visit> {
 
     List<Visit> selectVisitList(Pagination page);
 

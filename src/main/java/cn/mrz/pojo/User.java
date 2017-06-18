@@ -1,19 +1,48 @@
 package cn.mrz.pojo;
 
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/4/1.
  */
 
-public class User {
+public class User implements Serializable{
 
     public static final String[] COLNAMES = {"USERNAME","NICKNAME","EMAIL","ENABLED"};
 
+    private Long id;
+    @NotEmpty
     private String username;
     private String nickname;
+    @NotEmpty
     private String password;
+    @NotEmpty
+    @Email
     private String email;
     private int enabled;
 
+    public User() {
+    }
+
+    public User(Long id,String username, String nickname, String password, String email, int enabled) {
+        this.id = id;
+        this.username = username;
+        this.nickname = nickname;
+        this.password = password;
+        this.email = email;
+        this.enabled = enabled;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
     public String getUsername() {
         return username;
     }

@@ -1,6 +1,6 @@
 package cn.mrz.service.impl;
 
-import cn.mrz.dao.WordDao;
+import cn.mrz.mapper.WordMapper;
 import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.WordService;
@@ -34,23 +34,23 @@ public class WordServiceImpl implements WordService {
         }
     }
 
+    @Autowired
+    private WordMapper wordMapper;
+
     @Override
     public void update(Word word) {
-        wordDao.updateById(word);
+        wordMapper.updateById(word);
     }
 
     @Override
     public Word getById(Long id) {
-        return wordDao.selectById(id);
+        return wordMapper.selectById(id);
     }
 
     @Override
     public boolean delete(Long id) {
-        return wordDao.deleteById(id)==1;
+        return wordMapper.deleteById(id)==1;
     }
-
-    @Autowired
-    private WordDao wordDao;
 
     @Override
     public void getBlogWords(Blog blog) {
@@ -61,8 +61,7 @@ public class WordServiceImpl implements WordService {
 
     @Override
     public Page<Word> getWordsByWordHash(Page<Word> page,String hashcode) {
-
-        page.setRecords(wordDao.getWordsByWordHash(page,hashcode));
+        page.setRecords(wordMapper.getWordsByWordHash(page, hashcode));
         return page;
     }
 
@@ -100,7 +99,7 @@ public class WordServiceImpl implements WordService {
     }
 
     private void saveWords(long blogId, Map<String, TermWarp> termNumMap) {
-        wordDao.delWordsByBlogId(blogId);
+        wordMapper.delWordsByBlogId(blogId);
         Set<Map.Entry<String, TermWarp>> entries = termNumMap.entrySet();
         for (Map.Entry<String, TermWarp> wordTerm : entries) {
             String name = wordTerm.getKey();
@@ -111,19 +110,19 @@ public class WordServiceImpl implements WordService {
             word.setRemark(name);
             word.setWordType(termWarp.term.getNatureStr());
             word.setHashcode("" + name.hashCode());
-            wordDao.insert(word);
+            wordMapper.insert(word);
         }
     }
 
 
     @Override
     public List<Word> getTopHotWordList(int num) {
-        return getHotWordList(1,num);
+        return getHotWordList(new Page<Word>(1,num)).getRecords();
     }
 
     @Override
-    public List<Word> getHotWordList(int current, int pageSize) {
-        List<Word> words = wordDao.getWordList(new Page<Word>(current, pageSize));
-        return words;
+    public Page<Word> getHotWordList(Page<Word> page) {
+        page.setRecords(wordMapper.getWordList(page));
+        return page;
     }
 }

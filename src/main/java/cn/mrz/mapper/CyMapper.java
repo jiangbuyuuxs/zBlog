@@ -1,4 +1,4 @@
-package cn.mrz.dao;
+package cn.mrz.mapper;
 
 import cn.mrz.pojo.Cy;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
@@ -11,7 +11,7 @@ import java.util.List;
  * Created by Administrator on 2017/4/20.
  */
 @Repository
-public interface CyDao   extends BaseMapper<Cy> {
+public interface CyMapper extends BaseMapper<Cy> {
     List<Cy> getCyByPyFirst(String pyFirst);
     List<Cy> getCyByPyEnd(String pyEnd);
     Cy getCy(String cy);

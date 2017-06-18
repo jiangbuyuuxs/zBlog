@@ -1,6 +1,6 @@
 package cn.mrz.controller;
 
-import cn.mrz.dao.VisitDao;
+import cn.mrz.mapper.VisitMapper;
 import cn.mrz.pojo.User;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.UserService;
@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +34,7 @@ public class SystemController {
     @Autowired
     private BlogService blogService;
     @Autowired
-    private VisitDao visitDao;
+    private VisitMapper visitMapper;
     @Autowired
     private UserService userService;
 
@@ -47,16 +48,33 @@ public class SystemController {
     public String getBlogInfo() {
         Map<String, Object> info = new HashMap();
         int blogCountNum = blogService.getBlogCountNum();
-        int visitCount = visitDao.getAllVisitSum();
+        int visitCount = visitMapper.getAllVisitSum();
         info.put("blogCountNum", blogCountNum);
         info.put("visitCount", visitCount);
-
         String infoJson = "{\"success\": false}";
         ObjectMapper mapper = new ObjectMapper();
         try {
             infoJson = mapper.writeValueAsString(info);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return infoJson;
+    }
+    @ResponseBody
+    @RequestMapping(value = {"/admin/loggeduser"}, produces = {"application/json;charset=UTF-8"})
+    public String getLoggedUser() {
+        Map<String, Object> info = new HashMap();
+        List<String> loggedInUserList = userService.getLoggedInUserList();
+        info.put("success", true);
+        info.put("loggedInUserList", loggedInUserList);
+        info.put("loggedInUserCount", loggedInUserList==null?0:loggedInUserList.size());
+        String infoJson;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            infoJson = mapper.writeValueAsString(info);
+        } catch (IOException e) {
+            e.printStackTrace();
+            infoJson = "{\"success\": false,\"message\":\"转换数据失败\"}";
         }
         return infoJson;
     }
@@ -83,9 +101,8 @@ public class SystemController {
             mv.addObject("errorMessage", "尝试次数过多!");
             return mv;
         }
-        User user = userService.getUserByUsername(username);
         Session session = subject.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute("username", username);
         //获取到被拦截的页面,丢失锚信息
         SavedRequest savedRequest = WebUtils.getSavedRequest(request);
         String url = "/";
@@ -98,6 +115,7 @@ public class SystemController {
     public String logout() throws IOException {
         Subject currentUser = SecurityUtils.getSubject();
         if (currentUser != null) {
+            //注销之后,redis中的session还有300s的失效时间
             currentUser.logout();
         }
         return "redirect:/";

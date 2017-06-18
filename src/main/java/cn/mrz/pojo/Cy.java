@@ -1,10 +1,12 @@
 package cn.mrz.pojo;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/4/20.
  */
 
-public class Cy {
+public class Cy implements Serializable {
     private long id;
     private String cy;
 

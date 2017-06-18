@@ -11,6 +11,7 @@
             var blogCountNum = '${blogCountNum}';
             var pageNum = Math.ceil(blogCountNum / pageSize);
             var hashcode = '${hashcode}';
+            var hotWord = '${hotWord}';
             var blogPanel = new Vue({
                 el: '.main-panel',
                 data: {
@@ -36,16 +37,41 @@
                             return
                         var url = '/hotword/'+hashcode+'/id/' + page + '/page/'+pageSize+'/pagesize';
                         this.$http.get(url).then(function(data){
+                            this.blogList = null;
                             this.blogList = data.data.blogList;
                             this.curPage = page;
+                            this.$nextTick(function () {
+                                this.highlightWord($('.blog-list .row a'));
+                                this.highlightWord($('.summary'));
+                            });
                         },function(data){
                             console.log(data.msg);
                         });
+                    },
+                    highlightWord: function (toReplaceObjArr) {
+                        for(var i = 0,j = toReplaceObjArr.length;i<j;i++){
+                            var toReplaceObj = $(toReplaceObjArr[i]);
+                            toReplaceObj.html(toReplaceObj.text().replace(hotWord,'<span class="hotword-hl">'+hotWord+'</span>'));
+                        }
                     }
+                },created: function () {
+                    this.$nextTick(function () {
+                        this.highlightWord($('.blog-list .row a'));
+                        this.highlightWord($('.summary'));
+                    });
                 }
             });
         });
     </script>
+    <style>
+        .hotword-hl{
+            font-weight: bold;
+        }
+        .summary{
+            background-color: #d6e8c0;
+            padding:10px;
+        }
+    </style>
 </head>
 <body class="container">
 <div class="head-panel">
@@ -59,11 +85,16 @@
                 <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4">发布时间</div>
             </div>
             <div class="blog-list">
-                <div v-for="(blog,index) in blogList" class="row">
-                    <div class="col-lg-10 col-md-9 col-sm-9 col-xs-8 padding2px"><a :title="blog.title"
-                                                                                    :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
+                <div v-for="(blog,index) in blogList" >
+                    <div class="row">
+                        <div class="col-lg-10 col-md-9 col-sm-9 col-xs-8 padding2px">[标题:]<a :title="blog.title"
+                                                                                        :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 padding2px">{{blog.createDate}}</div>
                     </div>
-                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 padding2px">{{blog.createDate}}</div>
+                    <div class="row">
+                        <div class="summary">[摘要:]{{blog.texts}}</div>
+                    </div>
                 </div>
             </div>
             <div class="page-bar" :style="{visibility:pageNum>1?'visible':'hidden'}">

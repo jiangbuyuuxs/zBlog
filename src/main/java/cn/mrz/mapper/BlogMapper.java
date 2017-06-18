@@ -1,4 +1,4 @@
-package cn.mrz.dao;
+package cn.mrz.mapper;
 
 import cn.mrz.pojo.Blog;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
@@ -11,7 +11,7 @@ import java.util.List;
  * Created by Administrator on 2016/12/1.
  */
 @Repository
-public interface BlogDao extends BaseMapper<Blog> {
+public interface BlogMapper extends BaseMapper<Blog> {
     List<Blog> selectBlogList(Pagination page);
     List<Blog> selectBlogListWithoutContent(Pagination page);
     int selectCount();

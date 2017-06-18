@@ -1,9 +1,11 @@
 package cn.mrz.pojo;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/6/9.
  */
-public class Permission {
+public class Permission implements Serializable {
     private long id;
     private String permission;
 

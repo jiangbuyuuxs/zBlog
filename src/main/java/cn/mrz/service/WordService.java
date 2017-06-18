@@ -18,10 +18,10 @@ public interface WordService extends BaseService<Word,Long> {
      */
     List<Word> getTopHotWordList(int num);
 
-    List<Word> getHotWordList(int current, int pageSize);
+    Page<Word> getHotWordList(Page<Word> page);
 
     void getBlogWords(List<Blog> blogList);
     void getBlogWords(Blog blog);
 
-    public Page<Word> getWordsByWordHash(Page<Word> page,String hashcode);
+    Page<Word> getWordsByWordHash(Page<Word> page,String hashcode);
 }
