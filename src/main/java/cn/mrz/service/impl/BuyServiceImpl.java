@@ -1,5 +1,6 @@
 package cn.mrz.service.impl;
 
+import cn.mrz.dao.ItemDao;
 import cn.mrz.exception.BuyFileExistException;
 import cn.mrz.mapper.FavourableMapper;
 import cn.mrz.mapper.ItemMapper;
@@ -20,9 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.io.File;
 
 /**
@@ -32,6 +31,8 @@ import java.io.File;
 public class BuyServiceImpl implements BuyService {
     @Autowired
     ItemMapper itemMapper;
+    @Autowired
+    ItemDao itemDao;
     @Autowired
     FavourableMapper favourableDao;
     final String fileDictionary = "C://attach//";
@@ -85,12 +86,13 @@ public class BuyServiceImpl implements BuyService {
             List<Item> itemBatch = new ArrayList<Item>();
             List<Favourable> favourableBatch = new ArrayList<Favourable>();
             long queryItemExist = 0;
+            final Map<String,String[]> itemCLass = new HashMap<String,String[]>();
             for (Item item : items) {
                 long start = System.currentTimeMillis();
                 //页面返回事件45秒,这里使用35秒,在item_id上创建索引后这里使用3秒,页面响应时间12秒
-                List<Item> findItems = itemMapper.selectByItemId(item.getItemId());
+                Item findItems = itemMapper.selectByItemId(item.getItemId());
                 queryItemExist += System.currentTimeMillis() - start;
-                if (findItems == null || findItems.size() == 0) {
+                if (findItems == null) {
                     flag++;
                     itemBatch.add(item);
                     insertNum++;
@@ -98,6 +100,7 @@ public class BuyServiceImpl implements BuyService {
                     if (favourable != null) {
                         favourableBatch.add(favourable);
                     }
+                    itemCLass.put(item.getItemId(), item.getItemClass().split("/"));
                 }
                 if (flag == batchSize) {
                     itemMapper.insertItemList(itemBatch);
@@ -110,10 +113,46 @@ public class BuyServiceImpl implements BuyService {
             System.out.println("查询商品是否存在使用了:" + queryItemExist + "ms");
             itemMapper.insertItemList(itemBatch);
             favourableDao.insertFavourableList(favourableBatch);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    new BuyServiceImpl().setItemClass(itemCLass, itemDao);
+                }
+            }
+            ).start();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return insertNum != 0;
+    }
+
+    private void setItemClass(Map<String, String[]> itemClassMap, ItemDao itemDao) {
+        Iterator<Map.Entry<String, String[]>> iterator = itemClassMap.entrySet().iterator();
+        Map<Integer, List<String>> data = new HashMap<Integer, List<String>>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String[]> next = iterator.next();
+            String itemId = next.getKey();
+            String[] itemClasses = next.getValue();
+            for (String itemClass : itemClasses) {
+                int hashCode = itemClass.hashCode();
+                if (!data.containsKey(hashCode)) {
+                    ArrayList<String> itemIdList = new ArrayList<String>();
+                    itemIdList.add(itemId);
+                    data.put(hashCode, itemIdList);
+                    itemDao.addItemClass(itemClass);
+                } else {
+                    List<String> itemIdList = data.get(hashCode);
+                    itemIdList.add(itemId);
+                    data.put(hashCode, itemIdList);
+                }
+            }
+        }
+        Iterator<Map.Entry<Integer, List<String>>> dataIterator = data.entrySet().iterator();
+        while (dataIterator.hasNext()) {
+            Map.Entry<Integer, List<String>> next = dataIterator.next();
+            itemDao.setItemClass(next.getKey(), next.getValue());
+        }
     }
 
 
@@ -121,6 +160,25 @@ public class BuyServiceImpl implements BuyService {
     public Page<Item> getItem(Page<Item> page) {
         page.setRecords(itemMapper.selectItem(page));
         return page;
+    }
+
+    @Override
+    public Set<String> getItemClass() {
+        return itemDao.getItemClassList();
+    }
+
+    @Override
+    public List<String> getItemIdByClass(int itemClassHashCode) {
+        return itemDao.getItemIdByClassHashcode(itemClassHashCode);
+    }
+
+    @Override
+    public List<Item> getItemByItemIdList(List<String> itemIdList) {
+        List<Item> items = new ArrayList<Item>();
+        for(String itemId:itemIdList){
+            items.add(itemMapper.selectByItemId(itemId));
+        }
+        return items;
     }
 
     private List<Item> parseData(String filePath) throws Exception {
