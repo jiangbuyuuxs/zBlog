@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.mapper.FavourableMapper">
+    <select id="findFavourableByItemId" resultType="Favourable">
+              select * from   favourable
+                where item_id=#{itemId}
+        </select>
+
+    <insert id="insertFavourable" parameterType="Favourable" useGeneratedKeys="true" keyProperty="id">
+                insert into favourable(item_id,count_num,surplus,title,start_date,end_date,short_url,tao_url,tbk_url)
+                values(#{itemId},#{countNum},#{surplus},#{title},#{startDate},#{endDate},#{shortUrl},#{taoUrl},#{tbkUrl})
+        </insert>
+
+    <insert id="insertFavourableList" parameterType="java.util.List">
+        insert into favourable(item_id,count_num,surplus,title,start_date,end_date,short_url,tao_url,tbk_url)
+        values
+        <foreach collection="list" item="favourable" index="index" separator=",">
+            (#{favourable.itemId},#{favourable.countNum},#{favourable.surplus},#{favourable.title},#{favourable.startDate},#{favourable.endDate},#{favourable.shortUrl},#{favourable.taoUrl},#{favourable.tbkUrl})
+        </foreach>
+    </insert>
+
+</mapper>

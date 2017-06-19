@@ -19,7 +19,9 @@
             alert1("登录超时,请重新登录");
             //TODO 登录失效时,使用ajax方式登录
             //goUrl("/go/logon");
+            return false;
         }
+        return true;
     }
 
     window['BlogTool']['checkLogin'] = checkLogin;

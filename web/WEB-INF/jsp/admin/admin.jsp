@@ -41,7 +41,7 @@
         #admin-manager {
             position: relative;
             top: 0px;
-            min-height: 700px;
+            min-height: 690px;
         }
 
         .add-user-panel {
@@ -89,6 +89,15 @@
             border: 1px solid #cecece;
             border-radius: 3px;
             padding: 10px;
+        }
+
+        .file-upload-container {
+            margin: 20px;
+            border-radius: 3px;
+        }
+
+        .file-upload-container input {
+            background-color: #ffffff;
         }
     </style>
     <script type="text/x-template" id="blog-info-template">
@@ -241,7 +250,7 @@
             <span>当前登录用户:</span>
             <span v-for="loggedInUser of loggedInUserList">
                 <router-link :to="'/user/info/'+loggedInUser"><a class="logged-user">{{loggedInUser}}</a>
-                <%--<router-link :to="{name:'userInfoPanel',params:{username:loggedInUser}}"><a class="logged-user">{{loggedInUser}}</a>--%>
+                    <%--<router-link :to="{name:'userInfoPanel',params:{username:loggedInUser}}"><a class="logged-user">{{loggedInUser}}</a>--%>
                 </router-link>
             </span>
         </div>
@@ -278,6 +287,22 @@
             </div>
         </div>
     </script>
+    <script type="text/x-template" id="buy-manager-panel-template">
+        <div class="buy-manager-panel">
+            <div class="file-upload-container">
+                <form id="buyFileFrom">
+                    <input type="file" name="buyFile" id="buyFile"/>
+                    <a class="btn btn-success" @click.prevent="upload">上传</a>
+                </form>
+            </div>
+            <div>已完成:<span class="percent">0</span>%</div>
+            <ul>
+                <li v-for="buyFile in buyFileList">
+                    {{buyFile}}[<a @click.prevent="parseFile(buyFile)">解析</a>]
+                </li>
+            </ul>
+        </div>
+    </script>
     <script>
         $(function () {
             Vue.component('info-panel', {
@@ -293,7 +318,8 @@
                         this.loading = true;
                         var url = '/admin/blogInfo';
                         this.$http.get(url).then(function (data) {
-                            BlogTool.checkLogin(data);
+                            if (!BlogTool.checkLogin(data))
+                                return;
                             this.info = data.data;
                             this.loading = false;
                         }, function (response) {
@@ -548,12 +574,81 @@
                 }
             })
             ;
+            Vue.component('buy-manager-panel', {
+                template: '#buy-manager-panel-template',
+                data: function () {
+                    return {
+                        buyFileList: []
+                    }
+                },
+                methods: {
+                    fetchData: function () {
+                        var url = '/admin/buyfilelist';
+                        this.$http.get(url).then(function (data) {
+                                    if (data.data.success)
+                                        this.buyFileList = data.data.buyFileList;
+                                }, function (data) {
 
+                                }
+                        );
+                        this.$nextTick(function () {
+                            $('.percent').parent().hide();
+                        })
+                    },
+                    upload: function () {
+                        var formData = new FormData($('#buyFileFrom')[0]);
+                        var url = '/admin/uploadbuyfile';
+                        var percentObj = $('.percent');
+                        percentObj.parent().show();
+                        this.$http.post(url, formData, {
+                            progress: function (event) {
+                                percentObj.text(Math.floor((event.loaded / event.total) * 100));
+                            }
+                        }).then(function (data) {
+                                    percentObj.parent().hide();
+                                    var file = $('#buyFile')[0];
+                                    file.outerHTML = file.outerHTML
+                                    if (data.data.success) {
+                                        this.buyFileList = data.data.buyFileList;
+                                    } else {
+                                        alert(data.data.message ? data.data.message : '上传失败');
+                                    }
+                                }, function (data) {
+
+                                }
+                        );
+
+                    },
+                    parseFile: function (fileName) {
+                        var url = '/admin/parsebuyfile';
+                        this.$http.post(url, {fileName: fileName},
+                                {
+                                    emulateJSON: true
+                                }
+                        ).
+                                then(function (data) {
+                                    if (data.data.success) {
+                                        alert('解析成功');
+                                    } else {
+                                        alert(data.data.message ? data.data.message : '解析失败');
+                                    }
+                                }, function (data) {
+
+                                }
+                        );
+                    }
+                },
+                created: function () {
+                    this.fetchData();
+                }
+            })
+            ;
             var infoPanel = Vue.component('info-panel');
             var blogManager = Vue.component('blog-manager-panel');
             var userManager = Vue.component('user-manager-panel');
             var addUserPanel = Vue.component('add-user-panel');
             var userInfoPanel = Vue.component('user-info-panel');
+            var buyManager = Vue.component('buy-manager-panel');
 
             var router = new VueRouter({
                 routes: [
@@ -561,8 +656,9 @@
                     {path: '/', component: infoPanel},
                     {path: '/user/manager', component: userManager},
                     {path: '/user/add', component: addUserPanel},
-                    {name: 'userInfoPanel',path: '/user/info/:username', component: userInfoPanel},
-                    {path: '/blog/manager', component: blogManager}
+                    {name: 'userInfoPanel', path: '/user/info/:username', component: userInfoPanel},
+                    {path: '/blog/manager', component: blogManager},
+                    {path: '/buy/manager', component: buyManager}
                 ]
             });
 
@@ -606,7 +702,7 @@
         <div class="col-sm-2">
             <ul class="list-group">
                 <li class="list-group-item">
-                    <router-link to="/info">博客信息管理</router-link>
+                    <router-link to="/info">博客信息</router-link>
                 </li>
                 <li class="list-group-item">
                     <router-link to="/user/manager">用户管理</router-link>
@@ -614,6 +710,9 @@
                 <li class="list-group-item">
                     <router-link to="/blog/manager">博文管理</router-link>
                     <span class="add-blog">[<a href="/admin/blog/go/add" target="_blank">写一篇</a>]</span>
+                </li>
+                <li class="list-group-item">
+                    <router-link to="/buy/manager">淘宝客管理</router-link>
                 </li>
             </ul>
         </div>

@@ -1,14 +1,16 @@
 package cn.mrz.controller;
 
+import cn.mrz.exception.BuyFileExistException;
 import cn.mrz.mapper.VisitMapper;
-import cn.mrz.pojo.User;
 import cn.mrz.service.BlogService;
+import cn.mrz.service.BuyService;
 import cn.mrz.service.UserService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.util.SavedRequest;
@@ -17,6 +19,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +41,8 @@ public class SystemController {
     private VisitMapper visitMapper;
     @Autowired
     private UserService userService;
+    @Autowired
+    private BuyService buyService;
 
     @RequestMapping(value = {"/admin/go/{page}"})
     public String goAdminPage(@PathVariable String page) {
@@ -60,6 +66,7 @@ public class SystemController {
         }
         return infoJson;
     }
+
     @ResponseBody
     @RequestMapping(value = {"/admin/loggeduser"}, produces = {"application/json;charset=UTF-8"})
     public String getLoggedUser() {
@@ -67,7 +74,7 @@ public class SystemController {
         List<String> loggedInUserList = userService.getLoggedInUserList();
         info.put("success", true);
         info.put("loggedInUserList", loggedInUserList);
-        info.put("loggedInUserCount", loggedInUserList==null?0:loggedInUserList.size());
+        info.put("loggedInUserCount", loggedInUserList == null ? 0 : loggedInUserList.size());
         String infoJson;
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -134,4 +141,73 @@ public class SystemController {
         return "{\"success\":false}";
     }
 
+
+    @RequiresRoles("admin")
+    @ResponseBody
+    @RequestMapping(value = "/admin/buyfilelist", produces = {"application/json;charset=UTF-8"})
+    public String buyFileList() throws IOException {
+        List<String> buyFileList = buyService.getBuyFileList();
+        ObjectMapper mapper = new ObjectMapper();
+        Map map = new HashMap();
+        String infoJson = "";
+        map.put("success", true);
+        map.put("buyFileList", buyFileList);
+        try {
+            infoJson = mapper.writeValueAsString(map);
+        } catch (IOException e) {
+            e.printStackTrace();
+            infoJson = "{\"success\": false,\"message\":\"转换数据失败\"}";
+        }
+        return infoJson;
+    }
+
+    @RequiresRoles("admin")
+    @ResponseBody
+    @RequestMapping(value = "/admin/uploadbuyfile", produces = {"application/json;charset=UTF-8"})
+    public String uploadBuyFile(@RequestParam MultipartFile buyFile) throws IOException {
+        if(buyFile.isEmpty())
+            return "{\"success\": false,\"message\":\"请选择非空文件\"}";
+        String originalFilename = buyFile.getOriginalFilename();
+        String[] originalFilenameSplit = originalFilename.split("\\.");
+        if(originalFilenameSplit.length<2){
+            return "{\"success\": false,\"message\":\"请选择正确的文件\"}";
+        }else{
+            String extName = originalFilenameSplit[originalFilenameSplit.length-1];
+            if(!"xls".equals(extName)){
+                return "{\"success\": false,\"message\":\"请选择正确的.xls文件\"}";
+            }
+        }
+        try {
+            boolean saveBuyFile = buyService.saveBuyFile(buyFile);
+            String infoJson = "{\"success\": false}";
+            if (saveBuyFile) {
+                List<String> buyFileList = buyService.getBuyFileList();
+                ObjectMapper mapper = new ObjectMapper();
+                Map map = new HashMap();
+                map.put("success", true);
+                map.put("buyFileList", buyFileList);
+                try {
+                    infoJson = mapper.writeValueAsString(map);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    infoJson = "{\"success\": false,\"message\":\"转换数据失败\"}";
+                }
+                return infoJson;
+            } else {
+                return infoJson;
+            }
+        }catch (BuyFileExistException e){
+            return "{\"success\": false,\"message\":\"文件已存在\"}";
+        }
+    }
+    @RequiresRoles("admin")
+    @ResponseBody
+    @RequestMapping(value = "/admin/parsebuyfile", produces = {"application/json;charset=UTF-8"})
+    public String parseBuyFile(@RequestParam String fileName) throws IOException {
+        if(buyService.parseBuyFile(fileName)){
+            return "{\"success\": true,\"message\":\"成功解析\"}";
+        }
+        return "{\"success\": false,\"message\":\"解析失败\"}";
+
+    }
 }
