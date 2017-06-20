@@ -8,7 +8,7 @@
         <a class="list-group-item" href="/logout" >登出</a>
         <a class="list-group-item" href="/go/logon">登录</a>
         <a class="list-group-item" href="/admin/go/admin#/info">管理员</a>
-        <a class="list-group-item" href="/buy">买</a>
+        <a class="list-group-item" href="/buy/1">买</a>
     </div>
 </div>
 <div class="row copyright">

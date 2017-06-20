@@ -17,5 +17,7 @@ public interface ItemMapper extends BaseMapper<Item>{
 
     Item selectByItemId(String itemId);
 
+    int hasItemId(String itemId);
+
     int insertItemList(List<Item> itemBatch);
 }

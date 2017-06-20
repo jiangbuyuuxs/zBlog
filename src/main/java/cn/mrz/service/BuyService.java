@@ -1,6 +1,7 @@
 package cn.mrz.service;
 
 import cn.mrz.pojo.Item;
+import cn.mrz.pojo.ItemClass;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,9 +18,11 @@ public interface BuyService {
     boolean saveBuyFile(MultipartFile buyFile);
 
     boolean parseBuyFile(String buyFilePath);
-    public Page<Item> getItem(Page<Item> page);
+    Page<Item> getItem(Page<Item> page);
 
-    public Set<String> getItemClass();
+    Set<String> getItemClass();
+
+    public List<ItemClass> getItemClassByParentId(Long parentId);
 
     List<String> getItemIdByClass(int itemClassHashCode);
 

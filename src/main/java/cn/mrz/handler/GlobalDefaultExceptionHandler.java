@@ -26,6 +26,7 @@ public class GlobalDefaultExceptionHandler {
         ModelAndView mv = new ModelAndView();
         mv.addObject("message", "非法参数~~~");
         mv.addObject("url", req.getRequestURL());
+        mv.addObject("ex", e.getLocalizedMessage());
         mv.setViewName(DEFAULT_ERROR_VIEW);
         return mv;
     }
@@ -39,6 +40,7 @@ public class GlobalDefaultExceptionHandler {
         ModelAndView mv = new ModelAndView();
         mv.addObject("message", "找不到这样的博客~~~");
         mv.addObject("url", req.getRequestURL());
+        mv.addObject("ex",e.getLocalizedMessage());
         mv.setViewName(DEFAULT_ERROR_VIEW);
         return mv;
     }

@@ -34,6 +34,12 @@
         <td>${url}</td>
         <td>${message}</td>
       </tr>
+      <tr>
+        <td colspan="2">detail</td>
+      </tr>
+      <tr class="danger">
+        <td colspan="2">${ex}</td>
+      </tr>
     </table>
   </div>
 </div>

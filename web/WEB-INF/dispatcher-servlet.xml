@@ -20,6 +20,7 @@
     <mvc:annotation-driven/>
     <!--对静态资源文件的访问-->
     <mvc:resources mapping="/resources/**" location="/resources/" />
+    <mvc:resources mapping="favicon.ico" location="favicon.ico" />
 
     <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <!-- 定义需要特殊处理的异常，用类名或完全路径名作为key，异常也页名作为值-->

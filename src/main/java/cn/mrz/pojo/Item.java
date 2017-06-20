@@ -17,7 +17,9 @@ public class Item implements Serializable{
     private String title;
     private String imageUrl;
     private String detailUrl;
-    private String itemClass;
+    private int itemClass;
+    @TableField(exist = false)
+    private String itemClassString;
     private String tbkUrl;
     private Float price;
     private Float myMoney;
@@ -32,13 +34,14 @@ public class Item implements Serializable{
     @TableField(exist = false)
     private Favourable favourable;
 
-    public Item(Long id, String itemId, String title, String imageUrl, String detailUrl, String itemClass, String tbkUrl, Float price, Float myMoney, String shopName, String shopType, Date startDate, Date endDate, String shortUrl, String taoUrl, Long salesVolume, Favourable favourable) {
+    public Item(Long id, String itemId, String title, String imageUrl, String detailUrl, String itemClassString, String tbkUrl, Float price, Float myMoney, String shopName, String shopType, Date startDate, Date endDate, String shortUrl, String taoUrl, Long salesVolume, Favourable favourable) {
         this.id = id;
         this.itemId = itemId;
         this.title = title;
         this.imageUrl = imageUrl;
         this.detailUrl = detailUrl;
-        this.itemClass = itemClass;
+        this.itemClassString = itemClassString;
+        this.itemClass = itemClassString.hashCode();
         this.tbkUrl = tbkUrl;
         this.price = price;
         this.myMoney = myMoney;
@@ -95,11 +98,18 @@ public class Item implements Serializable{
         this.imageUrl = imageUrl;
     }
 
-    public String getItemClass() {
+    public String getItemClassString() {
+        return itemClassString;
+    }
+
+    public void setItemClassString(String itemClassString) {
+        this.itemClassString = itemClassString;
+    }
+    public int getItemClass() {
         return itemClass;
     }
 
-    public void setItemClass(String itemClass) {
+    public void setItemClass(int itemClassString) {
         this.itemClass = itemClass;
     }
 
