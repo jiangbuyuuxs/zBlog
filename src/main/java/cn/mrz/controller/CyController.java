@@ -2,7 +2,7 @@ package cn.mrz.controller;
 
 import cn.mrz.mapper.CyMapper;
 import cn.mrz.pojo.Cy;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,7 +41,6 @@ public class CyController {
             if (chenyu != null) {
                 String pyEnd = chenyu.getPyEnd();
                 List<Cy> cyByPyFirst = cyDao.getCyByPyFirst(pyEnd);
-                ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> map = new HashMap();
                 map.put("success", true);
                 map.put("cy", chenyu);
@@ -50,12 +49,7 @@ public class CyController {
                     map.put("num", cyByPyFirst.size());
                     map.put("nextcy", cyByPyFirst);
                 }
-                try {
-                    json = mapper.writeValueAsString(map);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return json;
-                }
+                json = JSONObject.toJSONString(map);
             }
         }
         return json;

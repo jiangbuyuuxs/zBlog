@@ -28,4 +28,7 @@ public interface BuyService {
 
     List<Item> getItemByItemIdList(List<String> itemIdList);
 
+    List<Item> getCacheIndexItemList(String key);
+
+    int cacheIndexItemList(String key,List<Item> itemList);
 }

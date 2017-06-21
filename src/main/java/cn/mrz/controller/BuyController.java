@@ -7,10 +7,11 @@ import cn.mrz.pojo.Favourable;
 import cn.mrz.pojo.Item;
 import cn.mrz.pojo.ItemClass;
 import cn.mrz.service.BuyService;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -28,6 +29,10 @@ import java.util.*;
 @Controller
 public class BuyController {
 
+    Logger logger = LoggerFactory.getLogger(BuyController.class);
+
+    final static String INDEX_ITEM_KEY = "index:item";
+
     @Autowired
     private BuyService buyService;
     @Autowired
@@ -40,10 +45,16 @@ public class BuyController {
     @RequestMapping(value = "/buy/{page}")
     public String index(ModelMap map, @PathVariable int page) {
         List<ItemClass> itemClass = buyService.getItemClassByParentId(new Long(0));
-        Page<Item> pagination = new Page<Item>(page, 40, "sales_volume");
-        pagination.setAsc(false);
-        pagination = buyService.getItem(pagination);
-        List<Item> itemList = pagination.getRecords();
+        List<Item> cacheItemList = buyService.getCacheIndexItemList(INDEX_ITEM_KEY);
+        List<Item> itemList = cacheItemList;
+        if(cacheItemList==null||cacheItemList.size() == 0){
+            Page<Item> pagination = new Page<Item>(page, 40, "sales_volume");
+            pagination.setAsc(false);
+            pagination = buyService.getItem(pagination);
+            itemList = pagination.getRecords();
+            //将首页数据存入redis,缓存一天
+            buyService.cacheIndexItemList(INDEX_ITEM_KEY,itemList);
+        }
         map.put("itemList", itemList);
         map.put("itemClassList", itemClass);
         return "/buy/index";
@@ -134,18 +145,11 @@ public class BuyController {
         EntityWrapper<ItemClass> entityWrapper = new EntityWrapper<ItemClass>();
         entityWrapper.where("parent_id={0}", id);
         List<ItemClass> subItemClassList = itemClassMapper.selectList(entityWrapper);
-        ObjectMapper objectMapper = new ObjectMapper();
         Map map = new HashMap();
         map.put("success", true);
         map.put("subItemClassList", subItemClassList);
-        String jsonStr = "{\"success\":false,\"message\":\"转换失败\"}";
-        try {
-            jsonStr = objectMapper.writeValueAsString(map);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return jsonStr;
-        }
-        return jsonStr;
+
+        return JSONObject.toJSONString(map);
     }
 
 }

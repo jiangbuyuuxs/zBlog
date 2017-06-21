@@ -1,5 +1,7 @@
 package cn.mrz.dao;
 
+import cn.mrz.pojo.Item;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,4 +30,8 @@ public interface ItemDao {
     public Set<String> getItemClassList();
 
     List<String> getItemIdByClassHashcode(int itemClassHashCode);
+
+    int setList(String key, List<Item> itemList);
+
+    List<Item> getList(String key);
 }

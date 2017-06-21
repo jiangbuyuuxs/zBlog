@@ -5,8 +5,8 @@ import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -44,26 +44,9 @@ public class IndexController {
         List<Blog> hotBlogList = blogService.getHotBlogList(5);
         List<Word> hotWordList = wordService.getTopHotWordList(15);
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
-        String blogListJson;
-        String hotBlogListJson;
-        String hotWordListJson;
-        try {
-            blogListJson = mapper.writeValueAsString(blogList);
-        } catch (IOException e) {
-            blogListJson = "{\"success\": false,\"msg\",\"获取信息失败\"}";
-        }
-        try {
-            hotBlogListJson = mapper.writeValueAsString(hotBlogList);
-        } catch (IOException e) {
-            hotBlogListJson = "{\"success\": false,\"msg\",\"获取热门博文失败\"}";
-        }
-        try {
-            hotWordListJson = mapper.writeValueAsString(hotWordList);
-        } catch (IOException e) {
-            hotWordListJson = "{\"success\": false,\"msg\",\"获取热词失败\"}";
-        }
+        String blogListJson = JSONObject.toJSONString(blogList);
+        String hotBlogListJson= JSONObject.toJSONString(hotBlogList);
+        String hotWordListJson= JSONObject.toJSONString(hotWordList);
         map.addAttribute("blogList", blogListJson);
         map.addAttribute("blogCountNum", blogCountNum);
         map.addAttribute("hotBlogList", hotBlogListJson);
@@ -101,16 +84,9 @@ public class IndexController {
                 break;
             }
         }
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
-        String blogListJson = "";
-        try {
-            blogListJson = mapper.writeValueAsString(blogList);
-        } catch (IOException e) {
-            logger.info("获取热词对应的博客列表时,转换失败 :"+e.getLocalizedMessage());
-            return "[]";
 
-        }
+        String blogListJson  = JSONObject.toJSONString(blogList);
+
         map.addAttribute("blogList",blogListJson);
         map.addAttribute("blogCountNum",blogCountNum);
         map.addAttribute("pageSize",pageSize);
@@ -126,17 +102,12 @@ public class IndexController {
         Page<Word> pagination = wordService.getWordsByWordHash(new Page<Word>(page, pageSize), hashcode);
         List<Word> records = pagination.getRecords();
         List<Blog> blogList = blogService.getBlogListByWordList(records);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
+
+
         HashMap hashMap = new HashMap();
+        hashMap.put("success", true);
         hashMap.put("blogList", blogList);
-        String blogListJson = "";
-        try {
-            blogListJson = mapper.writeValueAsString(hashMap);
-        } catch (IOException e) {
-            logger.info("获取热词对应的博客列表时,转换失败 :"+e.getLocalizedMessage());
-            return "[]";
-        }
+        String blogListJson = JSONObject.toJSONString(hashMap);
         return blogListJson;
     }
 

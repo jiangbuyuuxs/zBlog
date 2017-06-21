@@ -1,14 +1,15 @@
 package cn.mrz.dao.impl;
 
 import cn.mrz.dao.ItemDao;
+import cn.mrz.pojo.Item;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.data.redis.core.BoundListOperations;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Administrator on 2017/6/19.
@@ -19,27 +20,58 @@ public class ItemDaoImpl extends BaseDaoImpl implements ItemDao {
     public void setItemClass(Integer itemClassHashCode, List<String> itemIdList) {
         SetOperations setOperations = redisTemplate.opsForSet();
         for(String itemId:itemIdList)
-            setOperations.add("itemclass:" + itemClassHashCode, itemId);
+            setOperations.add("item:class:" + itemClassHashCode, itemId);
     }
 
     @Override
     public void addItemClass(String itemType) {
         SetOperations setOperations = redisTemplate.opsForSet();
-        setOperations.add("itemclass",itemType);
+        setOperations.add("item:class",itemType);
 
     }
     @Override
     public Set<String> getItemClassList() {
         SetOperations<String,String> setOperations = redisTemplate.opsForSet();
-        return setOperations.members("itemclass");
+        return setOperations.members("item:class");
     }
 
     @Override
     public List<String> getItemIdByClassHashcode(int itemClassHashCode) {
         SetOperations<String,String> setOperations = redisTemplate.opsForSet();
-        Set<String> members = setOperations.members("itemclass:" + itemClassHashCode);
+        Set<String> members = setOperations.members("item:class:" + itemClassHashCode);
         List<String> list = new ArrayList<String>();
         list.addAll(members);
         return list;
+    }
+
+    @Override
+    public int setList(String key, List<Item> itemList) {
+        BoundListOperations boundListOperations = redisTemplate.boundListOps(key);
+        for(Item item:itemList){
+            String itemJSON = JSONObject.toJSONString(item);
+            boundListOperations.leftPush(itemJSON);
+        }
+        Calendar todayEnd = Calendar.getInstance();
+        todayEnd.setTimeInMillis(System.currentTimeMillis());
+        todayEnd.set(Calendar.HOUR, 23);
+        todayEnd.set(Calendar.MINUTE, 59);
+        todayEnd.set(Calendar.SECOND, 59);
+        boundListOperations.expireAt(todayEnd.getTime());
+        return boundListOperations.size().intValue();
+    }
+
+    @Override
+    public List<Item> getList(String key) {
+        List<Item> itemList = new ArrayList<Item>();
+        BoundListOperations boundListOperations = redisTemplate.boundListOps(key);
+        Long size = boundListOperations.size();
+        while(size>0) {
+            Object itemObject = boundListOperations.rightPop();
+            String itemJSON = itemObject.toString();
+            Item item = JSONObject.parseObject(itemJSON, Item.class);
+            itemList.add(item);
+            size--;
+        }
+        return itemList;
     }
 }

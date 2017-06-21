@@ -5,6 +5,7 @@ import cn.mrz.mapper.VisitMapper;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.BuyService;
 import cn.mrz.service.UserService;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -15,7 +16,6 @@ import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.util.SavedRequest;
 import org.apache.shiro.web.util.WebUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -57,14 +57,7 @@ public class SystemController {
         int visitCount = visitMapper.getAllVisitSum();
         info.put("blogCountNum", blogCountNum);
         info.put("visitCount", visitCount);
-        String infoJson = "{\"success\": false}";
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            infoJson = mapper.writeValueAsString(info);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return infoJson;
+        return JSONObject.toJSONString(info);
     }
 
     @ResponseBody
@@ -75,15 +68,8 @@ public class SystemController {
         info.put("success", true);
         info.put("loggedInUserList", loggedInUserList);
         info.put("loggedInUserCount", loggedInUserList == null ? 0 : loggedInUserList.size());
-        String infoJson;
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            infoJson = mapper.writeValueAsString(info);
-        } catch (IOException e) {
-            e.printStackTrace();
-            infoJson = "{\"success\": false,\"message\":\"转换数据失败\"}";
-        }
-        return infoJson;
+
+        return JSONObject.toJSONString(info);
     }
 
     @RequestMapping("/login")
@@ -147,18 +133,12 @@ public class SystemController {
     @RequestMapping(value = "/admin/buyfilelist", produces = {"application/json;charset=UTF-8"})
     public String buyFileList() throws IOException {
         List<String> buyFileList = buyService.getBuyFileList();
-        ObjectMapper mapper = new ObjectMapper();
         Map map = new HashMap();
         String infoJson = "";
         map.put("success", true);
         map.put("buyFileList", buyFileList);
-        try {
-            infoJson = mapper.writeValueAsString(map);
-        } catch (IOException e) {
-            e.printStackTrace();
-            infoJson = "{\"success\": false,\"message\":\"转换数据失败\"}";
-        }
-        return infoJson;
+
+        return JSONObject.toJSONString(map);
     }
 
     @RequiresRoles("admin")
@@ -182,17 +162,11 @@ public class SystemController {
             String infoJson = "{\"success\": false}";
             if (saveBuyFile) {
                 List<String> buyFileList = buyService.getBuyFileList();
-                ObjectMapper mapper = new ObjectMapper();
                 Map map = new HashMap();
                 map.put("success", true);
                 map.put("buyFileList", buyFileList);
-                try {
-                    infoJson = mapper.writeValueAsString(map);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    infoJson = "{\"success\": false,\"message\":\"转换数据失败\"}";
-                }
-                return infoJson;
+
+                return JSONObject.toJSONString(map);
             } else {
                 return infoJson;
             }

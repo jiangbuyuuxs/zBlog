@@ -2,9 +2,8 @@ package cn.mrz.controller;
 
 import cn.mrz.pojo.User;
 import cn.mrz.service.UserService;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.util.JSONPObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -31,15 +30,7 @@ public class UserController {
         int pageSize = 10;
         int start = (page - 1) * 10;
         List<User> users = usersService.getUsers(start, pageSize, null);
-        ObjectMapper mapper = new ObjectMapper();
-        String usersJson = null;
-        try {
-            usersJson = mapper.writeValueAsString(users);
-        } catch (IOException e) {
-            e.printStackTrace();
-            usersJson = "{\"success\": false}";
-        }
-        return usersJson;
+        return JSONObject.toJSONString(users);
     }
 
     @RequiresRoles("admin")
@@ -61,13 +52,8 @@ public class UserController {
         int start = (page - 1) * 10;
         int end = start + pageSize;
         List<User> users = usersService.getUsers(start, end, null);
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            usersJson = mapper.writeValueAsString(users);
-        } catch (IOException e) {
-            e.printStackTrace();
-            usersJson = "{\"success\": false}";
-        }
+        usersJson = JSONObject.toJSONString(users);
+
         return usersJson;
     }
 
@@ -75,7 +61,7 @@ public class UserController {
     @RequestMapping(value = "/admin/user/exist", produces = {"application/json;charset=UTF-8"})
     public String existUser(@RequestParam String username) {
         User userByUsername = usersService.getUserByUsername(username);
-        if(userByUsername==null){
+        if (userByUsername == null) {
             return "true";
         }
         return "false";
@@ -86,7 +72,7 @@ public class UserController {
     @RequestMapping(value = "/admin/user/add", produces = {"application/json;charset=UTF-8"})
     public String existUser(@Valid User user, BindingResult bingingresult) {
 
-        if(bingingresult.hasErrors()){
+        if (bingingresult.hasErrors()) {
 
             return "{\"success\": false}";
         }
@@ -102,20 +88,15 @@ public class UserController {
     public String userInfo(@PathVariable String username) {
         User user = usersService.getUserByUsername(username);
         String userJson = "{\"success\": false}";
-        if(user!=null) {
+        if (user != null) {
             user.setPassword(null);
             Map map = new HashMap();
             map.put("success", true);
             map.put("userInfo", user);
-            try {
-                userJson = new ObjectMapper().writeValueAsString(map);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            userJson = JSONObject.toJSONString(map);
         }
         return userJson;
     }
-
 
 
 }

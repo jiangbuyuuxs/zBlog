@@ -36,13 +36,13 @@
             width: 80px;
             display: inline-block;
             padding-left: 2px;
-            font-weight: bold;
         }
 
         .item-price {
             width: 70px;
             display: inline-block;
             text-align: right;
+            margin: 5px 0 ;
         }
 
         .no-item {
@@ -117,7 +117,6 @@
             list-style: none;
             display: inline-block;
             margin: 4px;
-
         }
     </style>
     <script>
@@ -163,8 +162,8 @@
     </div>
     <div class="row item-class-nav">
         <ul class="item-class-container">
-            <li class="top-item"><a href="/buy/1">首页</a></li>
-            <li class="top-item"><a href="">全部</a></li>
+            <li class="top-item"><a href="/">首页</a></li>
+            <li class="top-item"><a href="/buy/1">全部</a></li>
             <c:forEach var="itemClass" items="${itemClassList}">
                 <li class="top-item"><a class="item-class-a" href="#" data-id="${itemClass.id}">${itemClass.title}</a></li>
             </c:forEach>
@@ -175,14 +174,15 @@
     <div class="row item-list-container">
         <c:forEach var="item" items="${itemList}">
             <div class="item">
-                <div><img class="item-image lazy" data-original="${item.imageUrl}_240x240"
-                          src="/resources/img/nopic.jpg">
+                <div>
+                    <a href="${item.tbkUrl}" target="_blank"><img class="item-image lazy" data-original="${item.imageUrl}_240x240"
+                          src="/resources/img/nopic.jpg"></a>
                 </div>
                 <div class="item-title">${item.title}</div>
                 <div class="item-info">
                     <span class="item-sales-volume">${item.salesVolume}</span>
-                    <span class="item-favourable">领券</span>
-                    <h4 class="item-price">${item.price}</h4>
+                    <span class="item-favourable"><a href="${item.tbkUrl}" target="_blank">领券</a></span>
+                    <span class="item-price h3">${item.price}</span>
                 </div>
             </div>
         </c:forEach>

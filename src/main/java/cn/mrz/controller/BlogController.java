@@ -3,9 +3,9 @@ package cn.mrz.controller;
 import cn.mrz.pojo.Blog;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,20 +41,11 @@ public class BlogController {
         pagination = blogService.getBlogList(pagination, false, false);
         List<Blog> blogList = pagination.getRecords();
         int blogCountNum = pagination.getTotal();//blogService.getBlogCountNum();
-
-        String blogListJson = "{\"success\": false,\"msg\",\"获取失败\"}";
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
-
         HashMap hashMap = new HashMap();
         hashMap.put("blogList", blogList);
         hashMap.put("blogCountNum", blogCountNum);
-        try {
-            blogListJson = mapper.writeValueAsString(hashMap);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return blogListJson;
+
+        return JSONObject.toJSONString(hashMap);
 
     }
 
@@ -129,16 +120,10 @@ public class BlogController {
             pagination= blogService.getBlogList(pagination, false, false);
             List<Blog> blogList = pagination.getRecords();
             int blogCountNum = pagination.getTotal();//blogService.getBlogCountNum();
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd mm:HH:ss"));
             HashMap hashMap = new HashMap();
             hashMap.put("blogList", blogList);
             hashMap.put("blogCountNum", blogCountNum);
-            try {
-                blogListJson = mapper.writeValueAsString(hashMap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                blogListJson = JSONObject.toJSONString(hashMap);
         }
         return blogListJson;
     }

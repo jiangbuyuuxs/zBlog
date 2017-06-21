@@ -201,6 +201,17 @@ public class BuyServiceImpl implements BuyService {
         return items;
     }
 
+    @Override
+    public List<Item> getCacheIndexItemList(String key) {
+        return itemDao.getList(key);
+    }
+
+    @Override
+    public int cacheIndexItemList(String key,List<Item> itemList) {
+        itemDao.setList(key, itemList);
+        return 0;
+    }
+
     private List<Item> parseData(String filePath) throws Exception {
         File file = new File(fileDictionary, filePath);
         InputStream is = new FileInputStream(file);
