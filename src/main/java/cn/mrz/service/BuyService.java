@@ -16,6 +16,7 @@ public interface BuyService {
     List<String> getBuyFileList();
 
     boolean saveBuyFile(MultipartFile buyFile);
+    boolean deleteBuyFile(String buyFilePath);
 
     boolean parseBuyFile(String buyFilePath);
     Page<Item> getItem(Page<Item> page);

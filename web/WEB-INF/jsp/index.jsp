@@ -6,6 +6,7 @@
 <head>
     <title>textBlog</title>
     <%@include file="comm/jscss.jsp" %>
+    <%@include file="comm/vue.jsp" %>
     <link rel="stylesheet" type="text/css" href="/resources/css/index.css">
     <script>
         $(function () {

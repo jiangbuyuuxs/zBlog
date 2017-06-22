@@ -1,5 +1,6 @@
 package cn.mrz.pojo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
 
@@ -26,7 +27,9 @@ public class Item implements Serializable{
     private String shopName;
     //TAOBAO TMALL
     private String shopType;
+    @JSONField (format="yyyy-MM-dd")
     private Date startDate;
+    @JSONField(format="yyyy-MM-dd")
     private Date endDate;
     private String shortUrl;
     private String taoUrl;

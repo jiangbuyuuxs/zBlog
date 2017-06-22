@@ -98,7 +98,6 @@ public class BuyController {
             itemMapper.delete(new EntityWrapper<Item>());
             favourableMapper.delete(new EntityWrapper<Favourable>());
             map.put("success", true);
-        }
             ItemClass itemClass1 = new ItemClass("衣不遮体了");
             itemClass1.setParentId(0);
             ItemClass itemClass2 = new ItemClass("食不果腹了");
@@ -113,6 +112,7 @@ public class BuyController {
             list.add(itemClass3);
             list.add(itemClass4);
             itemClassMapper.insertItemClassList2(list);
+        }
         return "/admin/buy/manager";
     }
 

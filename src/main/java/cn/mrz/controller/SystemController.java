@@ -174,6 +174,7 @@ public class SystemController {
             return "{\"success\": false,\"message\":\"文件已存在\"}";
         }
     }
+
     @RequiresRoles("admin")
     @ResponseBody
     @RequestMapping(value = "/admin/parsebuyfile", produces = {"application/json;charset=UTF-8"})
@@ -182,6 +183,16 @@ public class SystemController {
             return "{\"success\": true,\"message\":\"成功解析\"}";
         }
         return "{\"success\": false,\"message\":\"解析失败\"}";
+
+    }
+    @RequiresRoles("admin")
+    @ResponseBody
+    @RequestMapping(value = "/admin/deletebuyfile", produces = {"application/json;charset=UTF-8"})
+    public String deleteBuyFile(@RequestParam String fileName) throws IOException {
+        if(buyService.deleteBuyFile(fileName)){
+            return "{\"success\": true,\"message\":\"成功删除:"+fileName+"\"}";
+        }
+        return "{\"success\": false,\"message\":\"删除失败\"}";
 
     }
 }

@@ -53,7 +53,7 @@ public class ItemDaoImpl extends BaseDaoImpl implements ItemDao {
         }
         Calendar todayEnd = Calendar.getInstance();
         todayEnd.setTimeInMillis(System.currentTimeMillis());
-        todayEnd.set(Calendar.HOUR, 23);
+        todayEnd.set(Calendar.HOUR_OF_DAY, 23);
         todayEnd.set(Calendar.MINUTE, 59);
         todayEnd.set(Calendar.SECOND, 59);
         boundListOperations.expireAt(todayEnd.getTime());

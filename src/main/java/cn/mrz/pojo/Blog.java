@@ -1,5 +1,6 @@
 package cn.mrz.pojo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotations.TableName;
 
 import java.io.Serializable;
@@ -13,7 +14,9 @@ public class Blog  implements Serializable {
 
     private long id;
     private String title;
+    @JSONField (format="yyyy-MM-dd")
     private Date createDate;
+    @JSONField(format="yyyy-MM-dd")
     private Date editDate;
     private String texts;
     private long imageId;

@@ -4,7 +4,6 @@
         <a class="list-group-item" href="/">首页</a>
         <a class="list-group-item" href="/cy/cyjl">成语接龙</a>
         <a class="list-group-item" href="#">****************</a>
-
         <a class="list-group-item" href="/logout" >登出</a>
         <a class="list-group-item" href="/go/logon">登录</a>
         <a class="list-group-item" href="/admin/go/admin#/info">管理员</a>

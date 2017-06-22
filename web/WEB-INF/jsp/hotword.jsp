@@ -4,6 +4,7 @@
 <head>
     <title>热词搜索页</title>
     <%@include file="comm/jscss.jsp" %>
+    <%@include file="comm/vue.jsp" %>
     <link rel="stylesheet" type="text/css" href="/resources/css/index.css">
     <script>
         $(function () {

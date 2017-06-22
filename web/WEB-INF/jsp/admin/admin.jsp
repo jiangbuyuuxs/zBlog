@@ -11,6 +11,7 @@
 <head>
     <title>后台<shiro:lacksRole name="admin">非管理员</shiro:lacksRole></title>
     <%@include file="../comm/jscss.jsp" %>
+    <%@include file="../comm/vue.jsp" %>
     <script type="text/javascript" src="/resources/jQuery/plug/validate/jquery.validate.js"></script>
     <script type="text/javascript" src="/resources/jQuery/plug/validate/messages_zh.js"></script>
     <style>
@@ -298,7 +299,7 @@
             <div>已完成:<span class="percent">0</span>%</div>
             <ul>
                 <li v-for="buyFile in buyFileList">
-                    {{buyFile}}[<a @click.prevent="parseFile(buyFile)">解析</a>]
+                    {{buyFile}} <a class="btn btn-success btn-xs" @click.prevent="parseFile(buyFile)">解析</a> <a class="btn btn-danger btn-xs" @click.prevent="deleteFile(buyFile)">删除</a>
                 </li>
             </ul>
         </div>
@@ -631,6 +632,29 @@
                                         alert('解析成功');
                                     } else {
                                         alert(data.data.message ? data.data.message : '解析失败');
+                                    }
+                                }, function (data) {
+
+                                }
+                        );
+                    },
+                    deleteFile: function (fileName) {
+                        var isDel = confirm('是否删除');
+                        if(!isDel){
+                            return false;
+                        }
+                        var url = '/admin/deletebuyfile';
+                        this.$http.post(url, {fileName: fileName},
+                                {
+                                    emulateJSON: true
+                                }
+                        ).
+                                then(function (data) {
+                                    if (data.data.success) {
+                                        alert(data.data.message ? data.data.message : '成功删除');
+                                        this.fetchData();
+                                    } else {
+                                        alert(data.data.message ? data.data.message : '删除失败');
                                     }
                                 }, function (data) {
 

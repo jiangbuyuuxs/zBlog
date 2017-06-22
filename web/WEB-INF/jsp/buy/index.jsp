@@ -15,7 +15,8 @@
     <style>
         .item {
             display: inline-block;
-            margin: 10px 20px;
+            margin: 10px 18px;
+            border:1px solid #F0F0F0;
         }
 
         .item-title {
@@ -25,6 +26,8 @@
             width: 240px;
             font-size: 12px;
             line-height: 25px;
+            padding: 0 2px;
+            background: #a7cec9;
         }
 
         .item-image {
@@ -33,9 +36,11 @@
         }
 
         .item-sales-volume {
-            width: 80px;
+            width: 100%;
             display: inline-block;
-            padding-left: 2px;
+            text-align: center;
+            font-size:12px;
+            background: rgba(233, 238, 146, 0.79);
         }
 
         .item-price {
@@ -43,6 +48,7 @@
             display: inline-block;
             text-align: right;
             margin: 5px 0 ;
+            color:#FF0003;
         }
 
         .no-item {
@@ -60,9 +66,10 @@
         }
 
         .item-favourable {
-            width: 80px;
+            width: 77px;
             text-align: center;
             display: inline-block;
+            font-size:12px;
         }
 
         .top-item a {
@@ -117,6 +124,18 @@
             list-style: none;
             display: inline-block;
             margin: 4px;
+        }
+        .tmall{
+            background: url("/resources/img/buy.png") -91px -1px;
+            height:29px;
+            width:85px;
+            display: inline-block;
+        }
+        .taobao{
+            background: url("/resources/img/buy.png") -1px -1px;
+            height:29px;
+            width:85px;
+            display: inline-block;
         }
     </style>
     <script>
@@ -180,10 +199,11 @@
                 </div>
                 <div class="item-title">${item.title}</div>
                 <div class="item-info">
-                    <span class="item-sales-volume">${item.salesVolume}</span>
-                    <span class="item-favourable"><a href="${item.tbkUrl}" target="_blank">领券</a></span>
-                    <span class="item-price h3">${item.price}</span>
+                    <span class="item-price h3"><span class="h4">￥</span>${item.price}</span>
+                    <span class="item-favourable">${item.favourable.title}</span>
+                    <span class="item-buy"><a href="${item.tbkUrl}" target="_blank"><span class="${item.shopType}"> </span></a></span>
                 </div>
+                <div><span class="item-sales-volume">当前销量:${item.salesVolume}</span></div>
             </div>
         </c:forEach>
         <c:if test="${itemList.size()==0}">

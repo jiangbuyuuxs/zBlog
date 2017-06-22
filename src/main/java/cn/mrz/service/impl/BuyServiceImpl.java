@@ -10,24 +10,23 @@ import cn.mrz.pojo.Item;
 import cn.mrz.pojo.ItemClass;
 import cn.mrz.service.BuyService;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.io.File;
 
 /**
  * Created by Administrator on 2017/6/19.
@@ -55,10 +54,16 @@ public class BuyServiceImpl implements BuyService {
         }
         if (file.isDirectory()) {
             File[] files = file.listFiles();
-            for (File buyFile : files) {
-                if (buyFile.isFile()) {
-                    buyFileList.add(buyFile.getName());
+            //按最后修改时间逆序
+            List<File> fileList = Arrays.asList(files);
+            Collections.sort(fileList, new Comparator<File>() {
+                @Override
+                public int compare(File file1, File file2) {
+                    return (int) (file2.lastModified() - file1.lastModified());
                 }
+            });
+            for (File buyFile : fileList) {
+                buyFileList.add(buyFile.getName());
             }
         }
         return buyFileList;
@@ -85,6 +90,12 @@ public class BuyServiceImpl implements BuyService {
     }
 
     @Override
+    public boolean deleteBuyFile(String buyFilePath) {
+        File buyFile = new File(fileDictionary, buyFilePath);
+        return buyFile.delete();
+    }
+
+    @Override
     public boolean parseBuyFile(String buyFilePath) {
         try {
             List<Item> items = parseData(buyFilePath);
@@ -98,7 +109,7 @@ public class BuyServiceImpl implements BuyService {
             for (Item item : items) {
                 //TODO 这里可以优化一下
                 int existItem = itemMapper.hasItemId(item.getItemId());
-                if (existItem<1) {
+                if (existItem < 1) {
                     flag++;
                     itemBatch.add(item);
                     Favourable favourable = item.getFavourable();
@@ -183,7 +194,7 @@ public class BuyServiceImpl implements BuyService {
     @Override
     public List<ItemClass> getItemClassByParentId(Long parentId) {
         EntityWrapper<ItemClass> entityWrapper = new EntityWrapper<ItemClass>();
-        entityWrapper.where("parent_id={0}",parentId);
+        entityWrapper.where("parent_id={0}", parentId);
         return itemClassMapper.selectList(entityWrapper);
     }
 
@@ -207,7 +218,7 @@ public class BuyServiceImpl implements BuyService {
     }
 
     @Override
-    public int cacheIndexItemList(String key,List<Item> itemList) {
+    public int cacheIndexItemList(String key, List<Item> itemList) {
         itemDao.setList(key, itemList);
         return 0;
     }
@@ -252,7 +263,11 @@ public class BuyServiceImpl implements BuyService {
                 String salesVolumeStr = row.getCell(7).getStringCellValue();
                 String myMoneyStr = row.getCell(9).getStringCellValue();
                 String shopName = row.getCell(12).getStringCellValue();
-                String shopType = row.getCell(13).getStringCellValue();//平台类型
+                String shopTypeOrg = row.getCell(13).getStringCellValue();//平台类型
+                String shopType = "tmall";
+                if ("淘宝".equals(shopTypeOrg)) {
+                    shopType = "taobao";
+                }
                 Float price = Float.parseFloat(priceStr);
                 Float myMoney = Float.parseFloat(myMoneyStr);
                 Long salesVolume = Long.parseLong(salesVolumeStr);
