@@ -25,7 +25,7 @@
         }
 
         .blog-list {
-            height: 430px;
+            min-height: 430px;
         }
 
         .loading {
@@ -68,7 +68,7 @@
             padding: 20px;
             margin: 20px 0;
             background-color: #f8f8f8;
-            min-height: 560px;
+            min-height: 540px;
         }
 
         .head-image-container {
@@ -100,14 +100,28 @@
         .file-upload-container input {
             background-color: #ffffff;
         }
+        .info-tab-panel,.blog-tab-panel{
+            padding:10px;
+        }
+        .blog-tab-panel>.row{
+            border-bottom:1px dashed #000000;
+            margin:0 0 5px 0;
+
+        }
+        .tab-container{
+            background: #FFFFFF;
+            height: 280px;
+            border: 1px solid #dddddd;
+            border-top:none;
+        }
     </style>
     <script type="text/x-template" id="blog-info-template">
         <table class="table">
             <tbody>
             <tr>
-                <td>博文总数</td>
+                <td>博文总数:</td>
                 <td>{{info.blogCountNum}}</td>
-                <td>总访问人数</td>
+                <td>博客总访问人次:</td>
                 <td>{{info.visitCount}}</td>
             </tr>
             </tbody>
@@ -246,9 +260,9 @@
         </div>
     </script>
     <script type="text/x-template" id="logged-in-user-list-template">
-        <div class="logged-in-user-list">
-            <span>当前登录用户数:{{loggedInUserCount}}</span>
-            <span>当前登录用户:</span>
+        <div class="logged-in-user-list hidden-xs">
+            <span>当前访问人数:{{loggedInUserCount}}</span>
+            <span>当前已登录用户:</span>
             <span v-for="loggedInUser of loggedInUserList">
                 <router-link :to="'/user/info/'+loggedInUser"><a class="logged-user">{{loggedInUser}}</a>
                     <%--<router-link :to="{name:'userInfoPanel',params:{username:loggedInUser}}"><a class="logged-user">{{loggedInUser}}</a>--%>
@@ -267,25 +281,52 @@
                         <div class="username text-center">
                             {{userInfo.username}}
                         </div>
-                        <div>
-                            <a @click="back" class="btn btn-success">返回</a>
+                        <div class="row text-center">
+                            <a @click="back" class="btn btn-danger btn-xs">返回</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-8 col-lg-8">
                     <p class="resume">这是一个奇怪的人,什么都没有留下.</p>
-                    <span>个人信息</span>
-                    <span>博客</span>
-                    <span>话题</span>
-
-                    <div>
-                        <ul>
-                            <li>昵称:{{userInfo.nickname}}</li>
-                            <li>电子邮件:{{userInfo.email}}</li>
-                        </ul>
+                    <ul class="nav nav-tabs tab-head">
+                        <li class="info-li active"><a href="#" @click.prevent="togglePanel('info')">个人信息</a></li>
+                        <li class="blog-li"><a href="#" @click.prevent="togglePanel('blog')">某人的博客</a></li>
+                        <li class="topic-li"><a href="#" @click.prevent="togglePanel('topic')">某人的话题</a></li>
+                    </ul>
+                    <div class="tab-content tab-container">
+                        <components :is="currentView" :user-info="userInfo"></components>
                     </div>
                 </div>
             </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="info-tab-panel-template">
+        <div class="info-tab-panel tab-panel">
+            <div class="row">
+                <div class="col-lg-2">昵称:</div>
+                <div class="col-lg-4">{{userInfo.nickname}}<a class="btn btn-success btn-xs" href="#" @click.prevent="sendMessage(userInfo.username)">发消息</a></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2">电子邮件:</div>
+                <div class="col-lg-4">{{userInfo.email}}</div>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="blog-tab-panel-template">
+        <div class="blog-tab-panel tab-panel">
+            <div class="row" v-for="blog of userBlogList">
+                <div class="col-lg-6">
+                    <a target="_blank" :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
+                </div>
+                <div class="col-lg-3 pull-right">
+                    {{blog.createDate}}
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="topic-tab-panel-template">
+        <div class="topic-tab-panel tab-panel">
+            未实现
         </div>
     </script>
     <script type="text/x-template" id="buy-manager-panel-template">
@@ -299,7 +340,8 @@
             <div>已完成:<span class="percent">0</span>%</div>
             <ul>
                 <li v-for="buyFile in buyFileList">
-                    {{buyFile}} <a class="btn btn-success btn-xs" @click.prevent="parseFile(buyFile)">解析</a> <a class="btn btn-danger btn-xs" @click.prevent="deleteFile(buyFile)">删除</a>
+                    {{buyFile}} <a class="btn btn-success btn-xs" @click.prevent="parseFile(buyFile)">解析</a> <a
+                        class="btn btn-danger btn-xs" @click.prevent="deleteFile(buyFile)">删除</a>
                 </li>
             </ul>
         </div>
@@ -525,14 +567,66 @@
                 }
             })
             ;
+
+            var infoTabPanel = {
+                template: '#info-tab-panel-template',
+                props: ['userInfo'],
+                methods:{
+                    sendMessage:function(username){
+                        BlogTool.sendMessage(username);
+                    }
+                }
+            };
+            var blogTabPanel = {
+                template: '#blog-tab-panel-template',
+                props: ['userInfo'],
+                data: function () {
+                    return {userBlogList: []}
+                },
+                methods:{
+                    fetchData: function () {
+                        var username = this.userInfo.username;
+                        var url = '/admin/userblog/' + username + '/username'
+                        this.$http.get(url).then(function (data) {
+                                    if (data.data.success)
+                                        this.userBlogList = data.data.userBlogList;
+                                }, function (data) {
+
+                                }
+                        );
+                    }
+                },
+                watch:{
+                    'userInfo': function () {
+                        this.fetchData();
+                    }
+                },
+                created: function () {
+                    this.fetchData();
+                }
+            };
+            var topicTabPanel = {
+                template: '#topic-tab-panel-template'
+            };
             Vue.component('user-info-panel', {
                 template: '#user-info-panel-template',
                 data: function () {
                     return {
-                        userInfo: {}
+                        userInfo: {},
+                        currentView: infoTabPanel
                     }
                 },
+                components: {
+                    'infoTabPanel': infoTabPanel,
+                    'blogTabPanel': blogTabPanel,
+                    'topicTabPanel': topicTabPanel
+                },
                 methods: {
+                    togglePanel: function (id) {
+                        this.currentView = id + 'TabPanel';
+                        $('.tab-head li').removeClass('active');
+                        $('.'+id+'-li').addClass('active');
+                    },
                     fetchData: function (username) {
                         var url = '/admin/user/' + username + '/userinfo';
                         this.$http.get(url).then(function (data) {
@@ -640,7 +734,7 @@
                     },
                     deleteFile: function (fileName) {
                         var isDel = confirm('是否删除');
-                        if(!isDel){
+                        if (!isDel) {
                             return false;
                         }
                         var url = '/admin/deletebuyfile';

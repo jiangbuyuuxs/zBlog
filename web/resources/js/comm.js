@@ -58,4 +58,10 @@
 
     window['BlogTool']['deleteCookie'] = deleteCookie;
 
+    function sendMessage(username) {
+        alert1('向'+username+'发消息!');
+    }
+
+    window['BlogTool']['sendMessage'] = sendMessage;
+
 })($);

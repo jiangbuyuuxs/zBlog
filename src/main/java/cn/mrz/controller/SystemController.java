@@ -64,10 +64,13 @@ public class SystemController {
     @RequestMapping(value = {"/admin/loggeduser"}, produces = {"application/json;charset=UTF-8"})
     public String getLoggedUser() {
         Map<String, Object> info = new HashMap();
-        List<String> loggedInUserList = userService.getLoggedInUserList();
+        Map loggedUserMap = userService.getLoggedInUserList();
+        List<String> loggedInUserList = (List<String>)loggedUserMap.get("user");
+        int unLoggedUserNum = (Integer)loggedUserMap.get("unLoggedNum");
         info.put("success", true);
         info.put("loggedInUserList", loggedInUserList);
-        info.put("loggedInUserCount", loggedInUserList == null ? 0 : loggedInUserList.size());
+        info.put("unLoggedUserNum", unLoggedUserNum);
+        info.put("loggedInUserCount", loggedInUserList == null ? 0+unLoggedUserNum : loggedInUserList.size()+unLoggedUserNum);
 
         return JSONObject.toJSONString(info);
     }
@@ -134,7 +137,6 @@ public class SystemController {
     public String buyFileList() throws IOException {
         List<String> buyFileList = buyService.getBuyFileList();
         Map map = new HashMap();
-        String infoJson = "";
         map.put("success", true);
         map.put("buyFileList", buyFileList);
 

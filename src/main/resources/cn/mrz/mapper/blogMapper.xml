@@ -3,13 +3,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.mrz.mapper.BlogMapper">
     <sql id="cols">
-        title,create_date,edit_date,texts,image_id,class_type
+        title,create_date,edit_date,texts,image_id,class_type,author
     </sql>
 
 
 
     <select id="selectBlogListWithoutContent" resultType="Blog">
-        select id,title,create_date,edit_date,image_id,class_type from blogs
+        select id,title,create_date,edit_date,image_id,class_type,author from blogs
     </select>
 
     <select id="selectBlogList" resultType="Blog">
@@ -26,7 +26,7 @@
     <insert id="insertBlog" parameterType="Blog" useGeneratedKeys="true" keyProperty="id">
         insert into
         blogs(<include refid="cols"></include>)
-        values(#{title},#{createDate},#{editDate},#{texts},#{imageId},#{classType})
+        values(#{title},#{createDate},#{editDate},#{texts},#{imageId},#{classType},#{author})
     </insert>
     <delete id="deleteById">
         delete

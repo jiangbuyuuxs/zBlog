@@ -1,5 +1,5 @@
 <%@ page pageEncoding="UTF-8" %>
-<div class="float-nav">
+<div class="float-nav hidden-xs">
     <div class="list-group">
         <a class="list-group-item" href="/">首页</a>
         <a class="list-group-item" href="/cy/cyjl">成语接龙</a>

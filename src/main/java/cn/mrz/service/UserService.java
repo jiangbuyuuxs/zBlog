@@ -5,6 +5,7 @@ import cn.mrz.pojo.Role;
 import cn.mrz.pojo.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -20,8 +21,10 @@ public interface UserService extends BaseService<User,String>{
     Set<Permission> findPermissions(String username);
 
     /**
-     * 获取已登录的用户名
+     * 获取已登录的用户名和未登录用户数
      * @return
      */
-    List<String> getLoggedInUserList();
+    Map getLoggedInUserList();
+
+
 }

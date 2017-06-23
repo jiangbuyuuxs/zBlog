@@ -4,10 +4,7 @@ import cn.mrz.dao.UserDao;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Administrator on 2017/6/16.
@@ -16,20 +13,27 @@ import java.util.Set;
 public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 
     @Override
-    public List<String> getAllUser(){
-        List<String> userList= new ArrayList<String>();
-        Set<String> keys = redisTemplate.keys("spring:session:sessions:*");
-        Iterator<String> iterator = keys.iterator();
+    public Map getLoggedUser(){
+        Map result = new HashMap();
+        List<String> userList = new ArrayList<String>();
+        int unLoggedNum = 0;
+        Set<String> expires = redisTemplate.keys("spring:session:sessions:expires*");
+        Iterator<String> iterator = expires.iterator();
         while(iterator.hasNext()){
-            String key = iterator.next();
-            if(key.indexOf("expires")!=-1)
-                continue;
-            BoundHashOperations<String,String,Object> boundHashOperations = redisTemplate.boundHashOps(key);
+            String expiresKey = iterator.next();
+            String[] expiresKeys = expiresKey.split(":");
+            String sessionKeyId = expiresKeys[expiresKeys.length-1];
+            BoundHashOperations<String,String,Object> boundHashOperations = redisTemplate.boundHashOps("spring:session:sessions:"+sessionKeyId);
             if(boundHashOperations.hasKey("sessionAttr:username")) {
                 Object userObject = boundHashOperations.get("sessionAttr:username");
                 userList.add(userObject.toString());
+            }else{
+                unLoggedNum++;
             }
         }
-        return userList;
+        result.put("user",userList);
+        result.put("unLoggedNum",unLoggedNum);
+        return result;
     }
+
 }

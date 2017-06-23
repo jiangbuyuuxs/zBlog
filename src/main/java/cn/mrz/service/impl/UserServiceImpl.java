@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -73,7 +74,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> getLoggedInUserList() {
-        return userDao.getAllUser();
+    public Map getLoggedInUserList() {
+        return userDao.getLoggedUser();
     }
+
 }

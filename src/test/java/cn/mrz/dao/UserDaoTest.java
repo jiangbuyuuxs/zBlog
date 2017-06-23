@@ -10,6 +10,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.List;
+import java.util.Map;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:spring-test.xml"})
 public class UserDaoTest extends TestCase {
@@ -25,6 +28,8 @@ public class UserDaoTest extends TestCase {
 
     @Test
     public void testGetAllUser() throws Exception {
-        userDao.getAllUser();
+        Map loggedUser = userDao.getLoggedUser();
+        List<String> loggedInUserList = (List<String>)loggedUser.get("user");
+        int unLoggedUserNum = (Integer)loggedUser.get("unLoggedNum");
     }
 }

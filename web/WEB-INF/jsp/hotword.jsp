@@ -41,25 +41,12 @@
                             this.blogList = null;
                             this.blogList = data.data.blogList;
                             this.curPage = page;
-                            this.$nextTick(function () {
-                                this.highlightWord($('.blog-list .row a'));
-                                this.highlightWord($('.summary'));
-                            });
                         },function(data){
                             console.log(data.msg);
                         });
-                    },
-                    highlightWord: function (toReplaceObjArr) {
-                        for(var i = 0,j = toReplaceObjArr.length;i<j;i++){
-                            var toReplaceObj = $(toReplaceObjArr[i]);
-                            toReplaceObj.html(toReplaceObj.text().replace(hotWord,'<span class="hotword-hl">'+hotWord+'</span>'));
-                        }
                     }
                 },created: function () {
-                    this.$nextTick(function () {
-                        this.highlightWord($('.blog-list .row a'));
-                        this.highlightWord($('.summary'));
-                    });
+                    //TODO 改变页面DOM会使得分页出现问题.待解决
                 }
             });
         });

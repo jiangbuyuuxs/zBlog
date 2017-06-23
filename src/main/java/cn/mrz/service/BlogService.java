@@ -40,4 +40,6 @@ public interface BlogService extends BaseService<Blog,Long> {
      * @return
      */
     List<Blog> getBlogListByWordList(List<Word> wordList);
+
+    List<Blog> getUserBlogList(String author);
 }

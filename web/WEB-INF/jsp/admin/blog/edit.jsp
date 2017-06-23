@@ -78,6 +78,8 @@
 <div class="container">
     <input type="hidden" id="blogId" class="blogId form-control" name="blogId" placeholder="编号"
            value="${blog.id}">
+    <input type="text" id="author" class="author form-control" name="author" placeholder="username"
+           value="${blog.author}">
 
     <div class="form-group">
         <label for="classType">分类</label>

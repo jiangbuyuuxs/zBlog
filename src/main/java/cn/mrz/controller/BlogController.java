@@ -5,6 +5,7 @@ import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -42,11 +43,19 @@ public class BlogController {
         List<Blog> blogList = pagination.getRecords();
         int blogCountNum = pagination.getTotal();//blogService.getBlogCountNum();
         HashMap hashMap = new HashMap();
+        hashMap.put("success", true);
         hashMap.put("blogList", blogList);
         hashMap.put("blogCountNum", blogCountNum);
-
         return JSONObject.toJSONString(hashMap);
-
+    }
+    @ResponseBody
+    @RequestMapping(value = {"/admin/userblog/{username}/username"}, produces = {"application/json;charset=UTF-8"})
+    public String getUserBlogList(@PathVariable String username) {
+        List<Blog> userBlogList = blogService.getUserBlogList(username);
+        HashMap hashMap = new HashMap();
+        hashMap.put("success", true);
+        hashMap.put("userBlogList", userBlogList);
+        return JSONObject.toJSONString(hashMap);
     }
 
     @RequiresRoles("admin")
@@ -74,6 +83,9 @@ public class BlogController {
         blog.setEditDate(now);
         if (blog.getTitle() == null || "".equals(blog.getTitle().trim()))
             blog.setTitle(new SimpleDateFormat("yyyy年MM月dd日HH时m分ss秒").format(now) + "写下的博客");
+        if(blog.getAuthor()==null){
+            blog.setAuthor(SecurityUtils.getSubject().getPrincipal().toString());
+        }
         blogService.addBlog(blog);
         final Blog blog2 = blog;
         new Thread(new Runnable() {

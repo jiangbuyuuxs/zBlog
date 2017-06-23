@@ -8,6 +8,7 @@ import cn.mrz.pojo.Visit;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
 import cn.mrz.utils.StringUtils;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -100,6 +101,17 @@ public class BlogServiceImpl implements BlogService {
             blogList.add(blog);
         }
         return blogList;
+    }
+
+    @Override
+    public List<Blog> getUserBlogList(String author) {
+        EntityWrapper<Blog> blogEntityWrapper = new EntityWrapper<Blog>();
+        blogEntityWrapper
+                .setSqlSelect("id,title,create_date")
+                .where("author={0}",author)
+                .orderBy("create_date",false);
+        Page page = new Page(1, 10);
+        return blogMapper.selectPage(page,blogEntityWrapper);
     }
 
     private Blog getHotwordPart(Blog blog, String remark) {

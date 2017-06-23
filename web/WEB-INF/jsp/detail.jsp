@@ -37,7 +37,6 @@
   <div class="main-panel">
     <h2 class="blog-title">${blog.title}<small>${blog.createDate}</small></h2>
     <div class="highlight">${blog.texts}</div>
-
   </div>
     <%@include file="comm/footer.jsp" %>
     <script type="text/javascript" charset="utf-8" src="/visitblog/${blog.id}"></script>

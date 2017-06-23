@@ -21,6 +21,16 @@ public class Blog  implements Serializable {
     private String texts;
     private long imageId;
     private int classType;
+    private String author;
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
 
     public long getId() {
         return id;

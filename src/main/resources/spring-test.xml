@@ -25,7 +25,7 @@
         <property name="defaultEncoding" value="UTF-8"></property>
     </bean>
     <bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">
-        <property name="maxInactiveIntervalInSeconds" value="1800"/>
+        <property name="maxInactiveIntervalInSeconds" value="900"/>
     </bean>
 
     <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
