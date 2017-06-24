@@ -16,12 +16,44 @@
     function checkLogin(data) {
         var contentType = data.headers.map["Content-Type"][0];
         if (contentType && contentType.indexOf("html") != -1) {
-            alert1("登录超时,请重新登录");
-            //TODO 登录失效时,使用ajax方式登录
-            //goUrl("/go/logon");
+            alert1("登录超时,或没有权限.请重新登录");
+            alertLogonDialog();
             return false;
         }
         return true;
+    }
+
+    function alertLogonDialog() {
+        var $logonPanel = $('#logon-panel');
+        var $maskDiv = $('.logon-mask');
+        var $body = $('body');
+        $maskDiv.appendTo($body);
+        $body.addClass('no-scroll');
+        $maskDiv.removeClass('hidden');
+
+        $('.cancel-logon-btn').one('click', function () {
+            $maskDiv.addClass('hidden');
+            $body.removeClass('no-scroll');
+        });
+        $('.ajax-logon-btn').one('click', function () {
+            $.ajax($logonPanel.attr('data-action'), {
+                data: {
+                    username: $logonPanel.find('#username').val(),
+                    password: $logonPanel.find('#password').val()
+                },
+                type:'POST',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.success) {
+                        $maskDiv.addClass('hidden');
+                        $body.removeClass('no-scroll');
+
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            });
+        });
     }
 
     window['BlogTool']['checkLogin'] = checkLogin;
@@ -59,7 +91,7 @@
     window['BlogTool']['deleteCookie'] = deleteCookie;
 
     function sendMessage(username) {
-        alert1('向'+username+'发消息!');
+        alert1('向' + username + '发消息!');
     }
 
     window['BlogTool']['sendMessage'] = sendMessage;

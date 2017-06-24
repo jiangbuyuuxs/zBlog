@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +74,7 @@ public class SystemController {
         return JSONObject.toJSONString(info);
     }
 
-    @RequestMapping("/login")
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
     public ModelAndView login(@RequestParam("username") String username, @RequestParam("password") String password, HttpServletRequest request) {
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         Subject subject = SecurityUtils.getSubject();
@@ -105,6 +104,28 @@ public class SystemController {
         if (savedRequest != null)
             url = savedRequest.getRequestUrl();
         return new ModelAndView("redirect:" + url);
+    }
+    @ResponseBody
+    @RequestMapping(value = "/ajaxlogin",produces = {"application/json;charset=UTF-8"})
+    public String ajaxLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
+        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+        Subject subject = SecurityUtils.getSubject();
+        try {
+            subject.login(token);
+        } catch (IncorrectCredentialsException ice) {
+            // 捕获密码错误异常
+            return "{\"success\":false,\"message\":\"密码或用户名错误!\"}";
+        } catch (UnknownAccountException uae) {
+            // 捕获未知用户名异常
+            return "{\"success\":false,\"message\":\"密码或用户名错误!\"}";
+
+        } catch (ExcessiveAttemptsException eae) {
+            // 捕获错误登录过多的异常
+            return "{\"success\":false,\"message\":\"尝试次数过多!\"}";
+        }
+        Session session = subject.getSession();
+        session.setAttribute("username", username);
+        return "{\"success\":true}";
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)

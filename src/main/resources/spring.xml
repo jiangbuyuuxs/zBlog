@@ -111,6 +111,7 @@
             <value>
                 <!--anon 表示匿名访问，不需要认证以及授权-->
                 /logon=anon
+                /ajaxlogin=anon
                 /detail/**=anon
                 <!--获取博客列表-->
                 /admin/blog/*/page/*/pagesize=anon

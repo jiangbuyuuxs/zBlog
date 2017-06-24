@@ -100,19 +100,22 @@
         .file-upload-container input {
             background-color: #ffffff;
         }
-        .info-tab-panel,.blog-tab-panel{
-            padding:10px;
+
+        .info-tab-panel, .blog-tab-panel {
+            padding: 10px;
         }
-        .blog-tab-panel>.row{
-            border-bottom:1px dashed #000000;
-            margin:0 0 5px 0;
+
+        .blog-tab-panel > .row {
+            border-bottom: 1px dashed #000000;
+            margin: 0 0 5px 0;
 
         }
-        .tab-container{
+
+        .tab-container {
             background: #FFFFFF;
             height: 280px;
             border: 1px solid #dddddd;
-            border-top:none;
+            border-top: none;
         }
     </style>
     <script type="text/x-template" id="blog-info-template">
@@ -304,7 +307,9 @@
         <div class="info-tab-panel tab-panel">
             <div class="row">
                 <div class="col-lg-2">昵称:</div>
-                <div class="col-lg-4">{{userInfo.nickname}}<a class="btn btn-success btn-xs" href="#" @click.prevent="sendMessage(userInfo.username)">发消息</a></div>
+                <div class="col-lg-4">{{userInfo.nickname}}<a class="btn btn-success btn-xs" href="#"
+                                                              @click.prevent="sendMessage(userInfo.username)">发消息</a>
+                </div>
             </div>
             <div class="row">
                 <div class="col-lg-2">电子邮件:</div>
@@ -348,6 +353,15 @@
     </script>
     <script>
         $(function () {
+            Vue.http.interceptors.push(function (request, next) {
+                next(function(response) {
+                    if(!BlogTool.checkLogin(response)){
+                        //返回登录超时
+                        response.ok = false;
+                    }
+                });
+            });
+
             Vue.component('info-panel', {
                 template: '#blog-info-template',
                 data: function () {
@@ -367,7 +381,6 @@
                             this.loading = false;
                         }, function (response) {
                             this.loading = false;
-                            console.log(data.msg);
                         });
                     }
                 },
@@ -390,13 +403,12 @@
                         this.loading = true;
                         var url = '/admin/user/' + page + '/page';
                         this.$http.get(url).then(function (data) {
-                            BlogTool.checkLogin(data);
                             this.loading = false;
                             this.users = data.data;
                             this.curPage = page;
                         }, function (response) {
                             this.loading = false;
-                            console.log(data.msg);
+                            console.log(response.message);
                         });
                     },
                     deleteUser: function (username) {
@@ -405,7 +417,7 @@
                             this.$http.get(url).then(function (data) {
                                 this.users = data.data;
                             }, function (response) {
-                                console.log(data.msg);
+                                console.log(response.message);
                             });
                         }
                     }
@@ -517,7 +529,7 @@
                             this.curPage = page;
                         }, function (response) {
                             this.loading = false;
-                            console.log(data.msg);
+                            console.log(response.message);
                         });
                     },
                     deleteBlog: function (id) {
@@ -531,7 +543,7 @@
                                     this.fetchData(this.curPage - 1, false);
                                 }
                             }, function (response) {
-                                console.log(data.msg);
+                                console.log(response.message);
                             });
                         }
                     }
@@ -571,8 +583,8 @@
             var infoTabPanel = {
                 template: '#info-tab-panel-template',
                 props: ['userInfo'],
-                methods:{
-                    sendMessage:function(username){
+                methods: {
+                    sendMessage: function (username) {
                         BlogTool.sendMessage(username);
                     }
                 }
@@ -583,7 +595,7 @@
                 data: function () {
                     return {userBlogList: []}
                 },
-                methods:{
+                methods: {
                     fetchData: function () {
                         var username = this.userInfo.username;
                         var url = '/admin/userblog/' + username + '/username'
@@ -596,7 +608,7 @@
                         );
                     }
                 },
-                watch:{
+                watch: {
                     'userInfo': function () {
                         this.fetchData();
                     }
@@ -625,7 +637,7 @@
                     togglePanel: function (id) {
                         this.currentView = id + 'TabPanel';
                         $('.tab-head li').removeClass('active');
-                        $('.'+id+'-li').addClass('active');
+                        $('.' + id + '-li').addClass('active');
                     },
                     fetchData: function (username) {
                         var url = '/admin/user/' + username + '/userinfo';
@@ -789,57 +801,61 @@
         ;
     </script>
 </head>
-<body class="container">
-<div id="admin-manager">
-    <div class="row">
-        <nav class="navbar navbar-default">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <span class="navbar-brand">哦,<shiro:principal/></span>
-                </div>
-                <div class="navbar-form navbar-left">
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search">
+<body>
+<div class="container">
+    <div id="admin-manager">
+        <div class="row">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <span class="navbar-brand">哦,<shiro:principal/></span>
                     </div>
-                    <button type="submit" class="btn btn-default">搜索</button>
+                    <div class="navbar-form navbar-left">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                        <button type="submit" class="btn btn-default">搜索</button>
+                    </div>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">操作 <span
+                                    class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="change-user" href="#">切换用户</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="/logout">退出</a></li>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">操作 <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">掘金</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a href="/logout">退出</a></li>
-                        </ul>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <router-link to="/info">博客信息</router-link>
+                    </li>
+                    <li class="list-group-item">
+                        <router-link to="/user/manager">用户管理</router-link>
+                    </li>
+                    <li class="list-group-item">
+                        <router-link to="/blog/manager">博文管理</router-link>
+                        <span class="add-blog">[<a href="/admin/blog/go/add" target="_blank">写一篇</a>]</span>
+                    </li>
+                    <li class="list-group-item">
+                        <router-link to="/buy/manager">淘宝客管理</router-link>
                     </li>
                 </ul>
             </div>
-        </nav>
-    </div>
-    <div class="row">
-        <div class="col-sm-2">
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <router-link to="/info">博客信息</router-link>
-                </li>
-                <li class="list-group-item">
-                    <router-link to="/user/manager">用户管理</router-link>
-                </li>
-                <li class="list-group-item">
-                    <router-link to="/blog/manager">博文管理</router-link>
-                    <span class="add-blog">[<a href="/admin/blog/go/add" target="_blank">写一篇</a>]</span>
-                </li>
-                <li class="list-group-item">
-                    <router-link to="/buy/manager">淘宝客管理</router-link>
-                </li>
-            </ul>
+            <div class="col-sm-10 adminwin">
+                <router-view></router-view>
+            </div>
         </div>
-        <div class="col-sm-10 adminwin">
-            <router-view></router-view>
-        </div>
+        <logged-in-user-list></logged-in-user-list>
     </div>
-    <logged-in-user-list></logged-in-user-list>
+    <%@include file="../comm/footer.jsp" %>
+
 </div>
-<%@include file="../comm/footer.jsp" %>
 </body>
 </html>
