@@ -26,7 +26,7 @@ public class UserController {
 
     @ResponseBody
     @RequestMapping(value = "/admin/user/{page}/page", produces = {"application/json;charset=UTF-8"})
-    public String getUsersInfo(@PathVariable int page) {
+    public String getUserInfoList(@PathVariable int page) {
         int pageSize = 10;
         int start = (page - 1) * 10;
         List<User> users = usersService.getUsers(start, pageSize, null);
@@ -36,7 +36,7 @@ public class UserController {
     @RequiresRoles("admin")
     @ResponseBody
     @RequestMapping(value = "/admin/user/{username}/del/{page}/page", produces = {"application/json;charset=UTF-8"})
-    public String getUsersinfo(@PathVariable String username, @PathVariable int page) {
+    public String delUser(@PathVariable String username, @PathVariable int page) {
         String usersJson = null;
         User delUser = usersService.getUserByUsername(username);
         if (delUser == null) {

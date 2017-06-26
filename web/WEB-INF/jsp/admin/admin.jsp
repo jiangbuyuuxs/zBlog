@@ -118,6 +118,49 @@
             border-top: none;
         }
     </style>
+    <script type="text/x-template" id="head-nav">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <span class="navbar-brand">哦,<shiro:principal/></span>
+                </div>
+                <div class="navbar-form navbar-left">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search">
+                    </div>
+                    <button type="submit" class="btn btn-default">搜索</button>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">操作 <span
+                                class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a class="change-user" href="#">切换用户</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="/logout">退出</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </script>
+    <script type="text/x-template" id="menu-list-panel">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <router-link to="/info">博客信息</router-link>
+            </li>
+            <li class="list-group-item">
+                <router-link to="/user/manager">用户管理</router-link>
+            </li>
+            <li class="list-group-item">
+                <router-link to="/blog/manager">博文管理</router-link>
+                <span class="add-blog">[<a href="/admin/blog/go/add" target="_blank">写一篇</a>]</span>
+            </li>
+            <li class="list-group-item">
+                <router-link to="/buy/manager">淘宝客管理</router-link>
+            </li>
+        </ul>
+    </script>
     <script type="text/x-template" id="blog-info-template">
         <table class="table">
             <tbody>
@@ -246,7 +289,7 @@
                                 <a class="btn btn-default btn-xs disabled" href="#" @click.prevent="">编辑</a>
                             </shiro:lacksRole>
                         </td>
-                        <td><a :href="'/detail/'+blog.id+'/id'" target="_blank">{{blog.title}}</a></td>
+                        <td><a :href="'/blog/blog/'+blog.id" target="_blank">{{blog.title}}</a></td>
                         <td>{{blog.editDate}}</td>
                     </tr>
                     </tbody>
@@ -354,15 +397,22 @@
     <script>
         $(function () {
             Vue.http.interceptors.push(function (request, next) {
-                next(function(response) {
-                    if(!BlogTool.checkLogin(response)){
+                next(function (response) {
+                    if (!BlogTool.checkLogin(response)) {
                         //返回登录超时
                         response.ok = false;
                     }
                 });
             });
 
-            Vue.component('info-panel', {
+            var headNav = {
+                template: '#head-nav'
+            };
+            var menuListPanel = {
+                template: '#menu-list-panel'
+            };
+
+            var infoPanel = {
                 template: '#blog-info-template',
                 data: function () {
                     return {
@@ -387,9 +437,9 @@
                 created: function () {
                     this.fetchData();
                 }
-            });
+            };
 
-            Vue.component('user-manager-panel', {
+            var userManagerPanel = {
                 template: '#user-manager-template',
                 data: function () {
                     return {
@@ -425,9 +475,8 @@
                 created: function () {
                     this.fetchData(1);
                 }
-            })
-            ;
-            Vue.component('add-user-panel', {
+            };
+            var addUserPanel = {
                 template: '#add-user-panel-template',
                 data: function () {
                     return {
@@ -499,62 +548,61 @@
                             }
                     );
                 }
-            })
-            ;
+            };
             var blogPageSize = 10;
-            Vue.component('blog-manager-panel', {
-                template: '#blog-manager-template',
-                data: function () {
-                    return {
-                        blogList: [],
-                        blogCountNum: 0,
-                        pageNum: 0,
-                        curPage: 0,
-                        loading: false
-                    };
-                },
-                methods: {
-                    fetchData: function (page, init) {
-                        if (!init)
-                            if (page < 1 || page > this.pageNum || page === this.curPage)
-                                return;
-                        this.loading = true;
-                        var url = '/admin/blog/' + page + '/page/' + blogPageSize + '/pagesize';
-                        this.$http.get(url).then(function (data) {
-                            BlogTool.checkLogin(data);
-                            this.loading = false;
-                            this.blogList = data.data.blogList;
-                            this.blogCountNum = data.data.blogCountNum;
-                            this.pageNum = Math.ceil(this.blogCountNum / blogPageSize);
-                            this.curPage = page;
-                        }, function (response) {
-                            this.loading = false;
-                            console.log(response.message);
-                        });
-                    },
-                    deleteBlog: function (id) {
-                        var sure = confirm('是否删除该博文(id为:' + id + ')');
-                        if (sure) {
-                            var url = '/admin/blog/' + id + '/del/' + this.curPage + '/page';
-                            this.$http.get(url).then(function (data) {
-                                this.blogList = data.data.blogList;
-                                this.pageNum = Math.ceil(this.blogCountNum / 10);
-                                if (this.blogList.length == 0) {
-                                    this.fetchData(this.curPage - 1, false);
+            var blogManagerPanel = {
+                        template: '#blog-manager-template',
+                        data: function () {
+                            return {
+                                blogList: [],
+                                blogCountNum: 0,
+                                pageNum: 0,
+                                curPage: 0,
+                                loading: false
+                            };
+                        },
+                        methods: {
+                            fetchData: function (page, init) {
+                                if (!init)
+                                    if (page < 1 || page > this.pageNum || page === this.curPage)
+                                        return;
+                                this.loading = true;
+                                var url = '/admin/blog/' + page + '/page/' + blogPageSize + '/pagesize';
+                                this.$http.get(url).then(function (data) {
+                                    BlogTool.checkLogin(data);
+                                    this.loading = false;
+                                    this.blogList = data.data.blogList;
+                                    this.blogCountNum = data.data.blogCountNum;
+                                    this.pageNum = Math.ceil(this.blogCountNum / blogPageSize);
+                                    this.curPage = page;
+                                }, function (response) {
+                                    this.loading = false;
+                                    console.log(response.message);
+                                });
+                            },
+                            deleteBlog: function (id) {
+                                var sure = confirm('是否删除该博文(id为:' + id + ')');
+                                if (sure) {
+                                    var url = '/admin/blog/' + id + '/del/' + this.curPage + '/page';
+                                    this.$http.get(url).then(function (data) {
+                                        this.blogList = data.data.blogList;
+                                        this.pageNum = Math.ceil(this.blogCountNum / 10);
+                                        if (this.blogList.length == 0) {
+                                            this.fetchData(this.curPage - 1, false);
+                                        }
+                                    }, function (response) {
+                                        console.log(response.message);
+                                    });
                                 }
-                            }, function (response) {
-                                console.log(response.message);
-                            });
+                            }
+                        },
+                        created: function () {
+                            this.fetchData(1, true);
                         }
                     }
-                },
-                created: function () {
-                    this.fetchData(1, true);
-                }
-            })
-            ;
+                    ;
 
-            Vue.component('logged-in-user-list', {
+            var loggedInUserList = {
                 template: '#logged-in-user-list-template',
                 data: function () {
                     return {
@@ -577,8 +625,7 @@
                 created: function () {
                     this.fetchData();
                 }
-            })
-            ;
+            };
 
             var infoTabPanel = {
                 template: '#info-tab-panel-template',
@@ -620,181 +667,185 @@
             var topicTabPanel = {
                 template: '#topic-tab-panel-template'
             };
-            Vue.component('user-info-panel', {
-                template: '#user-info-panel-template',
-                data: function () {
-                    return {
-                        userInfo: {},
-                        currentView: infoTabPanel
-                    }
-                },
-                components: {
-                    'infoTabPanel': infoTabPanel,
-                    'blogTabPanel': blogTabPanel,
-                    'topicTabPanel': topicTabPanel
-                },
-                methods: {
-                    togglePanel: function (id) {
-                        this.currentView = id + 'TabPanel';
-                        $('.tab-head li').removeClass('active');
-                        $('.' + id + '-li').addClass('active');
-                    },
-                    fetchData: function (username) {
-                        var url = '/admin/user/' + username + '/userinfo';
-                        this.$http.get(url).then(function (data) {
-                                    if (data.data.success) {
-                                        this.userInfo = data.data.userInfo;
-                                    }
-                                }, function (data) {
-
-                                }
-                        );
-                    },
-                    back: function () {
-                        console.log("返回");
-                        router.go(-1);
-                    },
-                    getUsername: function () {
-                        var username = this.$route.params.username;
-                        if (username !== undefined) {
-                            BlogTool.setCookie("userinfo:username", username, 1);
-                        } else {
-                            username = BlogTool.getCookie("userinfo:username");
-                        }
-                        if (username === undefined) {
-                            router.push("/");
-                        }
-                        return username;
-                    }
-                },
-                watch: {
-                    '$route.params': function (params) {
-                        console.log(params);
-                    },
-                    '$route': function (to, from) {
-                        //监听的路由变化,但是无法监听使用param传递的
-                        this.fetchData(this.getUsername());
-                    }
-                },
-                created: function () {
-                    this.fetchData(this.getUsername());
-                }
-            })
-            ;
-            Vue.component('buy-manager-panel', {
-                template: '#buy-manager-panel-template',
-                data: function () {
-                    return {
-                        buyFileList: []
-                    }
-                },
-                methods: {
-                    fetchData: function () {
-                        var url = '/admin/buyfilelist';
-                        this.$http.get(url).then(function (data) {
-                                    if (data.data.success)
-                                        this.buyFileList = data.data.buyFileList;
-                                }, function (data) {
-
-                                }
-                        );
-                        this.$nextTick(function () {
-                            $('.percent').parent().hide();
-                        })
-                    },
-                    upload: function () {
-                        var formData = new FormData($('#buyFileFrom')[0]);
-                        var url = '/admin/uploadbuyfile';
-                        var percentObj = $('.percent');
-                        percentObj.parent().show();
-                        this.$http.post(url, formData, {
-                            progress: function (event) {
-                                percentObj.text(Math.floor((event.loaded / event.total) * 100));
+            var userInfoPanel = {
+                        template: '#user-info-panel-template',
+                        data: function () {
+                            return {
+                                userInfo: {},
+                                currentView: infoTabPanel
                             }
-                        }).then(function (data) {
-                                    percentObj.parent().hide();
-                                    var file = $('#buyFile')[0];
-                                    file.outerHTML = file.outerHTML
-                                    if (data.data.success) {
-                                        this.buyFileList = data.data.buyFileList;
-                                    } else {
-                                        alert(data.data.message ? data.data.message : '上传失败');
-                                    }
-                                }, function (data) {
+                        },
+                        components: {
+                            'infoTabPanel': infoTabPanel,
+                            'blogTabPanel': blogTabPanel,
+                            'topicTabPanel': topicTabPanel
+                        },
+                        methods: {
+                            togglePanel: function (id) {
+                                this.currentView = id + 'TabPanel';
+                                $('.tab-head li').removeClass('active');
+                                $('.' + id + '-li').addClass('active');
+                            },
+                            fetchData: function (username) {
+                                var url = '/admin/user/' + username + '/userinfo';
+                                this.$http.get(url).then(function (data) {
+                                            if (data.data.success) {
+                                                this.userInfo = data.data.userInfo;
+                                            }
+                                        }, function (data) {
 
+                                        }
+                                );
+                            },
+                            back: function () {
+                                console.log("返回");
+                                router.go(-1);
+                            },
+                            getUsername: function () {
+                                var username = this.$route.params.username;
+                                if (username !== undefined) {
+                                    BlogTool.setCookie("userinfo:username", username, 1);
+                                } else {
+                                    username = BlogTool.getCookie("userinfo:username");
                                 }
-                        );
-
-                    },
-                    parseFile: function (fileName) {
-                        var url = '/admin/parsebuyfile';
-                        this.$http.post(url, {fileName: fileName},
-                                {
-                                    emulateJSON: true
+                                if (username === undefined) {
+                                    router.push("/");
                                 }
-                        ).
-                                then(function (data) {
-                                    if (data.data.success) {
-                                        alert('解析成功');
-                                    } else {
-                                        alert(data.data.message ? data.data.message : '解析失败');
-                                    }
-                                }, function (data) {
-
-                                }
-                        );
-                    },
-                    deleteFile: function (fileName) {
-                        var isDel = confirm('是否删除');
-                        if (!isDel) {
-                            return false;
+                                return username;
+                            }
+                        },
+                        watch: {
+                            '$route.params': function (params) {
+                                console.log(params);
+                            },
+                            '$route': function (to, from) {
+                                //监听的路由变化,但是无法监听使用param传递的
+                                this.fetchData(this.getUsername());
+                            }
+                        },
+                        created: function () {
+                            this.fetchData(this.getUsername());
                         }
-                        var url = '/admin/deletebuyfile';
-                        this.$http.post(url, {fileName: fileName},
-                                {
-                                    emulateJSON: true
-                                }
-                        ).
-                                then(function (data) {
-                                    if (data.data.success) {
-                                        alert(data.data.message ? data.data.message : '成功删除');
-                                        this.fetchData();
-                                    } else {
-                                        alert(data.data.message ? data.data.message : '删除失败');
-                                    }
-                                }, function (data) {
-
-                                }
-                        );
                     }
-                },
-                created: function () {
-                    this.fetchData();
-                }
-            })
-            ;
-            var infoPanel = Vue.component('info-panel');
-            var blogManager = Vue.component('blog-manager-panel');
-            var userManager = Vue.component('user-manager-panel');
-            var addUserPanel = Vue.component('add-user-panel');
-            var userInfoPanel = Vue.component('user-info-panel');
-            var buyManager = Vue.component('buy-manager-panel');
+                    ;
+            var buyManagerPanel = {
+                        template: '#buy-manager-panel-template',
+                        data: function () {
+                            return {
+                                buyFileList: []
+                            }
+                        },
+                        methods: {
+                            fetchData: function () {
+                                var url = '/admin/buyfilelist';
+                                this.$http.get(url).then(function (data) {
+                                            if (data.data.success)
+                                                this.buyFileList = data.data.buyFileList;
+                                        }, function (data) {
 
-            var router = new VueRouter({
-                routes: [
-                    {path: '/info', component: infoPanel},
-                    {path: '/', component: infoPanel},
-                    {path: '/user/manager', component: userManager},
-                    {path: '/user/add', component: addUserPanel},
-                    {name: 'userInfoPanel', path: '/user/info/:username', component: userInfoPanel},
-                    {path: '/blog/manager', component: blogManager},
-                    {path: '/buy/manager', component: buyManager}
-                ]
-            });
+                                        }
+                                );
+                                this.$nextTick(function () {
+                                    $('.percent').parent().hide();
+                                })
+                            },
+                            upload: function () {
+                                var formData = new FormData($('#buyFileFrom')[0]);
+                                var url = '/admin/uploadbuyfile';
+                                var percentObj = $('.percent');
+                                percentObj.parent().show();
+                                this.$http.post(url, formData, {
+                                    progress: function (event) {
+                                        percentObj.text(Math.floor((event.loaded / event.total) * 100));
+                                    }
+                                }).then(function (data) {
+                                            percentObj.parent().hide();
+                                            var file = $('#buyFile')[0];
+                                            file.outerHTML = file.outerHTML
+                                            if (data.data.success) {
+                                                this.buyFileList = data.data.buyFileList;
+                                            } else {
+                                                alert(data.data.message ? data.data.message : '上传失败');
+                                            }
+                                        }, function (data) {
+
+                                        }
+                                );
+
+                            },
+                            parseFile: function (fileName) {
+                                var url = '/admin/parsebuyfile';
+                                this.$http.post(url, {fileName: fileName},
+                                        {
+                                            emulateJSON: true
+                                        }
+                                ).
+                                        then(function (data) {
+                                            if (data.data.success) {
+                                                alert('解析成功');
+                                            } else {
+                                                alert(data.data.message ? data.data.message : '解析失败');
+                                            }
+                                        }, function (data) {
+
+                                        }
+                                );
+                            },
+                            deleteFile: function (fileName) {
+                                var isDel = confirm('是否删除');
+                                if (!isDel) {
+                                    return false;
+                                }
+                                var url = '/admin/deletebuyfile';
+                                this.$http.post(url, {fileName: fileName},
+                                        {
+                                            emulateJSON: true
+                                        }
+                                ).
+                                        then(function (data) {
+                                            if (data.data.success) {
+                                                alert(data.data.message ? data.data.message : '成功删除');
+                                                this.fetchData();
+                                            } else {
+                                                alert(data.data.message ? data.data.message : '删除失败');
+                                            }
+                                        }, function (data) {
+
+                                        }
+                                );
+                            }
+                        },
+                        created: function () {
+                            this.fetchData();
+                        }
+                    }
+                    ;
+
 
             new Vue({
                         el: "#admin-manager",
-                        router: router
+                        components: {
+                            'head-nav': headNav,
+                            'info-panel': infoPanel,
+                            'user-manager': userManagerPanel,
+                            'add-user-panel': addUserPanel,
+                            'user-info-panel': userInfoPanel,
+                            'blog-manager-panel': blogManagerPanel,
+                            'buy-manager-panel': buyManagerPanel,
+                            'menu-list': menuListPanel,
+                            'logged-in-user-list': loggedInUserList
+                        },
+                        router: new VueRouter({
+                            routes: [
+                                {path: '/info', component: infoPanel},
+                                {path: '/', component: infoPanel},
+                                {path: '/user/manager', component: userManagerPanel},
+                                {path: '/user/add', component: addUserPanel},
+                                {name: 'userInfoPanel', path: '/user/info/:username', component: userInfoPanel},
+                                {path: '/blog/manager', component: blogManagerPanel},
+                                {path: '/buy/manager', component: buyManagerPanel}
+                            ]
+                        })
                     }
             );
         })
@@ -805,48 +856,11 @@
 <div class="container">
     <div id="admin-manager">
         <div class="row">
-            <nav class="navbar navbar-default">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <span class="navbar-brand">哦,<shiro:principal/></span>
-                    </div>
-                    <div class="navbar-form navbar-left">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search">
-                        </div>
-                        <button type="submit" class="btn btn-default">搜索</button>
-                    </div>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">操作 <span
-                                    class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="change-user" href="#">切换用户</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="/logout">退出</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <head-nav></head-nav>
         </div>
         <div class="row">
             <div class="col-sm-2">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <router-link to="/info">博客信息</router-link>
-                    </li>
-                    <li class="list-group-item">
-                        <router-link to="/user/manager">用户管理</router-link>
-                    </li>
-                    <li class="list-group-item">
-                        <router-link to="/blog/manager">博文管理</router-link>
-                        <span class="add-blog">[<a href="/admin/blog/go/add" target="_blank">写一篇</a>]</span>
-                    </li>
-                    <li class="list-group-item">
-                        <router-link to="/buy/manager">淘宝客管理</router-link>
-                    </li>
-                </ul>
+                <menu-list></menu-list>
             </div>
             <div class="col-sm-10 adminwin">
                 <router-view></router-view>
@@ -855,7 +869,6 @@
         <logged-in-user-list></logged-in-user-list>
     </div>
     <%@include file="../comm/footer.jsp" %>
-
 </div>
 </body>
 </html>

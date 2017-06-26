@@ -77,7 +77,7 @@ public class BlogServiceImpl implements BlogService {
         ArrayList<Blog> hotBlogList = new ArrayList<Blog>();
         for (Visit hotBlogVisit : hotBlogVisitList) {
             long blogId = hotBlogVisit.getBlogId();
-            Blog hotBlog = blogMapper.selectById(blogId);
+            Blog hotBlog = blogMapper.selectBlogWithoutContent(blogId);
             hotBlogList.add(hotBlog);
         }
         return hotBlogList;

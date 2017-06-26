@@ -12,6 +12,12 @@
         select id,title,create_date,edit_date,image_id,class_type,author from blogs
     </select>
 
+    <select id="selectBlogWithoutContent" resultType="Blog">
+        select id,title,create_date,edit_date,image_id,class_type,author
+        from blogs
+        where id=#{blogId}
+    </select>
+
     <select id="selectBlogList" resultType="Blog">
         select * from blogs
     </select>

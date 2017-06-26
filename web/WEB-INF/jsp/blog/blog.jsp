@@ -10,7 +10,7 @@
 <html lang="zh-CN">
 <head>
     <title>博文显示</title>
-  <%@include file="comm/jscss.jsp" %>
+  <%@include file="../comm/jscss.jsp" %>
   <style>
     body{
       background: #353535;
@@ -38,7 +38,7 @@
     <h2 class="blog-title">${blog.title}<small>${blog.createDate}</small></h2>
     <div class="highlight">${blog.texts}</div>
   </div>
-    <%@include file="comm/footer.jsp" %>
+    <%@include file="../comm/footer.jsp" %>
     <script type="text/javascript" charset="utf-8" src="/visitblog/${blog.id}"></script>
 </body>
 </html>

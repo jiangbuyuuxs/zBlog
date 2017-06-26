@@ -14,6 +14,7 @@ import java.util.List;
 public interface BlogMapper extends BaseMapper<Blog> {
     List<Blog> selectBlogList(Pagination page);
     List<Blog> selectBlogListWithoutContent(Pagination page);
+    Blog selectBlogWithoutContent(Long blogId);
     int selectCount();
     int deleteById(Long id);
     Long insertBlog(Blog blog);

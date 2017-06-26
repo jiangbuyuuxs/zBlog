@@ -8,58 +8,115 @@
     <%@include file="comm/jscss.jsp" %>
     <%@include file="comm/vue.jsp" %>
     <link rel="stylesheet" type="text/css" href="/resources/css/index.css">
+    <script type="text/x-template" id="blog-panel-template">
+        <div class="col-lg-9 col-md-8 col-sm-12 col-xs-12 blog-panel">
+            <div class="row blog-list-head">
+                <div class="col-lg-10 col-md-9 col-sm-9 col-xs-8 title">标题</div>
+                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4">发布时间</div>
+            </div>
+            <div class="blog-list">
+                <div v-for="(blog,index) in blogList" class="row">
+                    <div class="col-lg-10 col-md-9 col-sm-9 col-xs-8 padding2px"><a :title="blog.title"
+                                                                                    :href="'/blog/blog/'+blog.id">{{blog.title}}</a>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 padding2px">{{blog.createDate}}</div>
+                </div>
+            </div>
+            <div class="page-bar" :style="{visibility:pageNum>1?'visible':'hidden'}">
+                <ul class="pagination">
+                    <li><a href="#" @click="prePage"><span>&laquo;</span></a></li>
+                    <li v-for="i in pageNum" :class="{active:i===curPage}"><a href="#" @click="changePage(i)"
+                                                                              :data-page="i">{{i}}</a></li>
+                    <li><a href="#" @click="nextPage"><span>&raquo;</span></a></li>
+                </ul>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="top-blog-panel-template">
+        <div class="top-blog">
+            <div class="top-blog-list">
+                <p v-for="topBlog in topBlogList"><a :href="'/blog/blog/'+topBlog.id">{{topBlog.title}}</a></p>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="hot-word-panel-template">
+        <div class="blog-tag">
+            <a v-for="hotword in hotWordList" :href="'/blog/hotword/'+hotword.hashcode">{{hotword.remark}}</a>
+        </div>
+    </script>
+
     <script>
         $(function () {
-
             var isMobile = checkMobile();
-
-            function checkMobile (){
-                return $('.head-bar-open-btn').css('display')=='block';
+            function checkMobile() {
+                return $('.head-bar-open-btn').css('display') == 'block';
             }
-
             $(window).on('scroll', function () {
                 changeHeadBarPositionByScroll();
             });
-
             $(window).on('resize', function () {
                 isMobile = checkMobile();
                 changeHeadBarPosition();
                 changeHeadBarPositionByScroll();
             });
             changeHeadBarPosition();
-
-            function changeHeadBarPositionByScroll(){
-                if($('body').scrollTop()>0&&!isMobile){
+            function changeHeadBarPositionByScroll() {
+                if ($('body').scrollTop() > 0 && !isMobile) {
                     $('.head-panel').addClass('pc');
-                }else if(!isMobile){
+                } else if (!isMobile) {
                     $('.head-panel').removeClass('pc');
                 }
             }
-
-            function changeHeadBarPosition(){
-                if(checkMobile()){
+            function changeHeadBarPosition() {
+                if (checkMobile()) {
                     //移动模式
                     $('.head-panel').addClass('mobile');
-                }else{
+                } else {
                     $('.head-panel').removeClass('mobile');
                 }
             }
 
-
-            var pageSize = ${pageSize};
-            var blogCountNum = ${blogCountNum};
-            var pageNum = Math.ceil(blogCountNum / pageSize);
-
-            var blogPanel = new Vue({
-                el: '.main-panel',
-                data: {
-                    blogList:${blogList},
-                    pageNum: pageNum,
-                    curPage: 1,
-                    hotBlogList:${hotBlogList},
-                    hotWordList:${hotWordList}
+            var topBlogPanel =  {
+                template: '#top-blog-panel-template',
+                data: function () {
+                    return {
+                        topBlogList: []
+                    };
                 },
-
+                created: function () {
+                    var url = '/blog/topblog'
+                    this.$http.get(url).then(function (response) {
+                        this.topBlogList = response.data.data.topBlogList;
+                    }, function (response) {
+                        console.log(response.data.message);
+                    });
+                }
+            };
+            var hotWordPanel =  {
+                template: '#hot-word-panel-template',
+                data: function () {
+                    return {
+                        hotWordList: []
+                    };
+                },
+                created: function () {
+                    var url = '/blog/hotword'
+                    this.$http.get(url).then(function (response) {
+                        this.hotWordList = response.data.data.hotWordList;
+                    }, function (response) {
+                        console.log(response.data.message);
+                    });
+                }
+            };
+            var blogPanel = {
+                template: '#blog-panel-template',
+                data: function () {
+                    return {
+                        blogList: [],
+                        pageNum: 0,
+                        curPage: 1
+                    };
+                },
                 methods: {
                     prePage: function () {
                         this._changePage(this.curPage - 1);
@@ -73,16 +130,35 @@
                         this._changePage(page);
                     },
                     _changePage: function (page) {
-                        if (page < 1 || page > pageNum || page === this.curPage)
+                        if (page < 1 || page > this.pageNum || page === this.curPage)
                             return
-                        var url = 'admin/blog/' + page + '/page/'+pageSize+'/pagesize';
-                        this.$http.get(url).then(function(data){
-                            this.blogList = data.data.blogList;
+                        var url = '/blog/list?page='+page;
+                        this.$http.get(url).then(function (response) {
+                            this.blogList = response.data.data.blogList;
                             this.curPage = page;
-                        },function(data){
-                            console.log(data.msg);
+                        }, function (response) {
+                            console.log(response.data.message);
+                        });
+                    }, fetchData: function () {
+                        var url = '/blog/list';
+                        this.$http.get(url).then(function (response) {
+                            this.blogList = response.data.data.blogList;
+                            this.pageNum = response.data.data.pageNum;
+                        }, function (response) {
+                            console.log(data.data.message);
                         });
                     }
+                }, created: function () {
+                    this.fetchData();
+                }
+            };
+
+            new Vue({
+                el:'.main-panel',
+                components: {
+                    'blog-panel':blogPanel,
+                    'hot-word-panel':hotWordPanel,
+                    'top-blog-panel':topBlogPanel
                 }
             });
         });
@@ -92,7 +168,9 @@
 <div class="head-panel">
     <div class="navbar navbar-default" id="head-bar-container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed pull-left head-bar-open-btn glyphicon glyphicon-th-large" data-toggle="collapse" data-target=".head-bar-collapse"></button>
+            <button type="button"
+                    class="navbar-toggle collapsed pull-left head-bar-open-btn glyphicon glyphicon-th-large"
+                    data-toggle="collapse" data-target=".head-bar-collapse"></button>
         </div>
         <div class="collapse navbar-collapse head-bar-collapse">
             <nav class="navbar navbar-default head-bar">
@@ -115,72 +193,45 @@
         &nbsp;
     </div>
     <div class="row">
-        <div class="col-lg-9 col-md-8 col-sm-12 col-xs-12 blog-panel">
-            <div class="row blog-list-head">
-                <div class="col-lg-10 col-md-9 col-sm-9 col-xs-8 title">标题</div>
-                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4">发布时间</div>
-            </div>
-            <div class="blog-list">
-                <div v-for="(blog,index) in blogList" class="row">
-                    <div class="col-lg-10 col-md-9 col-sm-9 col-xs-8 padding2px"><a :title="blog.title"
-                                                                                   :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 padding2px">{{blog.createDate}}</div>
-                </div>
-            </div>
-            <div class="page-bar" :style="{visibility:pageNum>1?'visible':'hidden'}">
-                <ul class="pagination">
-                    <li><a href="#" @click="prePage"><span>&laquo;</span></a></li>
-                    <li v-for="i in pageNum" :class="{active:i===curPage}"><a href="#" @click="changePage(i)"
-                                                                              :data-page="i">{{i}}</a></li>
-                    <li><a href="#" @click="nextPage"><span>&raquo;</span></a></li>
-                </ul>
-            </div>
-        </div>
+        <blog-panel></blog-panel>
         <div class="col-lg-3 col-md-4 hidden-xs hidden-sm right-panel">
             <div class="right-container">
-            <div class="row sp25"></div>
-            <div class="row hidden">
-                <div class="head-img-container">
-                </div>
-            </div>
-            <div class="row">
-                <div class="user-name">
-                    Mrz
-                </div>
-            </div>
-            <div class="row sp25"></div>
-            <div class="row">
-                <div class="remark">
-                    滴滴答答的敲代码
-                </div>
-            </div>
-            <div class="row sp25"></div>
-            <div class="row sp25 column-title">
-                最喜欢用的词
-            </div>
-            <div class="row">
-                <div class="blog-tag">
-                    <a v-for="hotword in hotWordList" :href="'/hotword/'+hotword.hashcode+'/id'">{{hotword.remark}}</a>
-                </div>
-            </div>
-            <div class="row sp25"></div>
-            <div class="row sp25 column-title">
-                热门博文
-            </div>
-            <div class="row">
-                <div class="top-blog">
-                    <div class="top-blog-list">
-                        <p v-for="hotBlog in hotBlogList"><a :href="'/detail/'+hotBlog.id+'/id'">{{hotBlog.title}}</a></p>
+                <div class="row sp25"></div>
+                <div class="row hidden">
+                    <div class="head-img-container">
                     </div>
                 </div>
+                <div class="row">
+                    <div class="user-name">
+                        Mrz
+                    </div>
+                </div>
+                <div class="row sp25"></div>
+                <div class="row">
+                    <div class="remark">
+                        滴滴答答的敲代码
+                    </div>
+                </div>
+                <div class="row sp25"></div>
+                <div class="row sp25 column-title">
+                    最喜欢用的词
+                </div>
+                <div class="row">
+                    <hot-word-panel></hot-word-panel>
+                </div>
+                <div class="row sp25"></div>
+                <div class="row sp25 column-title">
+                    热门博文
+                </div>
+                <div class="row">
+                    <top-blog-panel></top-blog-panel>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 </div>
 <div class="other">
 </div>
-    <%@include file="comm/footer.jsp" %>
+<%@include file="comm/footer.jsp" %>
 </body>
 </html>
