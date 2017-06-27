@@ -1,5 +1,6 @@
 package cn.mrz.controller;
 
+import cn.mrz.exception.BuyFileExistException;
 import cn.mrz.mapper.FavourableMapper;
 import cn.mrz.mapper.ItemClassMapper;
 import cn.mrz.mapper.ItemMapper;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
@@ -152,4 +154,71 @@ public class BuyController {
         return JSONObject.toJSONString(map);
     }
 
+
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/file/list", produces = {"application/json;charset=UTF-8"})
+    public String getFileList() throws IOException {
+        List<String> fileList = buyService.getBuyFileList();
+        Map data = new HashMap();
+        data.put("fileList", fileList);
+        Map map = new HashMap();
+        map.put("success", true);
+        map.put("data", data);
+
+        return JSONObject.toJSONString(map);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/file/upload", produces = {"application/json;charset=UTF-8"})
+    public String uploadFile(@RequestParam MultipartFile buyFile) throws IOException {
+        if(buyFile.isEmpty())
+            return "{\"success\": false,\"message\":\"请选择非空文件\"}";
+        String originalFilename = buyFile.getOriginalFilename();
+        String[] originalFilenameSplit = originalFilename.split("\\.");
+        if(originalFilenameSplit.length<2){
+            return "{\"success\": false,\"message\":\"请选择正确的文件\"}";
+        }else{
+            String extName = originalFilenameSplit[originalFilenameSplit.length-1];
+            if(!"xls".equals(extName)){
+                return "{\"success\": false,\"message\":\"请选择正确的.xls文件\"}";
+            }
+        }
+        try {
+            boolean saveBuyFile = buyService.saveBuyFile(buyFile);
+            String infoJson = "{\"success\": false}";
+            if (saveBuyFile) {
+                List<String> fileList = buyService.getBuyFileList();
+                Map data = new HashMap();
+                data.put("fileList", fileList);
+                Map map = new HashMap();
+                map.put("success", true);
+                map.put("data", data);
+
+                return JSONObject.toJSONString(map);
+            } else {
+                return infoJson;
+            }
+        }catch (BuyFileExistException e){
+            return "{\"success\": false,\"message\":\"文件已存在\"}";
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/file/parse", produces = {"application/json;charset=UTF-8"})
+    public String parseFile(@RequestParam String fileName) throws IOException {
+        if(buyService.parseBuyFile(fileName)){
+            return "{\"success\": true,\"message\":\"成功解析\"}";
+        }
+        return "{\"success\": false,\"message\":\"解析失败\"}";
+
+    }
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/file/delete", produces = {"application/json;charset=UTF-8"})
+    public String deleteFile(@RequestParam String fileName) throws IOException {
+        if(buyService.deleteBuyFile(fileName)){
+            return "{\"success\": true,\"message\":\"成功删除:"+fileName+"\"}";
+        }
+        return "{\"success\": false,\"message\":\"删除失败\"}";
+
+    }
 }

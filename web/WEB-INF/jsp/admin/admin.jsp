@@ -25,7 +25,7 @@
         }
 
         .blog-list {
-            min-height: 430px;
+            min-height: 440px;
         }
 
         .loading {
@@ -180,16 +180,18 @@
                 <th>操作</th>
                 <th>用户名</th>
                 <th>昵称</th>
-                <th>激活状态</th>
+                <th width="150px">激活状态</th>
             </tr>
             <div class="loading" v-if="loading">
                 Loading...
             </div>
-            <tr v-for="user of users">
+            <tr v-for="(user,index) of userList">
                 <td>
                     <shiro:hasRole name="admin">
-                        <a class="btn btn-default btn-xs" href="#" @click.prevent="deleteUser(user.username)">删除</a>
-                        <a class="btn btn-default btn-xs" href="#" @click.prevent="editUser(user.username)">编辑</a>
+                        <a class="btn btn-default btn-xs" @click.prevent="deleteUser(user.username)">删除</a>
+                        <router-link :to="'/user/edit/'+user.username">
+                            <a class="btn btn-default btn-xs">编辑</a>
+                        </router-link>
                     </shiro:hasRole>
                     <shiro:lacksRole name="admin">
                         <a class="btn btn-default btn-xs disabled" href="#" @click.prevent="">删除</a>
@@ -198,11 +200,18 @@
                 </td>
                 <td>{{user.username}}</td>
                 <td>{{user.nickname}}</td>
-                <td :class="user.enabled===1?'text-danger':'text-success'">{{user.enabled===1?'激活':'未激活'}}</td>
+                <td :class="user.enabled===1?'text-danger':'text-success'">
+                    {{user.enabled===1?'激活':'未激活'}}
+                    <shiro:hasRole name="admin">
+                        <a class="btn btn-xs pull-right" :class="[user.enabled===1?'btn-success':'btn-danger',user.username==='admin'?'hidden':'']" @click.prevent="changeState(user.username,index)">
+                            {{user.enabled===1?'禁用':'激活'}}
+                        </a>
+                    </shiro:hasRole>
+                </td>
             </tr>
             <shiro:hasRole name="admin">
                 <tr>
-                    <td colspan="4"><a class="btn btn-success btn-xs pull-right" href="#/user/add">添加</a></td>
+                    <td colspan="4"><a class="btn btn-success btn-xs pull-left" href="#/user/add">添加</a></td>
                 </tr>
             </shiro:hasRole>
             </tbody>
@@ -264,6 +273,36 @@
             </form>
         </div>
     </script>
+    <script type="text/x-template" id="edit-user-panel-template">
+        <div class="edit-user-panel">
+            <form class="form-horizontal edit-user-panel-form">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label" for="username">用户名:</label>
+
+                    <div class="col-sm-4">
+                        <input class="form-control" id="username" name="username" type="text"
+                               :value="userInfo.username"/>
+                    </div>
+                    <div class="col-sm-4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label" for="nickname">昵称:</label>
+
+                    <div class="col-sm-4">
+                        <input class="form-control" id="nickname" name="nickname" type="text"
+                               :value="userInfo.nickname"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-6 control-label">
+                        <a class="btn btn-success" @click="back">返回</a>
+                        <a class="btn btn-success submit" @click="editUser">修改</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
     <script type="text/x-template" id="blog-manager-template">
         <div>
             <div class="loading" v-if="loading">
@@ -281,7 +320,7 @@
                         <td>
                             <shiro:hasRole name="admin">
                                 <a class="btn btn-default btn-xs" href="#" @click.prevent="deleteBlog(blog.id)">删除</a>
-                                <a class="btn btn-default btn-xs" :href="'/admin/blog/'+blog.id+'/edit'"
+                                <a class="btn btn-default btn-xs" :href="'/admin/blog/go/edit/'+blog.id"
                                    target="_blank">编辑</a>
                             </shiro:hasRole>
                             <shiro:lacksRole name="admin">
@@ -387,9 +426,9 @@
             </div>
             <div>已完成:<span class="percent">0</span>%</div>
             <ul>
-                <li v-for="buyFile in buyFileList">
-                    {{buyFile}} <a class="btn btn-success btn-xs" @click.prevent="parseFile(buyFile)">解析</a> <a
-                        class="btn btn-danger btn-xs" @click.prevent="deleteFile(buyFile)">删除</a>
+                <li v-for="fileName in fileList">
+                    {{fileName}} <a class="btn btn-success btn-xs" @click.prevent="parseFile(fileName)">解析</a> <a
+                        class="btn btn-danger btn-xs" @click.prevent="deleteFile(fileName)">删除</a>
                 </li>
             </ul>
         </div>
@@ -424,10 +463,10 @@
                     fetchData: function (page) {
                         this.loading = true;
                         var url = '/admin/blogInfo';
-                        this.$http.get(url).then(function (data) {
-                            if (!BlogTool.checkLogin(data))
+                        this.$http.get(url).then(function (response) {
+                            if (!BlogTool.checkLogin(response))
                                 return;
-                            this.info = data.data;
+                            this.info = response.data.data;
                             this.loading = false;
                         }, function (response) {
                             this.loading = false;
@@ -443,7 +482,7 @@
                 template: '#user-manager-template',
                 data: function () {
                     return {
-                        users: [],
+                        userList: [],
                         curPage: 1,
                         loading: false
                     };
@@ -451,25 +490,43 @@
                 methods: {
                     fetchData: function (page) {
                         this.loading = true;
-                        var url = '/admin/user/' + page + '/page';
-                        this.$http.get(url).then(function (data) {
+                        var url = '/admin/user/list';
+                        this.$http.get(url).then(function (response) {
                             this.loading = false;
-                            this.users = data.data;
+                            this.userList = response.data.data.userList;
                             this.curPage = page;
                         }, function (response) {
                             this.loading = false;
-                            console.log(response.message);
+                            console.log(response);
                         });
                     },
                     deleteUser: function (username) {
                         if (confirm('是否删除该用户(' + username + ')')) {
-                            var url = '/admin/user/' + username + '/del/' + this.curPage + '/page';
-                            this.$http.get(url).then(function (data) {
-                                this.users = data.data;
+                            var url = '/admin/user/delete';
+                            this.$http.get(url, {
+                                params: {
+                                    username: username,
+                                    page: this.curPage
+                                }
+                            }).then(function (response) {
+                                this.userList = response.data.data.userList;
                             }, function (response) {
-                                console.log(response.message);
+                                console.log(response.data.message);
                             });
                         }
+                    },
+                    changeState: function (username, index) {
+                        var url = '/admin/user/enabled';
+                        this.$http.get(url, {
+                            params: {
+                                username: username
+                            }
+                        }).then(function (response) {
+                            if(response.data.success)
+                                this.userList[index].enabled = response.data.data.enabled;
+                            else
+                                alert(response.data.message);
+                        });
                     }
                 },
                 created: function () {
@@ -478,11 +535,6 @@
             };
             var addUserPanel = {
                 template: '#add-user-panel-template',
-                data: function () {
-                    return {
-                        users: []
-                    };
-                },
                 methods: {
                     addUser: function () {
                         var valid = $(".add-user-panel-form").valid();
@@ -494,22 +546,20 @@
                                 email: $('#email').val()
                             };
                             var url = '/admin/user/add';
-                            this.$http.post(url, {
-                                emulateJSON: true,
-                                data: data
-                            }).then(function (data) {
-                                if (data.success) {
-                                    //
-                                    router.push('/user/manager');
+                            this.$http.post(url, data, {
+                                emulateJSON: true
+                            }).then(function (response) {
+                                if (response.data.success) {
+                                    this.$router.push('/user/manager');
                                 } else {
-
+                                    alert(response.data.message);
                                 }
                             });
 
                         }
                     },
                     back: function () {
-                        router.go(-1);
+                        this.$router.go(-1);
                     }
                 },
                 created: function () {
@@ -549,6 +599,50 @@
                     );
                 }
             };
+            var editUserPanel = {
+                template: '#edit-user-panel-template',
+                data: function () {
+                    return {
+                        userInfo: {}
+                    }
+                },
+                methods: {
+                    editUser: function () {
+                        var data = {
+                            username: this.userInfo.username,
+                            nickname: $('#nickname').val()
+                        };
+                        var url = '/admin/user/edit';
+                        this.$http.post(url, data, {
+                            emulateJSON: true
+                        }).then(function (response) {
+                            if (response.data.success) {
+                                this.$router.push('/user/manager');
+                            } else {
+                                alert('更新失败');
+                                this.fetchData();
+                            }
+                        });
+                    },
+                    back: function () {
+                        this.$router.go(-1);
+                    },
+                    fetchData: function () {
+                        var username = this.$route.params.username;
+                        var url = '/admin/user/username/' + username;
+                        this.$http.get(url).then(function (response) {
+                            if (response.data.success) {
+                                this.userInfo = response.data.data.userInfo;
+                            } else {
+                                alert(response.data.message);
+                            }
+                        });
+                    }
+                },
+                created: function () {
+                    this.fetchData();
+                }
+            };
             var blogPageSize = 10;
             var blogManagerPanel = {
                         template: '#blog-manager-template',
@@ -567,13 +661,18 @@
                                     if (page < 1 || page > this.pageNum || page === this.curPage)
                                         return;
                                 this.loading = true;
-                                var url = '/admin/blog/' + page + '/page/' + blogPageSize + '/pagesize';
-                                this.$http.get(url).then(function (data) {
-                                    BlogTool.checkLogin(data);
+                                var url = '/blog/list';
+                                this.$http.get(url, {
+                                    params: {
+                                        page: page,
+                                        pageSize: blogPageSize
+                                    }
+                                }).then(function (response) {
+                                    BlogTool.checkLogin(response);
                                     this.loading = false;
-                                    this.blogList = data.data.blogList;
-                                    this.blogCountNum = data.data.blogCountNum;
-                                    this.pageNum = Math.ceil(this.blogCountNum / blogPageSize);
+                                    this.blogList = response.data.data.blogList;
+                                    this.blogCountNum = response.data.data.blogCountNum;
+                                    this.pageNum = response.data.data.pageNum;
                                     this.curPage = page;
                                 }, function (response) {
                                     this.loading = false;
@@ -583,10 +682,15 @@
                             deleteBlog: function (id) {
                                 var sure = confirm('是否删除该博文(id为:' + id + ')');
                                 if (sure) {
-                                    var url = '/admin/blog/' + id + '/del/' + this.curPage + '/page';
-                                    this.$http.get(url).then(function (data) {
-                                        this.blogList = data.data.blogList;
-                                        this.pageNum = Math.ceil(this.blogCountNum / 10);
+                                    var url = '/admin/blog/delete';
+                                    this.$http.get(url, {
+                                        params: {
+                                            id: id,
+                                            page: this.curPage
+                                        }
+                                    }).then(function (response) {
+                                        this.blogList = response.data.data.blogList;
+                                        this.pageNum = response.data.data.pageNum;
                                         if (this.blogList.length == 0) {
                                             this.fetchData(this.curPage - 1, false);
                                         }
@@ -613,10 +717,10 @@
                 methods: {
                     fetchData: function () {
                         var url = '/admin/loggeduser';
-                        this.$http.get(url).then(function (data) {
-                                    this.loggedInUserList = data.data.loggedInUserList;
-                                    this.loggedInUserCount = data.data.loggedInUserCount;
-                                }, function (data) {
+                        this.$http.get(url).then(function (response) {
+                                    this.loggedInUserList = response.data.data.loggedInUserList;
+                                    this.loggedInUserCount = response.data.data.loggedInUserCount;
+                                }, function (response) {
 
                                 }
                         );
@@ -645,11 +749,11 @@
                 methods: {
                     fetchData: function () {
                         var username = this.userInfo.username;
-                        var url = '/admin/userblog/' + username + '/username'
-                        this.$http.get(url).then(function (data) {
-                                    if (data.data.success)
-                                        this.userBlogList = data.data.userBlogList;
-                                }, function (data) {
+                        var url = '/admin/blog/list/username/' + username;
+                        this.$http.get(url).then(function (response) {
+                                    if (response.data.success)
+                                        this.userBlogList = response.data.data.userBlogList;
+                                }, function (response) {
 
                                 }
                         );
@@ -687,19 +791,18 @@
                                 $('.' + id + '-li').addClass('active');
                             },
                             fetchData: function (username) {
-                                var url = '/admin/user/' + username + '/userinfo';
-                                this.$http.get(url).then(function (data) {
-                                            if (data.data.success) {
-                                                this.userInfo = data.data.userInfo;
+                                var url = '/admin/user/username/' + username;
+                                this.$http.get(url).then(function (response) {
+                                            if (response.data.success) {
+                                                this.userInfo = response.data.data.userInfo;
                                             }
-                                        }, function (data) {
+                                        }, function (response) {
 
                                         }
                                 );
                             },
                             back: function () {
-                                console.log("返回");
-                                router.go(-1);
+                                this.$router.go(-1);
                             },
                             getUsername: function () {
                                 var username = this.$route.params.username;
@@ -732,16 +835,16 @@
                         template: '#buy-manager-panel-template',
                         data: function () {
                             return {
-                                buyFileList: []
+                                fileList: []
                             }
                         },
                         methods: {
                             fetchData: function () {
-                                var url = '/admin/buyfilelist';
-                                this.$http.get(url).then(function (data) {
-                                            if (data.data.success)
-                                                this.buyFileList = data.data.buyFileList;
-                                        }, function (data) {
+                                var url = '/admin/buy/file/list';
+                                this.$http.get(url).then(function (response) {
+                                            if (response.data.success)
+                                                this.fileList = response.data.data.fileList;
+                                        }, function (response) {
 
                                         }
                                 );
@@ -751,42 +854,42 @@
                             },
                             upload: function () {
                                 var formData = new FormData($('#buyFileFrom')[0]);
-                                var url = '/admin/uploadbuyfile';
+                                var url = '/admin/buy/file/upload';
                                 var percentObj = $('.percent');
                                 percentObj.parent().show();
                                 this.$http.post(url, formData, {
                                     progress: function (event) {
                                         percentObj.text(Math.floor((event.loaded / event.total) * 100));
                                     }
-                                }).then(function (data) {
+                                }).then(function (response) {
                                             percentObj.parent().hide();
                                             var file = $('#buyFile')[0];
                                             file.outerHTML = file.outerHTML
-                                            if (data.data.success) {
-                                                this.buyFileList = data.data.buyFileList;
+                                            if (response.data.success) {
+                                                this.fileList = response.data.data.fileList;
                                             } else {
-                                                alert(data.data.message ? data.data.message : '上传失败');
+                                                alert(response.data.data.message ? response.data.data.message : '上传失败');
                                             }
-                                        }, function (data) {
+                                        }, function (response) {
 
                                         }
                                 );
 
                             },
                             parseFile: function (fileName) {
-                                var url = '/admin/parsebuyfile';
+                                var url = '/admin/buy/file/parse';
                                 this.$http.post(url, {fileName: fileName},
                                         {
                                             emulateJSON: true
                                         }
                                 ).
-                                        then(function (data) {
-                                            if (data.data.success) {
+                                        then(function (response) {
+                                            if (response.data.success) {
                                                 alert('解析成功');
                                             } else {
-                                                alert(data.data.message ? data.data.message : '解析失败');
+                                                alert(response.data.data.message ? response.data.data.message : '解析失败');
                                             }
-                                        }, function (data) {
+                                        }, function (response) {
 
                                         }
                                 );
@@ -796,20 +899,20 @@
                                 if (!isDel) {
                                     return false;
                                 }
-                                var url = '/admin/deletebuyfile';
+                                var url = '/admin/buy/file/delete';
                                 this.$http.post(url, {fileName: fileName},
                                         {
                                             emulateJSON: true
                                         }
                                 ).
-                                        then(function (data) {
-                                            if (data.data.success) {
-                                                alert(data.data.message ? data.data.message : '成功删除');
+                                        then(function (response) {
+                                            if (response.data.success) {
+                                                alert(response.data.data.message ? response.data.data.message : '成功删除');
                                                 this.fetchData();
                                             } else {
-                                                alert(data.data.message ? data.data.message : '删除失败');
+                                                alert(response.data.data.message ? response.data.data.message : '删除失败');
                                             }
-                                        }, function (data) {
+                                        }, function (response) {
 
                                         }
                                 );
@@ -829,6 +932,7 @@
                             'info-panel': infoPanel,
                             'user-manager': userManagerPanel,
                             'add-user-panel': addUserPanel,
+                            'edit-user-panel': editUserPanel,
                             'user-info-panel': userInfoPanel,
                             'blog-manager-panel': blogManagerPanel,
                             'buy-manager-panel': buyManagerPanel,
@@ -841,7 +945,8 @@
                                 {path: '/', component: infoPanel},
                                 {path: '/user/manager', component: userManagerPanel},
                                 {path: '/user/add', component: addUserPanel},
-                                {name: 'userInfoPanel', path: '/user/info/:username', component: userInfoPanel},
+                                {path: '/user/edit/:username', component: editUserPanel},
+                                {path: '/user/info/:username', component: userInfoPanel, name: 'userInfoPanel'},
                                 {path: '/blog/manager', component: blogManagerPanel},
                                 {path: '/buy/manager', component: buyManagerPanel}
                             ]

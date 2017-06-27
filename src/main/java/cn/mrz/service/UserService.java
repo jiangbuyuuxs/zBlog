@@ -3,8 +3,8 @@ package cn.mrz.service;
 import cn.mrz.pojo.Permission;
 import cn.mrz.pojo.Role;
 import cn.mrz.pojo.User;
+import com.baomidou.mybatisplus.plugins.Page;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,7 +14,6 @@ import java.util.Set;
 public interface UserService extends BaseService<User,String>{
     boolean addUser(User user);
     User getUserByUsername(String username);
-    List<User> getUsers(int start, int num, String sortBy);
 
     Set<Role> findRoles(String username);
 
@@ -26,5 +25,11 @@ public interface UserService extends BaseService<User,String>{
      */
     Map getLoggedInUserList();
 
+
+    Page<User> getUserList(Page<User> page);
+
+    boolean updateNickname(String username, String nickname);
+
+    int changeState(String username);
 
 }

@@ -39,6 +39,6 @@
     <div class="highlight">${blog.texts}</div>
   </div>
     <%@include file="../comm/footer.jsp" %>
-    <script type="text/javascript" charset="utf-8" src="/visitblog/${blog.id}"></script>
+    <script type="text/javascript" charset="utf-8" src="/blog/visit/${blog.id}"></script>
 </body>
 </html>

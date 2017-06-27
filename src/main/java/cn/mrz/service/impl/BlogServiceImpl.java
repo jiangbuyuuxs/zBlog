@@ -35,9 +35,10 @@ public class BlogServiceImpl implements BlogService {
         if (!hasContent) {
             page.setRecords(blogMapper.selectBlogListWithoutContent(page));
             return page;
-        }else
+        }else {
             page.setRecords(blogMapper.selectBlogList(page));
             return page;
+        }
     }
 
     @Override

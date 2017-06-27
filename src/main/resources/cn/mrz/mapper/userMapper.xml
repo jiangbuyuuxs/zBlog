@@ -12,6 +12,10 @@
         select * from users
     </select>
 
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" parameterType="User">
+        insert into users(username,nickname,`password`,email,enabled)  values(#{username},#{nickname},#{password},#{email},#{enabled})
+    </insert>
+
     <select id="findRoles" resultType="Role">
         select r.id,r.name
         from users u,user_role ur,role r

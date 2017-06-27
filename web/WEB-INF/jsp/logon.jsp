@@ -61,14 +61,14 @@
                 <div class="form-group">
                     <label for="username" class="col-sm-3 control-label">用户名</label>
                     <div class="col-sm-7">
-                        <input type="text" class="form-control" name="username" id="username" value="user"
+                        <input type="text" class="form-control" name="username" id="username" value="admin"
                                logoned="<%=username%>" placeholder="用户名">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="password" class="col-sm-3 control-label">密码</label>
                     <div class="col-sm-7">
-                        <input type="password" class="form-control" name="password" id="password" value="user" placeholder="咒语">
+                        <input type="password" class="form-control" name="password" id="password" value="admin" placeholder="咒语">
                         <a class="forget-pw" href="/go/forget">忘记密码</a>
                     </div>
                 </div>

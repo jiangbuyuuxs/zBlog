@@ -1,5 +1,7 @@
 package cn.mrz.pojo;
 
+import com.baomidou.mybatisplus.annotations.TableName;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -7,7 +9,7 @@ import java.io.Serializable;
 /**
  * Created by Administrator on 2017/4/1.
  */
-
+@TableName("users")
 public class User implements Serializable{
 
     public static final String[] COLNAMES = {"USERNAME","NICKNAME","EMAIL","ENABLED"};

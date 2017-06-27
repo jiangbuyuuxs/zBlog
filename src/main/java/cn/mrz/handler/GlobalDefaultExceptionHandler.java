@@ -57,4 +57,17 @@ public class GlobalDefaultExceptionHandler {
         mv.setViewName(DEFAULT_ERROR_VIEW);
         return mv;
     }
+    @ExceptionHandler(value = RuntimeException.class)
+    public ModelAndView commErrorHandler(HttpServletRequest req, Exception e) throws Exception {
+        // 如果异常使用了ResponseStatus注解，那么重新抛出该异常，Spring框架会处理该异常。
+        if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null)
+            throw e;
+        // 否则创建ModleAndView，处理该异常。
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("message", e.getMessage());
+        mv.addObject("url", req.getRequestURL());
+        mv.addObject("ex",e.getLocalizedMessage());
+        mv.setViewName(DEFAULT_ERROR_VIEW);
+        return mv;
+    }
 }

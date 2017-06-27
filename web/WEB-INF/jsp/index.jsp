@@ -132,8 +132,12 @@
                     _changePage: function (page) {
                         if (page < 1 || page > this.pageNum || page === this.curPage)
                             return
-                        var url = '/blog/list?page='+page;
-                        this.$http.get(url).then(function (response) {
+                        var url = '/blog/list';
+                        this.$http.get(url,{
+                            params:{
+                                page:page
+                            }
+                        }).then(function (response) {
                             this.blogList = response.data.data.blogList;
                             this.curPage = page;
                         }, function (response) {
