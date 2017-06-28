@@ -18,7 +18,7 @@ import java.util.Map;
  * Created by Administrator on 2017/4/6.
  */
 @Controller
-public class UserController {
+public class UserController extends BaseController{
 
     @Resource
     private UserService userService;
@@ -108,7 +108,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/admin/user/enabled", produces = {"application/json;charset=UTF-8"})
     public String enabledUser(@RequestParam String username) {
-        try {
+//        try {
             int enabled = userService.changeState(username);
             Map data = new HashMap();
             data.put("enabled", enabled);
@@ -117,12 +117,12 @@ public class UserController {
             map.put("success", true);
             map.put("data", data);
             return JSONObject.toJSONString(map);
-        }catch (RuntimeException e){
-            Map map = new HashMap();
-            map.put("success", false);
-            map.put("message", e.getMessage());
-            return JSONObject.toJSONString(map);
-        }
+//        }catch (RuntimeException e){
+//            Map map = new HashMap();
+//            map.put("success", false);
+//            map.put("message", e.getMessage());
+//            return JSONObject.toJSONString(map);
+//        }
     }
 
     @ResponseBody

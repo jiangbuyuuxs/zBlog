@@ -29,7 +29,7 @@ import java.util.*;
  * Created by Administrator on 2017/6/19.
  */
 @Controller
-public class BuyController {
+public class BuyController extends BaseController{
 
     Logger logger = LoggerFactory.getLogger(BuyController.class);
 

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-public class IndexController {
+public class IndexController  extends BaseController{
 
     Logger logger = LoggerFactory.getLogger(IndexController.class);
 

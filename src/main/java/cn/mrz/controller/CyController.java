@@ -18,7 +18,7 @@ import java.util.Map;
  * Created by Administrator on 2017/4/6.
  */
 @Controller
-public class CyController {
+public class CyController  extends BaseController{
 
     @Resource
     private CyMapper cyDao;

@@ -32,7 +32,7 @@ import java.util.Map;
  * Created by Administrator on 2017/3/16.
  */
 @Controller
-public class SystemController {
+public class SystemController extends BaseController{
 
     @Autowired
     private BlogService blogService;

@@ -29,8 +29,7 @@ import java.util.Map;
  * Created by Administrator on 2017/4/6.
  */
 @Controller
-public class BlogController {
-
+public class BlogController extends BaseController{
     final Integer pageSize = 10;
 
     @Resource
@@ -70,7 +69,7 @@ public class BlogController {
             Word word = wordsByWordHash.getRecords().get(0);
             hotWord = word.getRemark();
         }else{
-            throw new NoSuchWordException();
+            throw new RuntimeException("没有这样的博客");
         }
         map.addAttribute("hotWord",hotWord);
         map.addAttribute("hashcode",hashcode);
@@ -201,11 +200,11 @@ public class BlogController {
     @RequestMapping(value = "/admin/blog/edit")
     public String editBlog(Blog blog) {
         if (null == blog) {
-            return "{\"success\": false}";
+            return DEFAULT_FAILED_MESSAGE;
         }
         Blog oldBlog = blogService.getById(blog.getId());
         if (null == oldBlog) {
-            return "{\"success\": false}";
+            return DEFAULT_FAILED_MESSAGE;
         }
         blog.setEditDate(new Date(System.currentTimeMillis()));
         blogService.update(blog);
@@ -224,7 +223,7 @@ public class BlogController {
     public String deleteBlog(@RequestParam Long id,@RequestParam(required = false) Integer page) {
         if(page==null)
             page = 1;
-        String blogListJson = "{\"success\": false,\"msg\",\"操作失败\"}";
+        String blogListJson = DEFAULT_FAILED_MESSAGE;
         boolean isDelete = blogService.deleteBlogById(id);
         if(isDelete){
             Page<Blog> pagination = new Page<Blog>(page,pageSize,"create_date");
