@@ -181,7 +181,6 @@
                 <ul class="nav navbar-nav">
                     <li><a href="/">首页</a></li>
                     <li><a href="/cy/cyjl">成语接龙</a></li>
-                    <li><a href="/blog/list">博客列表</a></li>
                     <li><a href="/go/logon">登录</a></li>
                     <li><a href="/admin/go/admin#/info">管理员</a></li>
                 </ul>

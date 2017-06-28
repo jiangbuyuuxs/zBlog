@@ -1,7 +1,6 @@
 package cn.mrz.service.impl;
 
 import cn.mrz.dao.ItemDao;
-import cn.mrz.exception.BuyFileExistException;
 import cn.mrz.mapper.FavourableMapper;
 import cn.mrz.mapper.ItemClassMapper;
 import cn.mrz.mapper.ItemMapper;
@@ -78,7 +77,7 @@ public class BuyServiceImpl implements BuyService {
         String originalFilename = uploadFile.getOriginalFilename();
         File buyFile = new File(file, originalFilename);
         if (buyFile.exists()) {
-            throw new BuyFileExistException();
+            throw new RuntimeException("已存在同名文件~~~");
         }
         try {
             uploadFile.transferTo(buyFile);

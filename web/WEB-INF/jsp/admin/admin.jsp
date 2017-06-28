@@ -422,6 +422,7 @@
                 <form id="buyFileFrom">
                     <input type="file" name="buyFile" id="buyFile"/>
                     <a class="btn btn-success" @click.prevent="upload">上传</a>
+                    <span>限制20M以内文件</span>
                 </form>
             </div>
             <div>已完成:<span class="percent">0</span>%</div>
@@ -835,7 +836,8 @@
                         template: '#buy-manager-panel-template',
                         data: function () {
                             return {
-                                fileList: []
+                                fileList: [],
+                                uploading:false
                             }
                         },
                         methods: {
@@ -856,19 +858,23 @@
                                 var formData = new FormData($('#buyFileFrom')[0]);
                                 var url = '/admin/buy/file/upload';
                                 var percentObj = $('.percent');
-                                percentObj.parent().show();
                                 this.$http.post(url, formData, {
                                     progress: function (event) {
+                                        if(!this.uploading){
+                                            percentObj.parent().show();
+                                        }
                                         percentObj.text(Math.floor((event.loaded / event.total) * 100));
+                                        this.uploading = true;
                                     }
                                 }).then(function (response) {
                                             percentObj.parent().hide();
+                                            this.uploading = false;
                                             var file = $('#buyFile')[0];
                                             file.outerHTML = file.outerHTML
                                             if (response.data.success) {
                                                 this.fileList = response.data.data.fileList;
                                             } else {
-                                                alert(response.data.data.message ? response.data.data.message : '上传失败');
+                                                alert(response.data.message ? response.data.message : '上传失败');
                                             }
                                         }, function (response) {
 

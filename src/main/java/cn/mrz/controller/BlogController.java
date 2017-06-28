@@ -1,7 +1,6 @@
 package cn.mrz.controller;
 
-import cn.mrz.exception.NoSuchBlogException;
-import cn.mrz.exception.NoSuchWordException;
+
 import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
@@ -9,7 +8,6 @@ import cn.mrz.service.WordService;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,7 +53,7 @@ public class BlogController extends BaseController{
     public String goBlogPage(ModelMap map,@PathVariable Long id) {
         Blog blog = blogService.getById(id);
         if (blog == null) {
-            throw new NoSuchBlogException();
+            throw new RuntimeException("没有这样的博文~~~");
         }
         map.addAttribute("blog", blog);
         return "/blog/blog";

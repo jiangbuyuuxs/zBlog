@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.management.relation.RoleUnresolved;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +96,7 @@ public class UserController extends BaseController{
         if(addUserResult){
             return "{\"success\": true}";
         }
-        return "{\"success\": false}";
+        return DEFAULT_FAILED_MESSAGE;
     }
     @ResponseBody
     @RequestMapping(value = "/admin/user/edit", produces = {"application/json;charset=UTF-8"})
@@ -108,21 +109,14 @@ public class UserController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/user/enabled", produces = {"application/json;charset=UTF-8"})
     public String enabledUser(@RequestParam String username) {
-//        try {
-            int enabled = userService.changeState(username);
-            Map data = new HashMap();
-            data.put("enabled", enabled);
-            data.put("username", username);
-            Map map = new HashMap();
-            map.put("success", true);
-            map.put("data", data);
-            return JSONObject.toJSONString(map);
-//        }catch (RuntimeException e){
-//            Map map = new HashMap();
-//            map.put("success", false);
-//            map.put("message", e.getMessage());
-//            return JSONObject.toJSONString(map);
-//        }
+        int enabled = userService.changeState(username);
+        Map data = new HashMap();
+        data.put("enabled", enabled);
+        data.put("username", username);
+        Map map = new HashMap();
+        map.put("success", true);
+        map.put("data", data);
+        return JSONObject.toJSONString(map);
     }
 
     @ResponseBody
@@ -138,10 +132,7 @@ public class UserController extends BaseController{
             map.put("data", data);
             return JSONObject.toJSONString(map);
         }else{
-            Map map = new HashMap();
-            map.put("success", false);
-            map.put("message", "没找到这样的用户");
-            return JSONObject.toJSONString(map);
+            throw new RuntimeException("没有这样的用户:"+username);
         }
     }
 

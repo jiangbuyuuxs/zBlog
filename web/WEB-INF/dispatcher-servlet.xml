@@ -25,6 +25,9 @@
     <bean name="multipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="defaultEncoding" value="UTF-8"></property>
+        <!-- 设置这个参数后,上传超过尺寸的文件,会导致浏览器报错net::ERR_CONNECTION_ABORTED GG-->
+        <!--<property name="maxUploadSize" value="16777216"></property>
+        <property name="maxUploadSizePerFile" value="16777216"></property>-->
     </bean>
     <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <!-- 定义需要特殊处理的异常，用类名或完全路径名作为key，异常也页名作为值-->

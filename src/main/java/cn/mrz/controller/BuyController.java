@@ -1,6 +1,5 @@
 package cn.mrz.controller;
 
-import cn.mrz.exception.BuyFileExistException;
 import cn.mrz.mapper.FavourableMapper;
 import cn.mrz.mapper.ItemClassMapper;
 import cn.mrz.mapper.ItemMapper;
@@ -171,6 +170,7 @@ public class BuyController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/buy/file/upload", produces = {"application/json;charset=UTF-8"})
     public String uploadFile(@RequestParam MultipartFile buyFile) throws IOException {
+        //TODO 这个东西是先将文件上传,然后才有这些操作.所以说判断什么的不能在这里做,先于这里才可以
         if(buyFile.isEmpty())
             return "{\"success\": false,\"message\":\"请选择非空文件\"}";
         String originalFilename = buyFile.getOriginalFilename();
@@ -183,23 +183,18 @@ public class BuyController extends BaseController{
                 return "{\"success\": false,\"message\":\"请选择正确的.xls文件\"}";
             }
         }
-        try {
-            boolean saveBuyFile = buyService.saveBuyFile(buyFile);
-            String infoJson = "{\"success\": false}";
-            if (saveBuyFile) {
-                List<String> fileList = buyService.getBuyFileList();
-                Map data = new HashMap();
-                data.put("fileList", fileList);
-                Map map = new HashMap();
-                map.put("success", true);
-                map.put("data", data);
+        boolean saveBuyFile = buyService.saveBuyFile(buyFile);
+        if (saveBuyFile) {
+            List<String> fileList = buyService.getBuyFileList();
+            Map data = new HashMap();
+            data.put("fileList", fileList);
+            Map map = new HashMap();
+            map.put("success", true);
+            map.put("data", data);
 
-                return JSONObject.toJSONString(map);
-            } else {
-                return infoJson;
-            }
-        }catch (BuyFileExistException e){
-            return "{\"success\": false,\"message\":\"文件已存在\"}";
+            return JSONObject.toJSONString(map);
+        } else {
+            return DEFAULT_FAILED_MESSAGE;
         }
     }
 
