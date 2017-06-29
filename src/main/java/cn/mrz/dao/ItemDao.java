@@ -34,4 +34,8 @@ public interface ItemDao {
     int setList(String key, List<Item> itemList);
 
     List<Item> getList(String key);
+
+    String getItemCount(String itemCountKey);
+
+    void setItemCount(String itemCountKey, Integer itemCount);
 }

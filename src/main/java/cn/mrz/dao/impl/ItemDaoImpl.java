@@ -3,10 +3,7 @@ package cn.mrz.dao.impl;
 import cn.mrz.dao.ItemDao;
 import cn.mrz.pojo.Item;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.data.redis.core.BoundListOperations;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.SetOperations;
-import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -73,5 +70,17 @@ public class ItemDaoImpl extends BaseDaoImpl implements ItemDao {
             size--;
         }
         return itemList;
+    }
+
+    @Override
+    public String getItemCount(String itemCountKey) {
+        BoundValueOperations<String,String> boundValueOperations = redisTemplate.boundValueOps(itemCountKey);
+        return boundValueOperations.get();
+    }
+
+    @Override
+    public void setItemCount(String itemCountKey, Integer itemCount) {
+        BoundValueOperations<String,String> boundValueOperations = redisTemplate.boundValueOps(itemCountKey);
+        boundValueOperations.set(itemCount.toString());
     }
 }

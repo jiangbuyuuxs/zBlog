@@ -42,4 +42,6 @@ public interface BlogService extends BaseService<Blog,Long> {
     List<Blog> getBlogListByWordList(List<Word> wordList);
 
     List<Blog> getUserBlogList(String author);
+
+    List<Blog> searchBlogByTitle(int page,int pageSize,String keyword);
 }

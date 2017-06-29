@@ -33,6 +33,7 @@ public class BuyController extends BaseController{
     Logger logger = LoggerFactory.getLogger(BuyController.class);
 
     final static String INDEX_ITEM_KEY = "index:item";
+    final static String ITEM_COUNT_KEY = "index:item:count";
 
     @Autowired
     private BuyService buyService;
@@ -43,33 +44,70 @@ public class BuyController extends BaseController{
     @Autowired
     private FavourableMapper favourableMapper;
 
-    @RequestMapping(value = "/buy/{page}")
-    public String index(ModelMap map, @PathVariable int page) {
-        List<ItemClass> itemClass = buyService.getItemClassByParentId(new Long(0));
-        List<Item> cacheItemList = buyService.getCacheIndexItemList(INDEX_ITEM_KEY);
-        List<Item> itemList = cacheItemList;
-        if(cacheItemList==null||cacheItemList.size() == 0){
-            Page<Item> pagination = new Page<Item>(page, 40, "sales_volume");
+    @RequestMapping(value = "/buy")
+    public String index(ModelMap map) {
+        int pageSize = 40;
+        List<ItemClass> itemClass = buyService.getItemClassByParentId(0L);
+//        List<Item> cacheItemList = buyService.getCacheIndexItemList(INDEX_ITEM_KEY);
+//        String itemCountStr = buyService.getCacheItemCount(ITEM_COUNT_KEY);
+        Integer itemCount;
+        List<Item> itemList = null;//cacheItemList;
+//        if(cacheItemList==null||cacheItemList.size() == 0||itemCountStr==null){
+            Page<Item> pagination = new Page<Item>(1,pageSize , "sales_volume");
             pagination.setAsc(false);
             pagination = buyService.getItem(pagination);
             itemList = pagination.getRecords();
-            //将首页数据存入redis,缓存一天
-            buyService.cacheIndexItemList(INDEX_ITEM_KEY,itemList);
-        }
-        map.put("itemList", itemList);
-        map.put("itemClassList", itemClass);
+            itemCount = pagination.getTotal();
+            buyService.cacheIndexItemList(INDEX_ITEM_KEY, itemList);
+            buyService.cacheItemCount(ITEM_COUNT_KEY, itemCount);
+//        }else{
+//            itemCount = Integer.parseInt(itemCountStr);
+//        }
+        double pageNum = Math.ceil(itemCount.floatValue()/pageSize);
+        map.put("pageNum", pageNum);
+        map.put("itemList", JSONObject.toJSONString(itemList));
+        map.put("itemClassList", JSONObject.toJSONString(itemClass));
         return "/buy/index";
     }
 
-    @RequestMapping(value = "/buy/{itemclass}/itemclass")
-    public String itemClass(@PathVariable("itemclass") int hashCode, ModelMap map) {
-        List<String> itemIdList = buyService.getItemIdByClass(hashCode);
-        Set<String> itemClass = buyService.getItemClass();
-        //这里直接在页面做一个假分页好了.反正数据量也不大
-        List<Item> itemList = buyService.getItemByItemIdList(itemIdList);
-        map.put("itemList", itemList);
-        map.put("itemClassList", itemClass);
-        return "/buy/index";
+    @ResponseBody
+    @RequestMapping(value = "/buy/itemlist",produces = {"application/json;charset=UTF-8"})
+    public String getItemList(@RequestParam(value = "page",required = false) Integer page,@RequestParam(value = "itemClass",required = false)String itemClass,@RequestParam(value = "pageSize",required = false) Integer pageSize) {
+        if(pageSize==null)
+            pageSize = 40;
+        if(page==null)
+            page = 1;
+        Page<Item> pagination = new Page<Item>(page, 40 , "sales_volume");
+        pagination.setAsc(false);
+        if(itemClass!=null){
+            pagination = buyService.getItemByItemClass(pagination,itemClass);
+        }else{
+            pagination = buyService.getItem(pagination);
+        }
+        List<Item> itemList = pagination.getRecords();
+        Integer itemCount = pagination.getTotal();
+        Map data = new HashMap();
+        double pageNum = Math.ceil(itemCount.floatValue()/pageSize);
+        data.put("pageNum", pageNum);
+        data.put("itemList",itemList);
+        Map map = new HashMap();
+        map.put("success",true);
+        map.put("data",data);
+        return JSONObject.toJSONString(map);
+
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/buy/subitemclass",produces = {"application/json;charset=UTF-8"})
+    public String itemClass(@RequestParam(value = "id",required = false) Long id) {
+        List<ItemClass> subItemClassList = buyService.getSubItemClassByParentId(id);
+        Map data = new HashMap();
+        data.put("subItemClassList",subItemClassList);
+        Map map = new HashMap();
+        map.put("success",true);
+        map.put("data",data);
+        return JSONObject.toJSONString(map);
+
     }
 
 

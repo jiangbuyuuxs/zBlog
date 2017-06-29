@@ -115,6 +115,18 @@ public class BlogServiceImpl implements BlogService {
         return blogMapper.selectPage(page,blogEntityWrapper);
     }
 
+    @Override
+    public List<Blog> searchBlogByTitle(int page,int pageSize,String keyword) {
+        EntityWrapper<Blog> blogEntityWrapper = new EntityWrapper<Blog>();
+        blogEntityWrapper
+                .setSqlSelect("id,title,edit_date")
+                .where("title like {0}","%"+keyword+"%")
+                .orderBy("create_date",false);
+        Page pagination = new Page(page, pageSize);
+
+        return blogMapper.selectPage(pagination, blogEntityWrapper);
+    }
+
     private Blog getHotwordPart(Blog blog, String remark) {
         //截取的文章长度
         final int textsSubLength = 100;

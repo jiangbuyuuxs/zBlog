@@ -11,12 +11,13 @@
 <head>
     <title>买买买</title>
     <%@include file="../comm/jscss.jsp" %>
+    <%@include file="../comm/vue.jsp" %>
     <script type="text/javascript" src="/resources/jQuery/plug/lazyload/jquery.lazyload.js"></script>
     <style>
         .item {
             display: inline-block;
             margin: 10px 18px;
-            border:1px solid #F0F0F0;
+            border: 1px solid #F0F0F0;
         }
 
         .item-title {
@@ -39,7 +40,7 @@
             width: 100%;
             display: inline-block;
             text-align: center;
-            font-size:12px;
+            font-size: 12px;
             background: rgba(233, 238, 146, 0.79);
         }
 
@@ -47,8 +48,8 @@
             width: 70px;
             display: inline-block;
             text-align: right;
-            margin: 5px 0 ;
-            color:#FF0003;
+            margin: 5px 0;
+            color: #FF0003;
         }
 
         .no-item {
@@ -69,7 +70,7 @@
             width: 77px;
             text-align: center;
             display: inline-block;
-            font-size:12px;
+            font-size: 12px;
         }
 
         .top-item a {
@@ -85,6 +86,7 @@
             text-decoration: none;
             border-left: 2px solid #eeeeee;
             border-right: 2px solid #eeeeee;
+            cursor: hand;
         }
 
         .top-item a:hover {
@@ -92,6 +94,7 @@
             border-right: 2px solid #abd4f3;
             color: #abd4f3;
         }
+
         li a.active {
             border-left: 2px solid #abd4f3;
             border-right: 2px solid #abd4f3;
@@ -113,105 +116,225 @@
             background: url("/resources/img/silent.jpg");
         }
 
-        .item-list-container {
+        .item-list-panel {
             background: #cecece;
             width: 1170px;
             padding: 19px;
         }
 
-        .sub-item-class-item{
-            float:left;
+        .sub-item-class-item {
+            float: left;
             list-style: none;
             display: inline-block;
             margin: 4px;
         }
-        .tmall{
+
+        .tmall {
             background: url("/resources/img/buy.png") -91px -1px;
-            height:29px;
-            width:85px;
+            height: 29px;
+            width: 85px;
             display: inline-block;
         }
-        .taobao{
+
+        .taobao {
             background: url("/resources/img/buy.png") -1px -1px;
-            height:29px;
-            width:85px;
+            height: 29px;
+            width: 85px;
             display: inline-block;
+        }
+        .pagination a{
+            cursor: hand;
+        }
+        .go-page{
+            margin:20px 0;
         }
     </style>
+    <script type="text/x-template" id="app">
+        <div class="app">
+            <div class="row item-class-nav">
+                <ul class="item-class-container">
+                    <li class="top-item"><a href="/">首页</a></li>
+                    <li class="top-item"><a href="/buy/1">全部</a></li>
+                    <li v-for="(itemClass,index) of itemClassList" class="top-item"><a class="item-class-a"
+                                                                                       @click.prevent="showSub(itemClass.id,index)">{{itemClass.title}}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="row sub-item-class">
+                <ul v-for="(subItemClass,index) of subItemClassList" class="sub-item-class-container"
+                    :class="'sub-'+index">
+                    <li v-for="itemClass of subItemClass" class="sub-item-class-item" @click.prevent="selectItemClassType(itemClass.hashCode)"><a
+                            href="#">{{itemClass.title}}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="row item-list-panel">
+                <div v-for="item of itemList" class="item">
+                    <div>
+                        <a :href="item.tbkUrl" target="_blank"><img class="item-image lazy"
+                                                                    :data-original="item.imageUrl+'_240x240'"
+                                                                    src="/resources/img/nopic.jpg"></a>
+                    </div>
+                    <div class="item-title">{{item.title}}</div>
+                    <div class="item-info">
+                        <span class="item-price h3"><span class="h4">￥</span>{{item.price}}</span>
+                        <span class="item-favourable">{{item.favourable.title}}</span>
+                        <span class="item-buy"><a :href="item.tbkUrl" target="_blank"><span
+                                :class="item.shopType"> </span></a></span>
+                    </div>
+                    <div><span class="item-sales-volume">当前销量:{{item.salesVolume}}</span></div>
+                </div>
+            </div>
+            <div class="page-bar row" :style="{visibility:pageNum>1?'visible':'hidden'}">
+                <div class="col-lg-2">
+                    <select class="form-control go-page" @change.prevent="selectPage">
+                        <option v-for="page in pageNum" :value="page">{{page}}</option>
+                    </select>
+                </div>
+                <div class="col-lg-7">
+                    <ul class="pagination">
+                        <li><a href="#" @click="prePage"><span>&laquo;</span></a></li>
+                        <li v-for="i in pageNums" :class="{active:i===curPage}">
+                            <%--<a v-if="i!=='...'" :href="'/buy/'+i">{{i}}</a>--%>
+                            <a v-if="i!=='...'" @click.prevent="changePage(i)">{{i}}</a>
+                            <a v-if="i==='...'" @click.prevent href="#">...</a>
+                        </li>
+                        <li><a href="#" @click="nextPage"><span>&raquo;</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </script>
     <script>
         $(function () {
-            $('img.lazy').lazyload();
 
-            $('.item-class-a').each(function (position,item) {
-                var id = $(item).attr('data-id');
-                var liObj = $(item).parent();
-                $.ajax('/buy/getsubitemclass', {
-                    data: {id:id},
-                    dataType: 'json',
-                    success: function (data) {
-                        if(data.success){
-                            var ul = $('<ul class="sub-item-class-container sub-item-class-container-'+id+'"></ul>');
-                            var subItemClassList = data.subItemClassList;
-                            for(var i= 0,j=subItemClassList.length;i<j;i++){
-                                ul.append($('<li class="sub-item-class-item"><a data-id="'+subItemClassList[i].id+'" href="#">'+subItemClassList[i].title+'</a></li>'));
-                            }
-                            ul.hide();
-                            $('.sub-item-class').append(ul);
-                            liObj.on('click', function () {
-                                $(this).parent().find('.active').removeClass('active');
-                                $(this).find('a').addClass('active');
-                                $('.sub-item-class-container').hide();
-                                $('.sub-item-class-container-'+id).show();
-                            });
-                            $('.sub-item-class-item a').on('click', function () {
-
+            //分页条中间(除去首页和末页)显示的页数
+            var pageBarPageNum = 7;
+            var halfPageBarPageNum = Math.floor(pageBarPageNum / 2);
+            var app = {
+                template: '#app',
+                data: function () {
+                    return {
+                        itemList:${itemList},
+                        curPage: 1,
+                        pageNums: [],
+                        itemClass:'',
+                        pageNum:${pageNum},
+                        itemClassList:${itemClassList},
+                        subItemClassList: [],
+                        loadData: []
+                    }
+                },
+                methods: {
+                    showSub: function (id, index) {
+                        if (!this.loadData[index]) {
+                            var url = '/buy/subitemclass'
+                            this.$http.get(url, {params: {id: id}}).then(function (response) {
+                                Vue.set(this.subItemClassList, index, response.data.data.subItemClassList);
+                                this.loadData[index] = true;
                             });
                         }
+                        this.$nextTick(function () {
+                            $('.sub-item-class-container').hide();
+                            $('.sub-' + index).show();
+                        })
+                    },
+                    selectItemClassType: function (itemClass) {
+                        this.itemClass = itemClass;
+                        this.fetchData(1);
+                    },
+                    prePage: function () {
+                        if(this.curPage>2)
+                            this.fetchData(this.curPage-1);
+                    },
+                    nextPage: function () {
+                        if(this.curPage<this.pageNum-1)
+                            this.fetchData(this.curPage+1);
+                    },
+                    changePage: function (page) {
+                        this.fetchData(page);
+                    },
+                    selectPage: function (e) {
+                        this.fetchData(e.currentTarget.value-0);
+                    },
+
+                    getPageNum: function (startPage, endPage) {
+                        this.pageNums = [];
+                        for (var i = 0, j = startPage, k = endPage; j <= k; j++) {
+                            this.pageNums[i++] = j;
+                        }
+                        if (this.startPage > 2)
+                            this.pageNums.unshift("...");
+                        if (this.startPage > 1) {
+                            this.pageNums.unshift(1);
+                        }
+                        if (this.endPage < this.pageNum) {
+                            this.pageNums.push("...", this.pageNum);
+                        }
+                    },
+                    fetchData: function (page) {
+                        var url = '/buy/itemlist';
+                        this.$http.get(url, {params: {page: page,itemClass:this.itemClass}}).then(function (response) {
+                            this.itemList = response.data.data.itemList;
+                            this.curPage = page;
+                            this.pageNum = response.data.data.pageNum;
+                            this.$nextTick(function () {
+                                $('img.lazy').lazyload();
+                            });
+                            this.getPageNum(this.startPage, this.endPage);
+                        });
                     }
-                });
+                },
+                computed: {
+                    startPage: function () {
+                        //页码总数不足或者页码是最初几个
+                        if (this.pageNum <= pageBarPageNum || this.curPage <= 1 + (1 + halfPageBarPageNum)) {
+                            return 1;
+                        } else {
+                            //当当前页码之后的页码数不足时
+                            if (this.curPage + halfPageBarPageNum > this.pageNum - 1)
+                                return this.pageNum - pageBarPageNum;
+                            return this.curPage - halfPageBarPageNum;
+                        }
+                    },
+                    endPage: function () {
+                        //页码总数不足或者页码已经是最后几个
+                        if (this.pageNum <= pageBarPageNum || this.curPage >= this.pageNum - (1 + halfPageBarPageNum)) {
+                            return this.pageNum;
+                        } else {
+                            //当当前页码之前的页码不足时
+                            if (this.curPage - halfPageBarPageNum < 2)
+                                return pageBarPageNum + 1;
+                            return this.curPage + halfPageBarPageNum;
+                        }
+                    }
+                },
+                created: function () {
+                    this.subItemClassList.length = this.itemClassList.length;
+                    this.loadData.length = this.itemClassList.length;
+
+                    this.getPageNum(this.startPage, this.endPage);
+                    this.$nextTick(function () {
+                        $('img.lazy').lazyload();
+                    });
+                }
+            };
+            new Vue({
+                el: '.buy-main-panel',
+                components: {
+                    'app': app
+                }
             });
 
         });
     </script>
 </head>
 <body class="container">
-<div>
+<div class="buy-main-panel">
     <div class="row head">
         <p class="head-img-container"></p>
     </div>
-    <div class="row item-class-nav">
-        <ul class="item-class-container">
-            <li class="top-item"><a href="/">首页</a></li>
-            <li class="top-item"><a href="/buy/1">全部</a></li>
-            <c:forEach var="itemClass" items="${itemClassList}">
-                <li class="top-item"><a class="item-class-a" href="#" data-id="${itemClass.id}">${itemClass.title}</a></li>
-            </c:forEach>
-        </ul>
-    </div>
-    <div class="row sub-item-class">
-    </div>
-    <div class="row item-list-container">
-        <c:forEach var="item" items="${itemList}">
-            <div class="item">
-                <div>
-                    <a href="${item.tbkUrl}" target="_blank"><img class="item-image lazy" data-original="${item.imageUrl}_240x240"
-                          src="/resources/img/nopic.jpg"></a>
-                </div>
-                <div class="item-title">${item.title}</div>
-                <div class="item-info">
-                    <span class="item-price h3"><span class="h4">￥</span>${item.price}</span>
-                    <span class="item-favourable">${item.favourable.title}</span>
-                    <span class="item-buy"><a href="${item.tbkUrl}" target="_blank"><span class="${item.shopType}"> </span></a></span>
-                </div>
-                <div><span class="item-sales-volume">当前销量:${item.salesVolume}</span></div>
-            </div>
-        </c:forEach>
-        <c:if test="${itemList.size()==0}">
-            <div class="no-item">
-                .
-            </div>
-        </c:if>
-    </div>
+    <app></app>
 </div>
 <%@include file="../comm/footer.jsp" %>
 </body>

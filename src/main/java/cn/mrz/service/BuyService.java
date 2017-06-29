@@ -32,4 +32,12 @@ public interface BuyService {
     List<Item> getCacheIndexItemList(String key);
 
     int cacheIndexItemList(String key,List<Item> itemList);
+
+    String getCacheItemCount(String itemCountKey);
+
+    void cacheItemCount(String itemCountKey, Integer itemCount);
+
+    List<ItemClass> getSubItemClassByParentId(Long id);
+
+    Page<Item> getItemByItemClass(Page<Item> page, String itemClass);
 }

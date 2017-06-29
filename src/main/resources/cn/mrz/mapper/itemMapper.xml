@@ -32,6 +32,10 @@
         <select id="selectByItemId" resultMap="item_result_map">
                 select * from item where item_id = #{itemId}
         </select>
+
+        <select id="selectByItemClass" resultMap="item_result_map">
+                select * from item where item_class = #{itemClass}
+        </select>
         <select id="hasItemId" resultType="java.lang.Integer">
                 select count(id) from item where item_id = #{itemId}
         </select>

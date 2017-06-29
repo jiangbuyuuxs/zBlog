@@ -222,6 +222,27 @@ public class BuyServiceImpl implements BuyService {
         return 0;
     }
 
+    @Override
+    public String getCacheItemCount(String itemCountKey) {
+        return itemDao.getItemCount(itemCountKey);
+    }
+
+    @Override
+    public void cacheItemCount(String itemCountKey, Integer itemCount) {
+        itemDao.setItemCount(itemCountKey, itemCount);
+    }
+
+    @Override
+    public List<ItemClass> getSubItemClassByParentId(Long id) {
+       return itemClassMapper.selectByParentId(id);
+    }
+
+    @Override
+    public Page<Item> getItemByItemClass(Page<Item> pagination, String itemClass) {
+        pagination.setRecords(itemMapper.selectByItemClass(pagination,itemClass));
+        return pagination;
+    }
+
     private List<Item> parseData(String filePath) throws Exception {
         File file = new File(fileDictionary, filePath);
         InputStream is = new FileInputStream(file);

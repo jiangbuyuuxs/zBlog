@@ -1,17 +1,15 @@
 package cn.mrz.controller;
 
-import cn.mrz.exception.BuyFileExistException;
 import cn.mrz.mapper.VisitMapper;
+import cn.mrz.pojo.Blog;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.BuyService;
-import cn.mrz.service.UserService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.util.SavedRequest;
@@ -19,7 +17,6 @@ import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +35,6 @@ public class SystemController extends BaseController{
     private BlogService blogService;
     @Autowired
     private VisitMapper visitMapper;
-    @Autowired
-    private BuyService buyService;
 
     @RequestMapping(value = {"/admin/go/{page}"})
     public String goAdminPage(@PathVariable String page) {
@@ -51,11 +46,10 @@ public class SystemController extends BaseController{
     public String getBlogInfo() {
         int blogCountNum = blogService.getBlogCountNum();
         int visitCount = visitMapper.getAllVisitSum();
-        Map info = new HashMap();
         Map data = new HashMap();
-
         data.put("blogCountNum", blogCountNum);
         data.put("visitCount", visitCount);
+        Map info = new HashMap();
         info.put("success",true);
         info.put("data",data);
         return JSONObject.toJSONString(info);
@@ -136,5 +130,30 @@ public class SystemController extends BaseController{
         }
         return "{\"success\":false}";
     }
+
+    @ResponseBody
+    @RequestMapping(value = "/admin/search/search", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
+    public String search(@RequestParam String keyword,@RequestParam(required = false) String subject,@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer pageSize) throws IOException {
+        if(subject==null){
+            List<Blog> blogList = blogService.searchBlogByTitle(page, pageSize, keyword);
+            Map data = new HashMap();
+            data.put("blogList", blogList);
+            data.put("dataType", "blog");
+            Map info = new HashMap();
+            info.put("success",true);
+            info.put("data",data);
+            return JSONObject.toJSONString(info);
+        }
+        //聚合
+        List<Blog> blogList = blogService.searchBlogByTitle(page, pageSize, keyword);
+        Map data = new HashMap();
+        data.put("blogList", blogList);
+        data.put("dataType", "blog");
+        Map info = new HashMap();
+        info.put("success",true);
+        info.put("data",data);
+        return JSONObject.toJSONString(info);
+    }
+
 
 }

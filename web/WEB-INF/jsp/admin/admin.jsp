@@ -22,10 +22,17 @@
         .adminwin {
             border: 1px solid #dddddd;
             border-radius: 4px;
+            padding: 20px;
         }
 
         .blog-list {
             min-height: 440px;
+        }
+
+        .blog-list .blog-item a {
+            color: #000000;
+            font-size: 14px;
+            text-decoration: none;
         }
 
         .loading {
@@ -93,12 +100,17 @@
         }
 
         .file-upload-container {
-            margin: 20px;
             border-radius: 3px;
         }
 
         .file-upload-container input {
             background-color: #ffffff;
+        }
+
+        .buy-file-list {
+            border: 1px solid #cecece;
+            border-radius: 3px;
+            padding: 20px;
         }
 
         .info-tab-panel, .blog-tab-panel {
@@ -117,18 +129,22 @@
             border: 1px solid #dddddd;
             border-top: none;
         }
+
+        .edit-user-panel {
+            padding: 20px;
+        }
     </style>
-    <script type="text/x-template" id="head-nav">
+    <script type="text/x-template" id="head-nav-template">
         <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <span class="navbar-brand">哦,<shiro:principal/></span>
+                    <span class="navbar-brand">哦,你好 <shiro:principal/></span>
                 </div>
                 <div class="navbar-form navbar-left">
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search">
+                        <input type="text" class="form-control search-keyword" placeholder="博文title搜索">
                     </div>
-                    <button type="submit" class="btn btn-default">搜索</button>
+                    <button type="submit" class="btn btn-success" @click.prevent="search">搜索</button>
                 </div>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
@@ -143,6 +159,24 @@
                 </ul>
             </div>
         </nav>
+    </script>
+    <script type="text/x-template" id="search-result-panel">
+        <div class="search-result-panel">
+            博文:
+            <div class="blog-list" :class="{hidden:!hasBlogResult}">
+                <table class="table">
+                    <tbody>
+                    <tr v-for="blog of blogList">
+                        <td class="blog-item"><a :href="'/blog/blog/'+blog.id" target="_blank">{{blog.title}}</a></td>
+                        <td>{{blog.editDate}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div :class="{hidden:hasBlogResult}">
+                没有相关博文
+            </div>
+        </div>
     </script>
     <script type="text/x-template" id="menu-list-panel">
         <ul class="list-group">
@@ -174,48 +208,53 @@
         </table>
     </script>
     <script type="text/x-template" id="user-manager-template">
-        <table class="table">
-            <tbody>
-            <tr>
-                <th>操作</th>
-                <th>用户名</th>
-                <th>昵称</th>
-                <th width="150px">激活状态</th>
-            </tr>
+        <div class="user-manager-panel">
             <div class="loading" v-if="loading">
                 Loading...
             </div>
-            <tr v-for="(user,index) of userList">
-                <td>
-                    <shiro:hasRole name="admin">
-                        <a class="btn btn-default btn-xs" @click.prevent="deleteUser(user.username)">删除</a>
-                        <router-link :to="'/user/edit/'+user.username">
-                            <a class="btn btn-default btn-xs">编辑</a>
-                        </router-link>
-                    </shiro:hasRole>
-                    <shiro:lacksRole name="admin">
-                        <a class="btn btn-default btn-xs disabled" href="#" @click.prevent="">删除</a>
-                        <a class="btn btn-default btn-xs disabled" href="#" @click.prevent="">编辑</a>
-                    </shiro:lacksRole>
-                </td>
-                <td>{{user.username}}</td>
-                <td>{{user.nickname}}</td>
-                <td :class="user.enabled===1?'text-danger':'text-success'">
-                    {{user.enabled===1?'激活':'未激活'}}
-                    <shiro:hasRole name="admin">
-                        <a class="btn btn-xs pull-right" :class="[user.enabled===1?'btn-success':'btn-danger',user.username==='admin'?'hidden':'']" @click.prevent="changeState(user.username,index)">
-                            {{user.enabled===1?'禁用':'激活'}}
-                        </a>
-                    </shiro:hasRole>
-                </td>
-            </tr>
-            <shiro:hasRole name="admin">
+            <table class="table">
+                <tbody>
+                <shiro:hasRole name="admin">
+                    <tr>
+                        <td colspan="4"><a class="btn btn-success pull-left" href="#/user/add">添加用户</a></td>
+                    </tr>
+                </shiro:hasRole>
                 <tr>
-                    <td colspan="4"><a class="btn btn-success btn-xs pull-left" href="#/user/add">添加</a></td>
+                    <th>操作</th>
+                    <th>用户名</th>
+                    <th>昵称</th>
+                    <th width="150px">激活状态</th>
                 </tr>
-            </shiro:hasRole>
-            </tbody>
-        </table>
+                <tr v-for="(user,index) of userList">
+                    <td>
+                        <shiro:hasRole name="admin">
+                            <a class="btn btn-default btn-danger btn-xs"
+                               @click.prevent="deleteUser(user.username)">删除</a>
+                            <router-link :to="'/user/edit/'+user.username">
+                                <a class="btn btn-default btn-success btn-xs">编辑</a>
+                            </router-link>
+                        </shiro:hasRole>
+                        <shiro:lacksRole name="admin">
+                            <a class="btn btn-xs disabled" href="#" @click.prevent="">删除</a>
+                            <a class="btn btn-xs disabled" href="#" @click.prevent="">编辑</a>
+                        </shiro:lacksRole>
+                    </td>
+                    <td>{{user.username}}</td>
+                    <td>{{user.nickname}}</td>
+                    <td :class="user.enabled===1?'text-danger':'text-success'">
+                        {{user.enabled===1?'激活':'未激活'}}
+                        <shiro:hasRole name="admin">
+                            <a class="btn btn-xs pull-right"
+                               :class="[user.enabled===1?'btn-success':'btn-danger',user.username==='admin'?'hidden':'']"
+                               @click.prevent="changeState(user.username,index)">
+                                {{user.enabled===1?'禁用':'激活'}}
+                            </a>
+                        </shiro:hasRole>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </script>
     <script type="text/x-template" id="add-user-panel-template">
         <div class="add-user-panel">
@@ -266,7 +305,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-6 control-label">
-                        <a class="btn btn-success" @click="back">返回</a>
+                        <a class="btn btn-danger" @click="back">返回</a>
                         <a class="btn btn-success submit" @click="addUser">添加用户</a>
                     </div>
                 </div>
@@ -280,7 +319,7 @@
                     <label class="col-sm-4 control-label" for="username">用户名:</label>
 
                     <div class="col-sm-4">
-                        <input class="form-control" id="username" name="username" type="text"
+                        <input class="form-control" readonly id="username" name="username" type="text"
                                :value="userInfo.username"/>
                     </div>
                     <div class="col-sm-4">
@@ -296,7 +335,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-6 control-label">
-                        <a class="btn btn-success" @click="back">返回</a>
+                        <a class="btn btn-danger" @click="back">返回</a>
                         <a class="btn btn-success submit" @click="editUser">修改</a>
                     </div>
                 </div>
@@ -319,8 +358,9 @@
                     <tr v-for="blog of blogList">
                         <td>
                             <shiro:hasRole name="admin">
-                                <a class="btn btn-default btn-xs" href="#" @click.prevent="deleteBlog(blog.id)">删除</a>
-                                <a class="btn btn-default btn-xs" :href="'/admin/blog/go/edit/'+blog.id"
+                                <a class="btn btn-default btn-danger btn-xs" href="#"
+                                   @click.prevent="deleteBlog(blog.id)">删除</a>
+                                <a class="btn btn-default btn-success btn-xs" :href="'/admin/blog/go/edit/'+blog.id"
                                    target="_blank">编辑</a>
                             </shiro:hasRole>
                             <shiro:lacksRole name="admin">
@@ -328,7 +368,7 @@
                                 <a class="btn btn-default btn-xs disabled" href="#" @click.prevent="">编辑</a>
                             </shiro:lacksRole>
                         </td>
-                        <td><a :href="'/blog/blog/'+blog.id" target="_blank">{{blog.title}}</a></td>
+                        <td class="blog-item"><a :href="'/blog/blog/'+blog.id" target="_blank">{{blog.title}}</a></td>
                         <td>{{blog.editDate}}</td>
                     </tr>
                     </tbody>
@@ -421,12 +461,12 @@
             <div class="file-upload-container">
                 <form id="buyFileFrom">
                     <input type="file" name="buyFile" id="buyFile"/>
-                    <a class="btn btn-success" @click.prevent="upload">上传</a>
-                    <span>限制20M以内文件</span>
+                    <a class="btn btn-xs btn-success" @click.prevent="upload">上传</a>
+                    <span class="text-danger">限制20M以内(.xls)文件</span>
                 </form>
             </div>
             <div>已完成:<span class="percent">0</span>%</div>
-            <ul>
+            <ul class="buy-file-list">
                 <li v-for="fileName in fileList">
                     {{fileName}} <a class="btn btn-success btn-xs" @click.prevent="parseFile(fileName)">解析</a> <a
                         class="btn btn-danger btn-xs" @click.prevent="deleteFile(fileName)">删除</a>
@@ -445,9 +485,51 @@
                 });
             });
 
-            var headNav = {
-                template: '#head-nav'
+            var headNavPanel = {
+                template: '#head-nav-template',
+                methods: {
+                    search: function () {
+                        var keyword = $('.search-keyword').val();
+                        if (keyword != '' && keyword != undefined) {
+                            this.$router.push('/search/result/:' + keyword);
+                        }
+                    }
+                }
             };
+            var searchResultPanel = {
+                template: '#search-result-panel',
+                data: function () {
+                    return {
+                        blogList: []
+                    }
+                },
+                methods: {
+                    fetchData: function () {
+                        var keyword = $('.search-keyword').val();
+                        var url = '/admin/search/search';
+                        this.$http.post(url, {
+                            keyword: keyword,
+                            page: 1,
+                            pageSize: 5
+                        }, {emulateJSON: true}).then(function (response) {
+                            this.blogList = response.data.data.blogList;
+                        });
+                    }
+                },
+                computed: {
+                    hasBlogResult:function () {
+                        return this.blogList.length != 0;
+                    }
+
+                },
+                beforeRouteUpdate: function (to, from, next) {
+                    this.fetchData();
+                },
+                created: function () {
+                    this.fetchData();
+                }
+            };
+
             var menuListPanel = {
                 template: '#menu-list-panel'
             };
@@ -523,7 +605,7 @@
                                 username: username
                             }
                         }).then(function (response) {
-                            if(response.data.success)
+                            if (response.data.success)
                                 this.userList[index].enabled = response.data.data.enabled;
                             else
                                 alert(response.data.message);
@@ -837,7 +919,7 @@
                         data: function () {
                             return {
                                 fileList: [],
-                                uploading:false
+                                uploading: false
                             }
                         },
                         methods: {
@@ -860,7 +942,7 @@
                                 var percentObj = $('.percent');
                                 this.$http.post(url, formData, {
                                     progress: function (event) {
-                                        if(!this.uploading){
+                                        if (!this.uploading) {
                                             percentObj.parent().show();
                                         }
                                         percentObj.text(Math.floor((event.loaded / event.total) * 100));
@@ -934,9 +1016,10 @@
             new Vue({
                         el: "#admin-manager",
                         components: {
-                            'head-nav': headNav,
+                            'head-nav-panel': headNavPanel,
+                            'search-result-panel': searchResultPanel,
                             'info-panel': infoPanel,
-                            'user-manager': userManagerPanel,
+                            'user-manager-panel': userManagerPanel,
                             'add-user-panel': addUserPanel,
                             'edit-user-panel': editUserPanel,
                             'user-info-panel': userInfoPanel,
@@ -954,6 +1037,7 @@
                                 {path: '/user/edit/:username', component: editUserPanel},
                                 {path: '/user/info/:username', component: userInfoPanel, name: 'userInfoPanel'},
                                 {path: '/blog/manager', component: blogManagerPanel},
+                                {path: '/search/result/:keyword', component: searchResultPanel},
                                 {path: '/buy/manager', component: buyManagerPanel}
                             ]
                         })
@@ -967,7 +1051,7 @@
 <div class="container">
     <div id="admin-manager">
         <div class="row">
-            <head-nav></head-nav>
+            <head-nav-panel></head-nav-panel>
         </div>
         <div class="row">
             <div class="col-sm-2">
