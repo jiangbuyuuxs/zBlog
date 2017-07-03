@@ -28,12 +28,9 @@ import java.util.*;
  * Created by Administrator on 2017/6/19.
  */
 @Controller
-public class BuyController extends BaseController{
+public class BuyController extends BaseController {
 
     Logger logger = LoggerFactory.getLogger(BuyController.class);
-
-    final static String INDEX_ITEM_KEY = "index:item";
-    final static String ITEM_COUNT_KEY = "index:item:count";
 
     @Autowired
     private BuyService buyService;
@@ -48,64 +45,98 @@ public class BuyController extends BaseController{
     public String index(ModelMap map) {
         int pageSize = 40;
         List<ItemClass> itemClass = buyService.getItemClassByParentId(0L);
-//        List<Item> cacheItemList = buyService.getCacheIndexItemList(INDEX_ITEM_KEY);
-//        String itemCountStr = buyService.getCacheItemCount(ITEM_COUNT_KEY);
         Integer itemCount;
-        List<Item> itemList = null;//cacheItemList;
-//        if(cacheItemList==null||cacheItemList.size() == 0||itemCountStr==null){
-            Page<Item> pagination = new Page<Item>(1,pageSize , "sales_volume");
-            pagination.setAsc(false);
-            pagination = buyService.getItem(pagination);
-            itemList = pagination.getRecords();
-            itemCount = pagination.getTotal();
-            buyService.cacheIndexItemList(INDEX_ITEM_KEY, itemList);
-            buyService.cacheItemCount(ITEM_COUNT_KEY, itemCount);
-//        }else{
-//            itemCount = Integer.parseInt(itemCountStr);
-//        }
-        double pageNum = Math.ceil(itemCount.floatValue()/pageSize);
+        Page<Item> pagination = new Page<Item>(1, pageSize, "sales_volume");
+        pagination.setAsc(false);
+        pagination = buyService.getItem(pagination);
+        List<Item> itemList = pagination.getRecords();
+        itemCount = pagination.getTotal();
+        double pageNum = Math.ceil(itemCount.floatValue() / pageSize);
         map.put("pageNum", pageNum);
         map.put("itemList", JSONObject.toJSONString(itemList));
         map.put("itemClassList", JSONObject.toJSONString(itemClass));
         return "/buy/index";
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/buy/itemlist",produces = {"application/json;charset=UTF-8"})
-    public String getItemList(@RequestParam(value = "page",required = false) Integer page,@RequestParam(value = "itemClass",required = false)String itemClass,@RequestParam(value = "pageSize",required = false) Integer pageSize) {
-        if(pageSize==null)
-            pageSize = 40;
-        if(page==null)
-            page = 1;
-        Page<Item> pagination = new Page<Item>(page, 40 , "sales_volume");
+    @RequestMapping(value = "/buy/{page}")
+    public String index(ModelMap map, @PathVariable Integer page, @RequestParam(value = "itemclass",required = false) String itemClassStr) {
+        int pageSize = 40;
+        if("".equals(itemClassStr))
+            itemClassStr = null;
+
+        List<ItemClass> topItemClassList = buyService.getItemClassByParentId(0L);
+        List subItemClassList = new ArrayList();
+        boolean getItemClass = false;
+        for (ItemClass topItemClass : topItemClassList) {
+            List<ItemClass> subItemClass = buyService.getItemClassByParentId(topItemClass.getId());
+            subItemClassList.add(subItemClass);
+            if(itemClassStr!=null&&!getItemClass){
+                for(ItemClass itemClass :subItemClass){
+                    if(itemClassStr.equals(itemClass.getHashCode()+"")){
+                        map.put("topItemClass",  JSONObject.toJSONString(topItemClass));
+                        map.put("subItemClass",  JSONObject.toJSONString(itemClass));
+                        getItemClass = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Page<Item> pagination = new Page<Item>(page, pageSize, "sales_volume");
         pagination.setAsc(false);
-        if(itemClass!=null){
-            pagination = buyService.getItemByItemClass(pagination,itemClass);
-        }else{
+        pagination = buyService.getItemList(pagination, itemClassStr);
+        List<Item> itemList = pagination.getRecords();
+        Integer itemCount = pagination.getTotal();
+        double pageNum = Math.ceil(itemCount.floatValue() / pageSize);
+
+        if(!getItemClass){
+            map.put("topItemClass", "null");
+            map.put("subItemClass", "null");
+        }
+        map.put("pageNum", pageNum);
+        map.put("curPage", page);
+        map.put("itemList", JSONObject.toJSONString(itemList));
+        map.put("topItemClassList", JSONObject.toJSONString(topItemClassList));
+        map.put("subItemClassList", JSONObject.toJSONString(subItemClassList));
+        return "/buy/index2";
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/buy/itemlist", produces = {"application/json;charset=UTF-8"})
+    public String getItemList(@RequestParam(value = "page", required = false) Integer page, @RequestParam(value = "itemClass", required = false) String itemClass, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        if (pageSize == null)
+            pageSize = 40;
+        if (page == null)
+            page = 1;
+        Page<Item> pagination = new Page<Item>(page, 40, "sales_volume");
+        pagination.setAsc(false);
+        if (itemClass != null && !"".equals(itemClass)) {
+            pagination = buyService.getItemByItemClass(pagination, itemClass);
+        } else {
             pagination = buyService.getItem(pagination);
         }
         List<Item> itemList = pagination.getRecords();
         Integer itemCount = pagination.getTotal();
         Map data = new HashMap();
-        double pageNum = Math.ceil(itemCount.floatValue()/pageSize);
+        double pageNum = Math.ceil(itemCount.floatValue() / pageSize);
         data.put("pageNum", pageNum);
-        data.put("itemList",itemList);
+        data.put("itemList", itemList);
         Map map = new HashMap();
-        map.put("success",true);
-        map.put("data",data);
+        map.put("success", true);
+        map.put("data", data);
         return JSONObject.toJSONString(map);
 
     }
 
     @ResponseBody
-    @RequestMapping(value = "/buy/subitemclass",produces = {"application/json;charset=UTF-8"})
-    public String itemClass(@RequestParam(value = "id",required = false) Long id) {
+    @RequestMapping(value = "/buy/subitemclass", produces = {"application/json;charset=UTF-8"})
+    public String itemClass(@RequestParam(value = "id", required = false) Long id) {
         List<ItemClass> subItemClassList = buyService.getSubItemClassByParentId(id);
         Map data = new HashMap();
-        data.put("subItemClassList",subItemClassList);
+        data.put("subItemClassList", subItemClassList);
         Map map = new HashMap();
-        map.put("success",true);
-        map.put("data",data);
+        map.put("success", true);
+        map.put("data", data);
         return JSONObject.toJSONString(map);
 
     }
@@ -209,15 +240,15 @@ public class BuyController extends BaseController{
     @RequestMapping(value = "/admin/buy/file/upload", produces = {"application/json;charset=UTF-8"})
     public String uploadFile(@RequestParam MultipartFile buyFile) throws IOException {
         //TODO 这个东西是先将文件上传,然后才有这些操作.所以说判断什么的不能在这里做,先于这里才可以
-        if(buyFile.isEmpty())
+        if (buyFile.isEmpty())
             return "{\"success\": false,\"message\":\"请选择非空文件\"}";
         String originalFilename = buyFile.getOriginalFilename();
         String[] originalFilenameSplit = originalFilename.split("\\.");
-        if(originalFilenameSplit.length<2){
+        if (originalFilenameSplit.length < 2) {
             return "{\"success\": false,\"message\":\"请选择正确的文件\"}";
-        }else{
-            String extName = originalFilenameSplit[originalFilenameSplit.length-1];
-            if(!"xls".equals(extName)){
+        } else {
+            String extName = originalFilenameSplit[originalFilenameSplit.length - 1];
+            if (!"xls".equals(extName)) {
                 return "{\"success\": false,\"message\":\"请选择正确的.xls文件\"}";
             }
         }
@@ -239,17 +270,18 @@ public class BuyController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/buy/file/parse", produces = {"application/json;charset=UTF-8"})
     public String parseFile(@RequestParam String fileName) throws IOException {
-        if(buyService.parseBuyFile(fileName)){
+        if (buyService.parseBuyFile(fileName)) {
             return "{\"success\": true,\"message\":\"成功解析\"}";
         }
         return "{\"success\": false,\"message\":\"解析失败\"}";
 
     }
+
     @ResponseBody
     @RequestMapping(value = "/admin/buy/file/delete", produces = {"application/json;charset=UTF-8"})
     public String deleteFile(@RequestParam String fileName) throws IOException {
-        if(buyService.deleteBuyFile(fileName)){
-            return "{\"success\": true,\"message\":\"成功删除:"+fileName+"\"}";
+        if (buyService.deleteBuyFile(fileName)) {
+            return "{\"success\": true,\"message\":\"成功删除:" + fileName + "\"}";
         }
         return "{\"success\": false,\"message\":\"删除失败\"}";
 

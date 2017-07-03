@@ -102,8 +102,13 @@ public class UserController extends BaseController{
     }
     @ResponseBody
     @RequestMapping(value = "/admin/user/edit", produces = {"application/json;charset=UTF-8"})
-    public String editUser(@RequestParam String nickname,@RequestParam String username) {
-        boolean result = userService.updateNickname(username,nickname);
+    public String editUser(@RequestParam(required = false) String nickname,@RequestParam(required = false) String username) {
+        if(nickname==null||username==null)
+            throw new RuntimeException("必须同时提供要修改的用户名和昵称~~~");
+        User user = new User();
+        user.setUsername(username);
+        user.setNickname(nickname);
+        boolean result = userService.updateNickname(user);
         Map map = new HashMap();
         map.put("success", result);
         return JSONObject.toJSONString(map);
@@ -141,7 +146,7 @@ public class UserController extends BaseController{
     @ResponseBody
     @RequestMapping(value = {"/admin/loggeduser"}, produces = {"application/json;charset=UTF-8"})
     public String getLoggedUser() {
-        Map loggedUserMap = userService.getLoggedInUserList();
+        Map loggedUserMap = userService.getLoggedUserList();
         List<String> loggedInUserList = (List<String>)loggedUserMap.get("user");
         int unLoggedUserNum = (Integer)loggedUserMap.get("unLoggedNum");
 

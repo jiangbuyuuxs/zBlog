@@ -5,6 +5,7 @@ import cn.mrz.pojo.Blog;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.BuyService;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -135,7 +136,9 @@ public class SystemController extends BaseController{
     @RequestMapping(value = "/admin/search/search", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
     public String search(@RequestParam String keyword,@RequestParam(required = false) String subject,@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer pageSize) throws IOException {
         if(subject==null){
-            List<Blog> blogList = blogService.searchBlogByTitle(page, pageSize, keyword);
+            Page<Blog> pagination = new Page<Blog>(1,10);
+            pagination = blogService.searchBlogByTitle(pagination, keyword);
+            List<Blog> blogList = pagination.getRecords();
             Map data = new HashMap();
             data.put("blogList", blogList);
             data.put("dataType", "blog");
@@ -145,7 +148,9 @@ public class SystemController extends BaseController{
             return JSONObject.toJSONString(info);
         }
         //聚合
-        List<Blog> blogList = blogService.searchBlogByTitle(page, pageSize, keyword);
+        Page<Blog> pagination = new Page<Blog>(1,10);
+        pagination = blogService.searchBlogByTitle(pagination, keyword);
+        List<Blog> blogList = pagination.getRecords();
         Map data = new HashMap();
         data.put("blogList", blogList);
         data.put("dataType", "blog");

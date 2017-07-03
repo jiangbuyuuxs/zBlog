@@ -11,19 +11,19 @@ import java.util.List;
  */
 public interface BlogService extends BaseService<Blog,Long> {
 
-    Page<Blog> getBlogList(Page<Blog> page,Boolean isAsc, boolean hasContent);
-
-
-
-    /**
-     * 获取博客总量
-     * @return
-     */
-    int getBlogCountNum();
-
-    boolean addVisit(long blogId);
+    boolean addVisit(Long blogId);
 
     void addBlog(Blog blog);
+
+    /**
+     * 传入Blog对象,如果id不为空使用id为条件删除
+     * @param blog
+     * @return 删除数量
+     */
+
+    int deleteBlog(Blog blog);
+
+    Page<Blog> getBlogList(Page<Blog> page,boolean hasContent);
 
     /**
      * 获取访问量最高的几个博客
@@ -32,7 +32,6 @@ public interface BlogService extends BaseService<Blog,Long> {
      */
     List<Blog> getHotBlogList(int num);
 
-    boolean deleteBlogById(Long id);
 
     /**
      * 获取热词对应的博文,携带包含热词的部分文本
@@ -41,7 +40,13 @@ public interface BlogService extends BaseService<Blog,Long> {
      */
     List<Blog> getBlogListByWordList(List<Word> wordList);
 
-    List<Blog> getUserBlogList(String author);
+    Page<Blog> getUserBlogList(Page<Blog> page,String author);
 
-    List<Blog> searchBlogByTitle(int page,int pageSize,String keyword);
+    Page<Blog> searchBlogByTitle(Page<Blog> page,String keyword);
+
+    /**
+     * 获取总博客数量
+     * @return
+     */
+    int getBlogCountNum();
 }

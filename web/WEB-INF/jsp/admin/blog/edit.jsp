@@ -16,7 +16,12 @@
     <%@include file="../../comm/jscss.jsp" %>
     <script>
         $(function () {
-            var ue = UE.getEditor('editor');
+            var ue = UE.getEditor('editor',{
+                toolbars: [
+                    ['fullscreen', 'source', 'undo', 'redo', 'bold']
+                ]
+            });
+
             ue.ready(function () {
                 ue.setContent($('#blogtexts').html(), true);
             });
@@ -58,7 +63,7 @@
                                 console.log(data);
                                 if (data.success) {
                                     alert('修改了一篇~~~~~');
-                                    window.location.href = '/detail/' + blogId + '/id';
+                                    window.location.href = '/blog/blog/' + blogId;
                                 }
                             },
                             error: function (XMLHttpRequest, textStatus) {
@@ -70,7 +75,7 @@
                 }
             }
 
-            $('.send').bind('click', saveBlog);
+            $('.send').on('click', saveBlog);
         });
     </script>
 </head>

@@ -13,36 +13,9 @@ import java.util.*;
  */
 @Repository
 public class ItemDaoImpl extends BaseDaoImpl implements ItemDao {
-    @Override
-    public void setItemClass(Integer itemClassHashCode, List<String> itemIdList) {
-        SetOperations setOperations = redisTemplate.opsForSet();
-        for(String itemId:itemIdList)
-            setOperations.add("item:class:" + itemClassHashCode, itemId);
-    }
 
     @Override
-    public void addItemClass(String itemType) {
-        SetOperations setOperations = redisTemplate.opsForSet();
-        setOperations.add("item:class",itemType);
-
-    }
-    @Override
-    public Set<String> getItemClassList() {
-        SetOperations<String,String> setOperations = redisTemplate.opsForSet();
-        return setOperations.members("item:class");
-    }
-
-    @Override
-    public List<String> getItemIdByClassHashcode(int itemClassHashCode) {
-        SetOperations<String,String> setOperations = redisTemplate.opsForSet();
-        Set<String> members = setOperations.members("item:class:" + itemClassHashCode);
-        List<String> list = new ArrayList<String>();
-        list.addAll(members);
-        return list;
-    }
-
-    @Override
-    public int setList(String key, List<Item> itemList) {
+    public int setItemList(String key, List<Item> itemList) {
         BoundListOperations boundListOperations = redisTemplate.boundListOps(key);
         for(Item item:itemList){
             String itemJSON = JSONObject.toJSONString(item);
@@ -58,7 +31,7 @@ public class ItemDaoImpl extends BaseDaoImpl implements ItemDao {
     }
 
     @Override
-    public List<Item> getList(String key) {
+    public List<Item> getItemList(String key) {
         List<Item> itemList = new ArrayList<Item>();
         BoundListOperations boundListOperations = redisTemplate.boundListOps(key);
         Long size = boundListOperations.size();
@@ -79,8 +52,8 @@ public class ItemDaoImpl extends BaseDaoImpl implements ItemDao {
     }
 
     @Override
-    public void setItemCount(String itemCountKey, Integer itemCount) {
+    public void setItemCount(String itemCountKey, int itemCount) {
         BoundValueOperations<String,String> boundValueOperations = redisTemplate.boundValueOps(itemCountKey);
-        boundValueOperations.set(itemCount.toString());
+        boundValueOperations.set(itemCount+"");
     }
 }

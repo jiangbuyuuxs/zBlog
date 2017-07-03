@@ -11,6 +11,7 @@ import org.ansj.recognition.impl.StopRecognition;
 import org.ansj.splitWord.analysis.ToAnalysis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Set;
 /**
  * Created by Administrator on 2017/3/16.
  */
+@Transactional
 @Service
 public class WordServiceImpl implements WordService {
 

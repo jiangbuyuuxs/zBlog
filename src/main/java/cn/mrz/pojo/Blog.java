@@ -12,15 +12,15 @@ import java.util.Date;
 @TableName("blogs")
 public class Blog  implements Serializable {
 
-    private long id;
+    private Long id;
     private String title;
     @JSONField (format="yyyy-MM-dd")
     private Date createDate;
     @JSONField(format="yyyy-MM-dd")
     private Date editDate;
     private String texts;
-    private long imageId;
-    private int classType;
+    private Long imageId;
+    private Integer classType;
     private String author;
 
     public String getAuthor() {
@@ -32,19 +32,19 @@ public class Blog  implements Serializable {
     }
 
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public int getClassType() {
+    public Integer getClassType() {
         return classType;
     }
 
-    public void setClassType(int classType) {
+    public void setClassType(Integer classType) {
         this.classType = classType;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -80,11 +80,11 @@ public class Blog  implements Serializable {
         this.texts = texts;
     }
 
-    public long getImageId() {
+    public Long getImageId() {
         return imageId;
     }
 
-    public void setImageId(long imageId) {
+    public void setImageId(Long imageId) {
         this.imageId = imageId;
     }
 }

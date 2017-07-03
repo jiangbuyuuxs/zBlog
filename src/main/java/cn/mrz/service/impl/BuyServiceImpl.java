@@ -33,6 +33,7 @@ import java.util.*;
 @Service
 @Transactional
 public class BuyServiceImpl implements BuyService {
+
     @Autowired
     ItemMapper itemMapper;
     @Autowired
@@ -41,7 +42,6 @@ public class BuyServiceImpl implements BuyService {
     FavourableMapper favourableMapper;
     @Autowired
     ItemClassMapper itemClassMapper;
-    final String fileDictionary = "C://attach//";
 
     @Override
     public List<String> getBuyFileList() {
@@ -151,43 +151,10 @@ public class BuyServiceImpl implements BuyService {
         return true;
     }
 
-    private void setItemClass(Map<String, String> itemClassMap, ItemDao itemDao) {
-        Iterator<Map.Entry<String, String>> iterator = itemClassMap.entrySet().iterator();
-        Map<Integer, List<String>> data = new HashMap<Integer, List<String>>();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> next = iterator.next();
-            String itemId = next.getKey();
-            String itemClass = next.getValue();
-            int hashCode = itemClass.hashCode();
-            if (!data.containsKey(hashCode)) {
-                ArrayList<String> itemIdList = new ArrayList<String>();
-                itemIdList.add(itemId);
-                data.put(hashCode, itemIdList);
-                itemDao.addItemClass(itemClass);
-            } else {
-                List<String> itemIdList = data.get(hashCode);
-                itemIdList.add(itemId);
-                data.put(hashCode, itemIdList);
-            }
-
-        }
-        Iterator<Map.Entry<Integer, List<String>>> dataIterator = data.entrySet().iterator();
-        while (dataIterator.hasNext()) {
-            Map.Entry<Integer, List<String>> next = dataIterator.next();
-            itemDao.setItemClass(next.getKey(), next.getValue());
-        }
-    }
-
-
     @Override
     public Page<Item> getItem(Page<Item> page) {
         page.setRecords(itemMapper.selectItem(page));
         return page;
-    }
-
-    @Override
-    public Set<String> getItemClass() {
-        return itemDao.getItemClassList();
     }
 
     @Override
@@ -197,39 +164,109 @@ public class BuyServiceImpl implements BuyService {
         return itemClassMapper.selectList(entityWrapper);
     }
 
+    /**
+     * 尝试从缓存中获取数据,未获取到则从db中读取.
+     * @param itemPage
+     * @param itemClass
+     * @return
+     */
     @Override
-    public List<String> getItemIdByClass(int itemClassHashCode) {
-        return itemDao.getItemIdByClassHashcode(itemClassHashCode);
-    }
-
-    @Override
-    public List<Item> getItemByItemIdList(List<String> itemIdList) {
-        List<Item> items = new ArrayList<Item>();
-        for (String itemId : itemIdList) {
-            items.add(itemMapper.selectByItemId(itemId));
+    public Page<Item> getItemList(Page<Item> itemPage, String itemClass){
+        int size = itemPage.getSize();
+        int pages = itemPage.getPages();
+        //防止缓存击穿
+        //计算是否已超出最大数量
+        List<Item> itemListCache = getItemListCache(pages,size,itemClass);
+        String itemCountStr = getItemListCountCache(itemClass);
+        Integer itemCount;
+        List<Item> itemList = itemListCache;
+        if (itemList == null || itemList.size() == 0 || itemCountStr == null || "".equals(itemCountStr)) {
+            itemPage = getItemByItemClass(itemPage,itemClass);
+            itemCount = itemPage.getTotal();
+            cacheItemList(pages,size,itemClass,itemPage.getRecords());
+            cacheItemListCount(itemClass, itemCount);
+        } else{
+            itemCount = Integer.parseInt(itemCountStr);
+            itemPage.setRecords(itemList);
+            itemPage.setTotal(itemCount);
         }
-        return items;
+        return itemPage;
     }
 
-    @Override
-    public List<Item> getCacheIndexItemList(String key) {
-        return itemDao.getList(key);
+    private void cacheItemListCount(String itemClass,Integer itemCount) {
+        //TODO 缓存所有种类的商品数
+        String key = ITEM_LIST_COUNT_KEY_PREFIX;
+        if(itemClass==null){
+            key += "all";
+
+        }else{
+            key += itemClass;
+
+        }
+
     }
 
-    @Override
-    public int cacheIndexItemList(String key, List<Item> itemList) {
-        itemDao.setList(key, itemList);
+    /**
+     * 从缓存中获取对应种类的商品总数
+     * @param itemClass
+     * @return
+     */
+    private String getItemListCountCache(String itemClass) {
+        String key = ITEM_LIST_COUNT_KEY_PREFIX;
+        if(itemClass==null){
+             key += "all";
+
+        }else{
+            key += itemClass;
+
+        }
+        return "";
+    }
+
+
+    /**
+     * 缓存商品列表
+     * @param pages
+     * @param size
+     * @param itemClass
+     * @return
+     */
+    private int cacheItemList(int pages, int size, String itemClass,List<Item> itemList) {
+        String key = ITEM_LIST_KEY_PREFIX ;
+        if(itemClass==null){
+            key += "all:page:";
+            if(size==40){
+                key += pages;
+                return itemDao.setItemList(key,itemList);
+            }else if(size<40){
+
+            }else if(size>40){
+
+            }
+        }else{
+            key += itemClass;
+
+        }
         return 0;
     }
 
-    @Override
-    public String getCacheItemCount(String itemCountKey) {
-        return itemDao.getItemCount(itemCountKey);
-    }
+    private List<Item> getItemListCache(int pages, int size,String itemClass) {
+        String key = ITEM_LIST_KEY_PREFIX ;
+        if(itemClass==null){
+            key += "all:page:";
+            if(size==40){
+                key += pages;
+                return itemDao.getItemList(key);
+            }else if(size<40){
 
-    @Override
-    public void cacheItemCount(String itemCountKey, Integer itemCount) {
-        itemDao.setItemCount(itemCountKey, itemCount);
+            }else if(size>40){
+
+            }
+        }else{
+            key += itemClass;
+
+        }
+        return null;
     }
 
     @Override
@@ -239,6 +276,8 @@ public class BuyServiceImpl implements BuyService {
 
     @Override
     public Page<Item> getItemByItemClass(Page<Item> pagination, String itemClass) {
+        if(itemClass==null)
+           return getItem(pagination);
         pagination.setRecords(itemMapper.selectByItemClass(pagination,itemClass));
         return pagination;
     }

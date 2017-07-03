@@ -13,31 +13,20 @@ import java.util.Set;
  * Created by Administrator on 2017/6/19.
  */
 public interface BuyService {
-    List<String> getBuyFileList();
+    String fileDictionary = "C://attach//";
+    String ITEM_LIST_KEY_PREFIX = "item:list:";
+    String ITEM_LIST_COUNT_KEY_PREFIX = "item:list:count:";
 
+    List<String> getBuyFileList();
     boolean saveBuyFile(MultipartFile buyFile);
     boolean deleteBuyFile(String buyFilePath);
-
     boolean parseBuyFile(String buyFilePath);
+
     Page<Item> getItem(Page<Item> page);
-
-    Set<String> getItemClass();
-
     public List<ItemClass> getItemClassByParentId(Long parentId);
 
-    List<String> getItemIdByClass(int itemClassHashCode);
-
-    List<Item> getItemByItemIdList(List<String> itemIdList);
-
-    List<Item> getCacheIndexItemList(String key);
-
-    int cacheIndexItemList(String key,List<Item> itemList);
-
-    String getCacheItemCount(String itemCountKey);
-
-    void cacheItemCount(String itemCountKey, Integer itemCount);
-
     List<ItemClass> getSubItemClassByParentId(Long id);
-
     Page<Item> getItemByItemClass(Page<Item> page, String itemClass);
+
+    Page<Item> getItemList(Page<Item> itemPage, String itemClass);
 }

@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.plugins.pagination.Pagination;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import java.util.Set;
 /**
  * Created by Administrator on 2017/4/6.
  */
+@Transactional
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -51,9 +53,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean updateNickname(String username, String nickname) {
-        User userByUsername = userMapper.getUserByUsername(username);
-        userByUsername.setNickname(nickname);
+    public boolean updateNickname(User user) {
+        User userByUsername = userMapper.getUserByUsername(user.getUsername());
+        userByUsername.setNickname(user.getNickname());
         Integer result = userMapper.updateById(userByUsername);
         return result==1;
     }
@@ -61,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public int changeState(String username) {
         User userByUsername = userMapper.getUserByUsername(username);
-        if("admin".equals(userByUsername.getUsername())){
+        if("admin".equals(username)){
             throw new RuntimeException("无法修改管理员状态");
         }
         int enabled = userByUsername.getEnabled();
@@ -97,7 +99,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Map getLoggedInUserList() {
+    public Map getLoggedUserList() {
         return userDao.getLoggedUser();
     }
 

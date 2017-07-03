@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/12/1.
  */
+@Transactional
 @Service
 public class BlogServiceImpl implements BlogService {
     @Autowired
@@ -29,9 +31,7 @@ public class BlogServiceImpl implements BlogService {
     @Autowired
     private WordMapper wordMapper;
     @Override
-    public Page<Blog> getBlogList(Page<Blog> page,Boolean isAsc,boolean hasContent) {
-        if(isAsc!=null)
-            page.setAsc(isAsc);
+    public Page<Blog> getBlogList(Page<Blog> page,boolean hasContent) {
         if (!hasContent) {
             page.setRecords(blogMapper.selectBlogListWithoutContent(page));
             return page;
@@ -42,12 +42,7 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public int getBlogCountNum() {
-        return blogMapper.selectCount();
-    }
-
-    @Override
-    public boolean addVisit(long blogId) {
+    public boolean addVisit(Long blogId) {
         try {
             Visit visit = visitMapper.getVisitByBlogid(blogId);
             if (null == visit) {
@@ -85,11 +80,16 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public boolean deleteBlogById(Long id) {
-        int deleteVisit = visitMapper.deleteById(id);
-        int deleteBlog = blogMapper.deleteById(id);
-        int deleteWord = wordMapper.delWordsByBlogId(id);
-        return deleteBlog==1;
+    public int deleteBlog(Blog blog) {
+        if(blog!=null){
+            Long id = blog.getId();
+            int deleteVisit = visitMapper.deleteById(id);
+            int deleteBlog = blogMapper.deleteById(id);
+            int deleteWord = wordMapper.delWordsByBlogId(id);
+            return deleteBlog;
+        }else{
+            return 0;
+        }
     }
 
     @Override
@@ -105,26 +105,32 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public List<Blog> getUserBlogList(String author) {
+    public Page<Blog> getUserBlogList(Page<Blog> page,String author) {
         EntityWrapper<Blog> blogEntityWrapper = new EntityWrapper<Blog>();
         blogEntityWrapper
                 .setSqlSelect("id,title,create_date")
                 .where("author={0}",author)
                 .orderBy("create_date",false);
-        Page page = new Page(1, 10);
-        return blogMapper.selectPage(page,blogEntityWrapper);
+        page.setRecords(blogMapper.selectPage(page,blogEntityWrapper));
+        return page;
     }
 
     @Override
-    public List<Blog> searchBlogByTitle(int page,int pageSize,String keyword) {
+    public Page<Blog> searchBlogByTitle(Page<Blog> page,String keyword) {
         EntityWrapper<Blog> blogEntityWrapper = new EntityWrapper<Blog>();
         blogEntityWrapper
                 .setSqlSelect("id,title,edit_date")
                 .where("title like {0}","%"+keyword+"%")
                 .orderBy("create_date",false);
-        Page pagination = new Page(page, pageSize);
 
-        return blogMapper.selectPage(pagination, blogEntityWrapper);
+        page.setRecords(blogMapper.selectPage(page, blogEntityWrapper));
+        return page;
+
+    }
+
+    @Override
+    public int getBlogCountNum() {
+        return blogMapper.selectCount();
     }
 
     private Blog getHotwordPart(Blog blog, String remark) {
@@ -167,6 +173,7 @@ public class BlogServiceImpl implements BlogService {
         return blogMapper.selectById(id);
     }
 
+    @Deprecated
     public boolean delete(Long id) {
         return blogMapper.deleteById(id) == 1;
     }

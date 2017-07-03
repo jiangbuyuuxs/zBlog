@@ -20,7 +20,16 @@ public interface WordService extends BaseService<Word,Long> {
 
     Page<Word> getHotWordList(Page<Word> page);
 
+    /**
+     * 获取多个博客的分词
+     * @param blogList
+     */
     void getBlogWords(List<Blog> blogList);
+
+    /**
+     * 获取单个博客的分词
+     * @param blog
+     */
     void getBlogWords(Blog blog);
 
     Page<Word> getWordsByWordHash(Page<Word> page,String hashcode);

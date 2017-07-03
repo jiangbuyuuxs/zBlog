@@ -84,7 +84,8 @@ public class BlogController extends BaseController{
         if(sort==null)
             sort = "create_date";
         Page<Blog> pagination = new Page<Blog>(page, pageSize,sort);
-        pagination = blogService.getBlogList(pagination, false, false);
+        pagination.setAsc(false);
+        pagination = blogService.getBlogList(pagination, false);
         List<Blog> blogList = pagination.getRecords();
         Integer blogCountNum = pagination.getTotal();
         Map map = new HashMap();
@@ -163,7 +164,9 @@ public class BlogController extends BaseController{
     @ResponseBody
     @RequestMapping(value = {"/admin/blog/list/username/{username}"}, produces = {"application/json;charset=UTF-8"})
     public String getBlogListByUsername(@PathVariable String username) {
-        List<Blog> userBlogList = blogService.getUserBlogList(username);
+        Page<Blog> pagination = new Page<Blog>(1, 10);
+        pagination = blogService.getUserBlogList(pagination,username);
+        List<Blog> userBlogList =pagination.getRecords();
         HashMap data = new HashMap();
         data.put("userBlogList", userBlogList);
         HashMap hashMap = new HashMap();
@@ -222,10 +225,13 @@ public class BlogController extends BaseController{
         if(page==null)
             page = 1;
         String blogListJson = DEFAULT_FAILED_MESSAGE;
-        boolean isDelete = blogService.deleteBlogById(id);
-        if(isDelete){
+        Blog blog = new Blog();
+        blog.setId(id);
+        int isDelete = blogService.deleteBlog(blog);
+        if(isDelete>0){
             Page<Blog> pagination = new Page<Blog>(page,pageSize,"create_date");
-            pagination= blogService.getBlogList(pagination, false, false);
+            pagination.setAsc(false);
+            pagination= blogService.getBlogList(pagination, false);
             List<Blog> blogList = pagination.getRecords();
             Integer blogCountNum = pagination.getTotal();
             double pageNum = Math.ceil(blogCountNum.doubleValue() / pageSize.doubleValue());

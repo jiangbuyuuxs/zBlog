@@ -21,14 +21,16 @@ public interface UserService extends BaseService<User,String>{
 
     /**
      * 获取已登录的用户名和未登录用户数
+     * result.put("user",已登录用户名列表);
+     * result.put("unLoggedNum",未登录用户数);
      * @return
      */
-    Map getLoggedInUserList();
+    Map getLoggedUserList();
 
 
     Page<User> getUserList(Page<User> page);
 
-    boolean updateNickname(String username, String nickname);
+    boolean updateNickname(User user);
 
     int changeState(String username);
 

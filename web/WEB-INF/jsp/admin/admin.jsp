@@ -73,7 +73,6 @@
 
         .user-info-panel {
             padding: 20px;
-            margin: 20px 0;
             background-color: #f8f8f8;
             min-height: 540px;
         }
