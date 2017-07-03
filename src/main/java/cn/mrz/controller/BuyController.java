@@ -59,10 +59,26 @@ public class BuyController extends BaseController {
     }
 
     @RequestMapping(value = "/buy/{page}")
-    public String index(ModelMap map, @PathVariable Integer page, @RequestParam(value = "itemclass",required = false) String itemClassStr) {
+    public String index(ModelMap map, @PathVariable Integer page, @RequestParam(value = "itemclass", required = false) String itemClassStr, @RequestParam(value = "sort", required = false) String sortStr) {
         int pageSize = 40;
-        if("".equals(itemClassStr))
+        String qStr = "";
+        if ("".equals(itemClassStr)) {
             itemClassStr = null;
+        }
+        if (itemClassStr != null) {
+            qStr = "?itemclass=" + itemClassStr;
+        }
+        String order = "sales_volume";
+        boolean asc = false;//倒序排列
+        if (sortStr != null && !"".equals(sortStr)) {
+            String[] orderArr = sortStr.split("_");
+            order = orderArr[0];
+            String ascStr = orderArr[1];//顺序
+            if ("0".equals(ascStr))
+                asc = false;
+            else if ("1".equals(ascStr))
+                asc = true;
+        }
 
         List<ItemClass> topItemClassList = buyService.getItemClassByParentId(0L);
         List subItemClassList = new ArrayList();
@@ -70,11 +86,11 @@ public class BuyController extends BaseController {
         for (ItemClass topItemClass : topItemClassList) {
             List<ItemClass> subItemClass = buyService.getItemClassByParentId(topItemClass.getId());
             subItemClassList.add(subItemClass);
-            if(itemClassStr!=null&&!getItemClass){
-                for(ItemClass itemClass :subItemClass){
-                    if(itemClassStr.equals(itemClass.getHashCode()+"")){
-                        map.put("topItemClass",  JSONObject.toJSONString(topItemClass));
-                        map.put("subItemClass",  JSONObject.toJSONString(itemClass));
+            if (itemClassStr != null && !getItemClass) {
+                for (ItemClass itemClass : subItemClass) {
+                    if (itemClassStr.equals(itemClass.getHashCode() + "")) {
+                        map.put("topItemClass", JSONObject.toJSONString(topItemClass));
+                        map.put("subItemClass", JSONObject.toJSONString(itemClass));
                         getItemClass = true;
                         break;
                     }
@@ -82,17 +98,19 @@ public class BuyController extends BaseController {
             }
         }
 
-        Page<Item> pagination = new Page<Item>(page, pageSize, "sales_volume");
-        pagination.setAsc(false);
+        Page<Item> pagination = new Page<Item>(page, pageSize, order);
+        pagination.setAsc(asc);
         pagination = buyService.getItemList(pagination, itemClassStr);
         List<Item> itemList = pagination.getRecords();
         Integer itemCount = pagination.getTotal();
         double pageNum = Math.ceil(itemCount.floatValue() / pageSize);
 
-        if(!getItemClass){
+        if (!getItemClass) {
             map.put("topItemClass", "null");
             map.put("subItemClass", "null");
         }
+
+        map.put("qStr", qStr);
         map.put("pageNum", pageNum);
         map.put("curPage", page);
         map.put("itemList", JSONObject.toJSONString(itemList));

@@ -14,9 +14,10 @@
     <%@include file="../comm/vue.jsp" %>
     <script type="text/javascript" src="/resources/jQuery/plug/lazyload/jquery.lazyload.js"></script>
     <style>
-        *{
+        * {
             color: #666;
         }
+
         .item {
             display: inline-block;
             margin: 10px 18px;
@@ -68,11 +69,13 @@
             display: inline-block;
             height: 35px;
         }
+
         .sub-item-class-container li {
             height: 28px;
         }
-        .sub-item-class-container li a{
-            color:#666;
+
+        .sub-item-class-container li a {
+            color: #666;
         }
 
         .item-favourable {
@@ -96,7 +99,16 @@
             color: #666;
         }
 
-        .top-item a:hover ,.item-class-a.active ,.active{
+        .sub-item-class-item a {
+            border-bottom: 2px solid transparent;
+            text-decoration: none;
+        }
+
+        .sub-item-class-item a:hover {
+            color: #FF0003;
+        }
+
+        .top-item a:hover, .item-class-a.active {
             border-bottom: 2px solid #FF0003;
             color: #FF0003;
         }
@@ -119,23 +131,25 @@
         .item-list-panel {
             background: #cecece;
             width: 1170px;
-            padding: 19px;
+            padding: 10px 19px 19px 19px;
         }
 
-        .sub-item-class{
+        .sub-item-class {
             background: #ffffff;
             position: absolute;
-            top:35px;
-            margin:0 0 0 40px;
-            width:600px;
-            left:224px;
+            top: 35px;
+            margin: 0 0 0 40px;
+            width: 600px;
+            left: 224px;
         }
-        .sub-item-class-container{
-            padding-left:10px;
+
+        .sub-item-class-container {
+            padding-left: 10px;
             border: 1px solid #FF0003;
             border-top: none;
 
         }
+
         .sub-item-class-item {
             list-style: none;
             display: inline-block;
@@ -155,20 +169,28 @@
             width: 85px;
             display: inline-block;
         }
-        .pagination a{
+
+        .pagination a {
             cursor: hand;
         }
-        .go-page{
-            margin:20px 0;
+
+        .go-page {
+            margin: 20px 0;
         }
-        ul.sub-item-class-container{
-            padding:0px;
+
+        ul.sub-item-class-container {
+            padding: 0px;
         }
-        ul.item-class-container{
+
+        ul.item-class-container {
             margin-bottom: 0;
         }
-        .item-class-path{
-            padding-left:40px;
+
+        .item-class-path {
+            margin-bottom: 0px;
+        }
+        .item-order-container{
+            margin:10px 0 10px 20px;
         }
     </style>
     <script type="text/x-template" id="app">
@@ -178,15 +200,17 @@
                     <li class="top-item"><a href="/">首页</a></li>
                     <li class="top-item"><a href="/buy/1">全部</a></li>
                     <div style="display: inline;" @mouseleave="hideSub">
-                        <li v-for="itemClass in topItemClassList" class="top-item"><a class="item-class-a" :data-id="itemClass.id"
-                                                                                           @mouseover.prevent="showSub(itemClass.id)">{{itemClass.title}}</a>
+                        <li v-for="itemClass in topItemClassList" class="top-item"><a class="item-class-a"
+                                                                                      :data-id="itemClass.id"
+                                                                                      @mouseover.prevent="showSub(itemClass.id)">{{itemClass.title}}</a>
                         </li>
                         <div class="row sub-item-class">
                             <ul v-for="subItemClass in subItemClassList" class="sub-item-class-container"
                                 :class="'sub-'+subItemClass[0].parentId"
                                 :data-parentid="subItemClass[0].parentId">
                                 <li v-for="itemClass of subItemClass" class="sub-item-class-item"><a
-                                        :href="'/buy/1?itemclass='+itemClass.hashCode" :data-item-hash="itemClass.hashCode">{{itemClass.title}}</a>
+                                        :href="'/buy/1?itemclass='+itemClass.hashCode"
+                                        :data-item-hash="itemClass.hashCode">{{itemClass.title}}</a>
                                 </li>
                             </ul>
                         </div>
@@ -194,7 +218,16 @@
                 </ul>
             </div>
             <div class="row item-list-panel">
-                <div class="row item-class-path" v-if="topItemClass!=null">{{topItemClass.title}}＞{{subItemClass.title}}</div>
+                <ol class="breadcrumb item-class-path" v-if="topItemClass!=null">
+                    <li class="active">{{topItemClass.title}}</li>
+                    <li class="active">{{subItemClass.title}}</li>
+                </ol>
+                <div class="row item-order-container">
+                    <div class="btn-group" >
+                        <a class="btn btn-xs" :class="saleBtn" :href="'/buy/1'+qStr">销量</a>
+                        <a class="btn btn-xs" :class="priceBtn" :href="'/buy/1'+priceQStr">价格</a>
+                    </div>
+                </div>
                 <div v-for="item of itemList" class="item">
                     <div>
                         <a :href="item.tbkUrl" target="_blank"><img class="item-image lazy"
@@ -225,7 +258,8 @@
                             <a v-if="i==curPage" href="#" @click.prevent>{{i}}</a>
                             <a v-if="i==='...'">...</a>
                         </li>
-                        <li><a href="#" :href="'/buy/'+(curPage==pageNum?pageNum:curPage+1)+qStr"><span>&raquo;</span></a></li>
+                        <li><a href="#"
+                               :href="'/buy/'+(curPage==pageNum?pageNum:curPage+1)+qStr"><span>&raquo;</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -233,8 +267,6 @@
     </script>
     <script>
         $(function () {
-            var qStr = window.location.search;
-
 
             //分页条中间(除去首页和末页)显示的页数
             var pageBarPageNum = 7;
@@ -247,7 +279,9 @@
                         curPage: ${curPage},
                         pageNums: [],
                         pageNum:${pageNum},
-                        qStr:qStr,
+                        qStr: '${qStr}',
+                        sortPrice:-1,
+                        sortSale:1,//默认按销售量排序
                         topItemClass:${topItemClass},
                         subItemClass:${subItemClass},
                         topItemClassList:${topItemClassList},
@@ -260,15 +294,15 @@
                         $('.item-class-a').removeClass('active');
                     },
                     showSub: function (parentId) {
-                       $('.sub-item-class-container').hide();
-                       $('.sub-'+parentId).show();
+                        $('.sub-item-class-container').hide();
+                        $('.sub-' + parentId).show();
                         $('.item-class-a').removeClass('active');
-                        $('.item-class-a[data-id='+parentId+']').addClass('active');
+                        $('.item-class-a[data-id=' + parentId + ']').addClass('active');
                     },
                     selectPage: function (e) {
-                        var page = e.currentTarget.value-0;
-                        if(page!=this.curPage)
-                            window.location.href = '/buy/'+page+qStr;
+                        var page = e.currentTarget.value - 0;
+                        if (page != this.curPage)
+                            window.location.href = '/buy/' + page + qStr;
                     },
                     getPageNum: function (startPage, endPage) {
                         this.pageNums = [];
@@ -306,6 +340,36 @@
                             if (this.curPage - halfPageBarPageNum < 2)
                                 return pageBarPageNum + 1;
                             return this.curPage + halfPageBarPageNum;
+                        }
+                    },
+                    priceQStr: function () {
+                        var search = document.location.search;
+                        var priceOrderFlag = 'sort=price_';
+                        var hasSortPrice = search.indexOf(priceOrderFlag);
+                        if(hasSortPrice>-1) {
+                            var forward = search.substr(hasSortPrice + priceOrderFlag.length, 1);
+                            //存在这样价格条件,将其往反方向调整
+                            this.sortPrice = Math.abs(forward - 1);
+                            this.sortSale = 0;
+                            return this.qStr + '&sort=price_'+this.sortPrice;
+                        }else{
+                            return this.qStr + '&sort=price_0';
+                        }
+                    },
+                    priceBtn: function () {
+                        if(this.sortPrice==-1){
+                            return 'btn-default';
+                        }else if(this.sortPrice==0){
+                            return 'btn-success';
+                        }else if(this.sortPrice==1){
+                            return 'btn-danger';
+                        }
+                    },
+                    saleBtn: function () {
+                        if(this.sortSale==0){
+                            return 'btn-default';
+                        }else if(this.sortSale==1){
+                            return 'btn-danger';
                         }
                     }
                 },
