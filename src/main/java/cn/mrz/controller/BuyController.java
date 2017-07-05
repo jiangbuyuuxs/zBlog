@@ -74,10 +74,13 @@ public class BuyController extends BaseController {
             String[] orderArr = sortStr.split("_");
             order = orderArr[0];
             String ascStr = orderArr[1];//顺序
-            if ("0".equals(ascStr))
+            if ("0".equals(ascStr)) {
                 asc = false;
-            else if ("1".equals(ascStr))
+            }else if ("1".equals(ascStr)) {
                 asc = true;
+            }else{
+                throw new RuntimeException("排序参数格式不对,不要乱搞~~~");
+            }
         }
 
         List<ItemClass> topItemClassList = buyService.getItemClassByParentId(0L);

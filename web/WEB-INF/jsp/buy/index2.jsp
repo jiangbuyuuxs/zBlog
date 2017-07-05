@@ -147,7 +147,7 @@
             padding-left: 10px;
             border: 1px solid #FF0003;
             border-top: none;
-
+            width:1170px;
         }
 
         .sub-item-class-item {
@@ -224,8 +224,12 @@
                 </ol>
                 <div class="row item-order-container">
                     <div class="btn-group" >
-                        <a class="btn btn-xs" :class="saleBtn" :href="'/buy/1'+qStr">销量</a>
-                        <a class="btn btn-xs" :class="priceBtn" :href="'/buy/1'+priceQStr">价格</a>
+                        <a class="btn btn-xs"
+                           :class="sortSale==1?'btn-danger':'btn-default'"
+                           :href="'/buy/1'+qStr">销量</a>
+                        <a class="btn btn-xs"
+                           :class="sortPrice==-1?'btn-default':(this.sortPrice==0?'btn-success':'btn-danger')"
+                           :href="'/buy/1'+priceQStr">价格</a>
                     </div>
                 </div>
                 <div v-for="item of itemList" class="item">
@@ -354,22 +358,6 @@
                             return this.qStr + '&sort=price_'+this.sortPrice;
                         }else{
                             return this.qStr + '&sort=price_0';
-                        }
-                    },
-                    priceBtn: function () {
-                        if(this.sortPrice==-1){
-                            return 'btn-default';
-                        }else if(this.sortPrice==0){
-                            return 'btn-success';
-                        }else if(this.sortPrice==1){
-                            return 'btn-danger';
-                        }
-                    },
-                    saleBtn: function () {
-                        if(this.sortSale==0){
-                            return 'btn-default';
-                        }else if(this.sortSale==1){
-                            return 'btn-danger';
                         }
                     }
                 },

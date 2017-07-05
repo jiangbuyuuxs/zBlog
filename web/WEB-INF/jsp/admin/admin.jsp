@@ -228,9 +228,11 @@
                     <td>
                         <shiro:hasRole name="admin">
                             <a class="btn btn-default btn-danger btn-xs"
+                               :class="user.username==='admin'||user.username==='user'?'hidden':''"
                                @click.prevent="deleteUser(user.username)">删除</a>
                             <router-link :to="'/user/edit/'+user.username">
-                                <a class="btn btn-default btn-success btn-xs">编辑</a>
+                                <a class="btn btn-default btn-success btn-xs"
+                                   :class="user.username==='admin'||user.username==='user'?'hidden':''">编辑</a>
                             </router-link>
                         </shiro:hasRole>
                         <shiro:lacksRole name="admin">
@@ -244,7 +246,7 @@
                         {{user.enabled===1?'激活':'未激活'}}
                         <shiro:hasRole name="admin">
                             <a class="btn btn-xs pull-right"
-                               :class="[user.enabled===1?'btn-success':'btn-danger',user.username==='admin'?'hidden':'']"
+                               :class="[user.enabled===1?'btn-success':'btn-danger',user.username==='admin'||user.username==='user'?'hidden':'']"
                                @click.prevent="changeState(user.username,index)">
                                 {{user.enabled===1?'禁用':'激活'}}
                             </a>
@@ -574,9 +576,14 @@
                         this.loading = true;
                         var url = '/admin/user/list';
                         this.$http.get(url).then(function (response) {
-                            this.loading = false;
-                            this.userList = response.data.data.userList;
-                            this.curPage = page;
+                            if(response.data.success){
+                                this.loading = false;
+                                this.userList = response.data.data.userList;
+                                this.curPage = page;
+                            }else{
+                                BlogTool.alert(response.data.message);
+                                this.loading = false;
+                            }
                         }, function (response) {
                             this.loading = false;
                             console.log(response);
@@ -591,7 +598,11 @@
                                     page: this.curPage
                                 }
                             }).then(function (response) {
-                                this.userList = response.data.data.userList;
+                                if(response.data.success){
+                                    this.userList = response.data.data.userList;
+                                }else{
+                                    BlogTool.alert(response.data.message);
+                                }
                             }, function (response) {
                                 console.log(response.data.message);
                             });
@@ -607,7 +618,7 @@
                             if (response.data.success)
                                 this.userList[index].enabled = response.data.data.enabled;
                             else
-                                alert(response.data.message);
+                                BlogTool.alert(response.data.message);
                         });
                     }
                 },
@@ -634,7 +645,7 @@
                                 if (response.data.success) {
                                     this.$router.push('/user/manager');
                                 } else {
-                                    alert(response.data.message);
+                                    BlogTool.alert(response.data.message);
                                 }
                             });
 

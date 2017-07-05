@@ -47,6 +47,12 @@ public class UserController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/user/delete", produces = {"application/json;charset=UTF-8"})
     public String delUser(@RequestParam String username, @RequestParam(required = false) Integer page) {
+        Map map = new HashMap();
+        if("admin".equals(username)||"user".equals(username)){
+            map.put("success", false);
+            map.put("message", "系统内部用户无法删除~~~");
+            return JSONObject.toJSONString(map);
+        }
         if(page==null)
             page = 1;
         String usersJson;
@@ -66,7 +72,6 @@ public class UserController extends BaseController{
         List<User> userList = pagination.getRecords();
         Map data = new HashMap();
         data.put("userList",userList);
-        Map map = new HashMap();
         map.put("success",true);
         map.put("data",data);
 
@@ -103,13 +108,18 @@ public class UserController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/user/edit", produces = {"application/json;charset=UTF-8"})
     public String editUser(@RequestParam(required = false) String nickname,@RequestParam(required = false) String username) {
+        Map map = new HashMap();
+        if("admin".equals(username)||"user".equals(username)){
+            map.put("success", false);
+            map.put("message", "系统内部用户无法编辑~~~");
+            return JSONObject.toJSONString(map);
+        }
         if(nickname==null||username==null)
             throw new RuntimeException("必须同时提供要修改的用户名和昵称~~~");
         User user = new User();
         user.setUsername(username);
         user.setNickname(nickname);
         boolean result = userService.updateNickname(user);
-        Map map = new HashMap();
         map.put("success", result);
         return JSONObject.toJSONString(map);
     }
