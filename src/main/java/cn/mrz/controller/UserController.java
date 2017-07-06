@@ -53,18 +53,21 @@ public class UserController extends BaseController{
             map.put("message", "系统内部用户无法删除~~~");
             return JSONObject.toJSONString(map);
         }
+
         if(page==null)
             page = 1;
-        String usersJson;
+
         User delUser = userService.getUserByUsername(username);
         if (delUser == null) {
-            usersJson = "{\"success\": false,\"message\":\"未找到需要删除的用户\"}";
-            return usersJson;
+            map.put("success", false);
+            map.put("message", "未找到需要删除的用户~~~");
+            return JSONObject.toJSONString(map);
         }
         boolean delNum = userService.delete(delUser.getUsername());
         if (!delNum) {
-            usersJson = "{\"success\": false,\"message\":\"未成功删除用户\"}";
-            return usersJson;
+            map.put("success", false);
+            map.put("message", "未成功删除用户~~~");
+            return JSONObject.toJSONString(map);
         }
         int pageSize = 10;
         Page<User> pagination = userService.getUserList(new Page<User>(page, pageSize));

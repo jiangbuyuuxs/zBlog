@@ -463,7 +463,7 @@
                 <form id="buyFileFrom">
                     <input type="file" name="buyFile" id="buyFile"/>
                     <a class="btn btn-xs btn-success" @click.prevent="upload">上传</a>
-                    <span class="text-danger">限制20M以内(.xls)文件</span>
+                    <span class="text-danger">限制40M以内(.xls)文件</span>
                 </form>
             </div>
             <div>已完成:<span class="percent">0</span>%</div>
@@ -1005,10 +1005,10 @@
                                 ).
                                         then(function (response) {
                                             if (response.data.success) {
-                                                alert(response.data.data.message ? response.data.data.message : '成功删除');
+                                                alert(response.data.message);
                                                 this.fetchData();
                                             } else {
-                                                alert(response.data.data.message ? response.data.data.message : '删除失败');
+                                                alert(response.data.message);
                                             }
                                         }, function (response) {
 

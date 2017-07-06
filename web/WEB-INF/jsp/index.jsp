@@ -149,7 +149,7 @@
                             this.blogList = response.data.data.blogList;
                             this.pageNum = response.data.data.pageNum;
                         }, function (response) {
-                            console.log(data.data.message);
+                            console.log(response.data.message);
                         });
                     }
                 }, created: function () {

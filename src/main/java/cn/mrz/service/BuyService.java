@@ -29,4 +29,10 @@ public interface BuyService {
     Page<Item> getItemByItemClass(Page<Item> page, String itemClass);
 
     Page<Item> getItemList(Page<Item> itemPage, String itemClass);
+
+    /**
+     * 定时任务调用,清理过期的商品信息
+     * @return
+     */
+    int clearObsoleteItem();
 }

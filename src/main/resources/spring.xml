@@ -129,4 +129,27 @@
         <property name="securityManager" ref="securityManager"/>
     </bean>
 
+
+
+    <!--定时任务-->
+    <bean id="clearObsoleteItemJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="itemTask"></property>
+        <property name="targetMethod" value="clearObsoleteItemTask"></property>
+        <property name="concurrent" value="false"></property>
+    </bean>
+    <bean id="clearObsoleteItemTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="clearObsoleteItemJob"></property>
+        <property name="cronExpression">
+            <value>1 0 0 ? * *</value><!--每天凌晨00:00:01-->
+            <!--<value>0 0/1 * * * ?</value>-->
+        </property>
+    </bean>
+    <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="clearObsoleteItemTrigger"></ref>
+            </list>
+        </property>
+    </bean>
+
 </beans>

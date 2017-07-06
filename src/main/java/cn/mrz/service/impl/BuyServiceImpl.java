@@ -94,6 +94,7 @@ public class BuyServiceImpl implements BuyService {
         return buyFile.delete();
     }
 
+
     @Override
     public boolean parseBuyFile(String buyFilePath) {
         try {
@@ -166,26 +167,27 @@ public class BuyServiceImpl implements BuyService {
 
     /**
      * 尝试从缓存中获取数据,未获取到则从db中读取.
+     *
      * @param itemPage
      * @param itemClass
      * @return
      */
     @Override
-    public Page<Item> getItemList(Page<Item> itemPage, String itemClass){
+    public Page<Item> getItemList(Page<Item> itemPage, String itemClass) {
         int size = itemPage.getSize();
         int pages = itemPage.getPages();
         //防止缓存击穿
         //计算是否已超出最大数量
-        List<Item> itemListCache = getItemListCache(pages,size,itemClass);
+        List<Item> itemListCache = getItemListCache(pages, size, itemClass);
         String itemCountStr = getItemListCountCache(itemClass);
         Integer itemCount;
         List<Item> itemList = itemListCache;
         if (itemList == null || itemList.size() == 0 || itemCountStr == null || "".equals(itemCountStr)) {
-            itemPage = getItemByItemClass(itemPage,itemClass);
+            itemPage = getItemByItemClass(itemPage, itemClass);
             itemCount = itemPage.getTotal();
-            cacheItemList(pages,size,itemClass,itemPage.getRecords());
+            cacheItemList(pages, size, itemClass, itemPage.getRecords());
             cacheItemListCount(itemClass, itemCount);
-        } else{
+        } else {
             itemCount = Integer.parseInt(itemCountStr);
             itemPage.setRecords(itemList);
             itemPage.setTotal(itemCount);
@@ -193,13 +195,36 @@ public class BuyServiceImpl implements BuyService {
         return itemPage;
     }
 
-    private void cacheItemListCount(String itemClass,Integer itemCount) {
+    @Override
+    public int clearObsoleteItem() {
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String today = simpleDateFormat.format(date);
+        EntityWrapper<Favourable> favourableEntityWrapper = new EntityWrapper<Favourable>();
+        favourableEntityWrapper.lt("end_date", today);
+        List<Favourable> favourableList = favourableMapper.selectList(favourableEntityWrapper);
+        int i = 0;
+        for (Favourable favourable : favourableList) {
+            favourableMapper.deleteById(favourable.getId());
+            EntityWrapper<Item> itemEntityWrapper = new EntityWrapper<Item>();
+            itemEntityWrapper.eq("item_id", favourable.getItemId());
+            itemMapper.delete(itemEntityWrapper);
+            i++;
+            if(i==100){
+                i=0;
+
+            }
+        }
+        return favourableList.size();
+    }
+
+    private void cacheItemListCount(String itemClass, Integer itemCount) {
         //TODO 缓存所有种类的商品数
         String key = ITEM_LIST_COUNT_KEY_PREFIX;
-        if(itemClass==null){
+        if (itemClass == null) {
             key += "all";
 
-        }else{
+        } else {
             key += itemClass;
 
         }
@@ -208,15 +233,16 @@ public class BuyServiceImpl implements BuyService {
 
     /**
      * 从缓存中获取对应种类的商品总数
+     *
      * @param itemClass
      * @return
      */
     private String getItemListCountCache(String itemClass) {
         String key = ITEM_LIST_COUNT_KEY_PREFIX;
-        if(itemClass==null){
-             key += "all";
+        if (itemClass == null) {
+            key += "all";
 
-        }else{
+        } else {
             key += itemClass;
 
         }
@@ -226,43 +252,44 @@ public class BuyServiceImpl implements BuyService {
 
     /**
      * 缓存商品列表
+     *
      * @param pages
      * @param size
      * @param itemClass
      * @return
      */
-    private int cacheItemList(int pages, int size, String itemClass,List<Item> itemList) {
-        String key = ITEM_LIST_KEY_PREFIX ;
-        if(itemClass==null){
+    private int cacheItemList(int pages, int size, String itemClass, List<Item> itemList) {
+        String key = ITEM_LIST_KEY_PREFIX;
+        if (itemClass == null) {
             key += "all:page:";
-            if(size==40){
+            if (size == 40) {
                 key += pages;
-                return itemDao.setItemList(key,itemList);
-            }else if(size<40){
+                return itemDao.setItemList(key, itemList);
+            } else if (size < 40) {
 
-            }else if(size>40){
+            } else if (size > 40) {
 
             }
-        }else{
+        } else {
             key += itemClass;
 
         }
         return 0;
     }
 
-    private List<Item> getItemListCache(int pages, int size,String itemClass) {
-        String key = ITEM_LIST_KEY_PREFIX ;
-        if(itemClass==null){
+    private List<Item> getItemListCache(int pages, int size, String itemClass) {
+        String key = ITEM_LIST_KEY_PREFIX;
+        if (itemClass == null) {
             key += "all:page:";
-            if(size==40){
+            if (size == 40) {
                 key += pages;
                 return itemDao.getItemList(key);
-            }else if(size<40){
+            } else if (size < 40) {
 
-            }else if(size>40){
+            } else if (size > 40) {
 
             }
-        }else{
+        } else {
             key += itemClass;
 
         }
@@ -271,14 +298,14 @@ public class BuyServiceImpl implements BuyService {
 
     @Override
     public List<ItemClass> getSubItemClassByParentId(Long id) {
-       return itemClassMapper.selectByParentId(id);
+        return itemClassMapper.selectByParentId(id);
     }
 
     @Override
     public Page<Item> getItemByItemClass(Page<Item> pagination, String itemClass) {
-        if(itemClass==null)
-           return getItem(pagination);
-        pagination.setRecords(itemMapper.selectByItemClass(pagination,itemClass));
+        if (itemClass == null)
+            return getItem(pagination);
+        pagination.setRecords(itemMapper.selectByItemClass(pagination, itemClass));
         return pagination;
     }
 
@@ -332,7 +359,7 @@ public class BuyServiceImpl implements BuyService {
                 Long salesVolume = Long.parseLong(salesVolumeStr);
 
                 Favourable favourable = new Favourable(countNum, new java.sql.Date(favourableEndDate.getTime()), itemId, null, new java.sql.Date(favourableStartDate.getTime()), surplus, null, favourableTbkUrl, favourableTitle);
-                Item item = new Item(null, itemId, title, imageUrl, detailUrl, itemClassString, favourableTbkUrl, price, myMoney, shopName, shopType, null, null, null, null, salesVolume, favourable);
+                Item item = new Item(null, itemId, title, imageUrl, detailUrl, itemClassString, favourableTbkUrl, price, myMoney, shopName, shopType, new java.sql.Date(favourableStartDate.getTime()), new java.sql.Date(favourableEndDate.getTime()), null, null, salesVolume, favourable);
                 items.add(item);
             }
             return items;

@@ -20,7 +20,7 @@
 
         .item {
             display: inline-block;
-            margin: 10px 18px;
+            margin: 10px 15px;
             border: 1px solid #F0F0F0;
         }
 
@@ -28,7 +28,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            width: 240px;
+            width: 250px;
             font-size: 12px;
             line-height: 25px;
             padding: 0 2px;
@@ -36,10 +36,41 @@
         }
 
         .item-image {
-            width: 240px;
-            height: 240px;
+            width: 250px;
+            height: 250px;
         }
 
+        .item-info{
+            line-height: 32px;
+        }
+        .item-buy{
+            height: 29px;
+            width: 85px;
+            display: inline-block;
+            margin:1px 0;
+        }
+        .tmall {
+            background: url("/resources/img/buy.png") -91px -1px;
+        }
+        .taobao {
+            background: url("/resources/img/buy.png") -1px -1px;
+        }
+
+        .item-favourable {
+            width: 85px;
+            text-align: center;
+            display: inline-block;
+            font-size: 12px;
+            line-height: normal;
+        }
+
+        .item-price {
+            width: 70px;
+            display: inline-block;
+            text-align: right;
+            margin: 2px 0;
+            color: #FF0003;
+        }
         .item-sales-volume {
             width: 100%;
             display: inline-block;
@@ -47,15 +78,6 @@
             font-size: 12px;
             background: rgba(233, 238, 146, 0.79);
         }
-
-        .item-price {
-            width: 70px;
-            display: inline-block;
-            text-align: right;
-            margin: 5px 0;
-            color: #FF0003;
-        }
-
         .no-item {
             text-align: center;
             background: #cecece;
@@ -76,13 +98,6 @@
 
         .sub-item-class-container li a {
             color: #666;
-        }
-
-        .item-favourable {
-            width: 77px;
-            text-align: center;
-            display: inline-block;
-            font-size: 12px;
         }
 
         .top-item a {
@@ -144,30 +159,15 @@
         }
 
         .sub-item-class-container {
-            padding-left: 10px;
             border: 1px solid #FF0003;
             border-top: none;
-            width:1170px;
+            width:600px;
         }
 
         .sub-item-class-item {
             list-style: none;
             display: inline-block;
             margin: 4px;
-        }
-
-        .tmall {
-            background: url("/resources/img/buy.png") -91px -1px;
-            height: 29px;
-            width: 85px;
-            display: inline-block;
-        }
-
-        .taobao {
-            background: url("/resources/img/buy.png") -1px -1px;
-            height: 29px;
-            width: 85px;
-            display: inline-block;
         }
 
         .pagination a {
@@ -184,6 +184,7 @@
 
         ul.item-class-container {
             margin-bottom: 0;
+            width:1170px;
         }
 
         .item-class-path {
@@ -235,15 +236,14 @@
                 <div v-for="item of itemList" class="item">
                     <div>
                         <a :href="item.tbkUrl" target="_blank"><img class="item-image lazy"
-                                                                    :data-original="item.imageUrl+'_240x240'"
+                                                                    :data-original="item.imageUrl+'_250x250'"
                                                                     src="/resources/img/nopic.jpg"></a>
                     </div>
                     <div class="item-title">{{item.title}}</div>
                     <div class="item-info">
                         <span class="item-price h3"><span class="h4">￥</span>{{item.price}}</span>
                         <span class="item-favourable">{{item.favourable.title}}</span>
-                        <span class="item-buy"><a :href="item.tbkUrl" target="_blank"><span
-                                :class="item.shopType"> </span></a></span>
+                        <a class="item-buy" :class="item.shopType" :href="item.tbkUrl" target="_blank"></a>
                     </div>
                     <div><span class="item-sales-volume">当前销量:{{item.salesVolume}}</span></div>
                 </div>
@@ -256,13 +256,13 @@
                 </div>
                 <div class="col-lg-7">
                     <ul class="pagination">
-                        <li><a href="#" :href="'/buy/'+(curPage==1?1:curPage-1)+qStr"><span>&laquo;</span></a></li>
+                        <li v-if="curPage>1"><a href="#" :href="'/buy/'+(curPage==1?1:curPage-1)+qStr"><span>&laquo;</span></a></li>
                         <li v-for="i in pageNums" :class="{active:i===curPage}">
                             <a v-if="i!=='...'&&i!=curPage" :href="'/buy/'+i+qStr">{{i}}</a>
                             <a v-if="i==curPage" href="#" @click.prevent>{{i}}</a>
                             <a v-if="i==='...'">...</a>
                         </li>
-                        <li><a href="#"
+                        <li v-if="curPage<pageNum"><a href="#"
                                :href="'/buy/'+(curPage==pageNum?pageNum:curPage+1)+qStr"><span>&raquo;</span></a></li>
                     </ul>
                 </div>
@@ -281,8 +281,8 @@
                     return {
                         itemList:${itemList},
                         curPage: ${curPage},
-                        pageNums: [],
-                        pageNum:${pageNum},
+                        pageNums: [],//显示的页数
+                        pageNum:${pageNum},//总页数
                         qStr: '${qStr}',
                         sortPrice:-1,
                         sortSale:1,//默认按销售量排序
@@ -306,7 +306,7 @@
                     selectPage: function (e) {
                         var page = e.currentTarget.value - 0;
                         if (page != this.curPage)
-                            window.location.href = '/buy/' + page + qStr;
+                            window.location.href = '/buy/' + page + this.qStr;
                     },
                     getPageNum: function (startPage, endPage) {
                         this.pageNums = [];
@@ -348,16 +348,25 @@
                     },
                     priceQStr: function () {
                         var search = document.location.search;
-                        var priceOrderFlag = 'sort=price_';
-                        var hasSortPrice = search.indexOf(priceOrderFlag);
-                        if(hasSortPrice>-1) {
-                            var forward = search.substr(hasSortPrice + priceOrderFlag.length, 1);
-                            //存在这样价格条件,将其往反方向调整
-                            this.sortPrice = Math.abs(forward - 1);
-                            this.sortSale = 0;
-                            return this.qStr + '&sort=price_'+this.sortPrice;
+                        console.log(search,hasSortPrice);
+                        //不存在查询条件
+                        if(search==''){
+                            return this.qStr + '?sort=price_0';
                         }else{
-                            return this.qStr + '&sort=price_0';
+                            var priceOrderFlag = 'sort=price_';
+                            var hasSortPrice = search.indexOf(priceOrderFlag);
+                            //存在价格排序这个条件
+                            if(hasSortPrice>-1) {
+                                var forward = search.substr(hasSortPrice + priceOrderFlag.length, 1);
+                                this.sortPrice = Math.abs(forward - 1);
+                                this.sortSale = 0;
+                                //只有一个排序参数
+                                if(search.indexOf('?'+priceOrderFlag)==0)
+                                    return this.qStr + '?sort=price_'+this.sortPrice;
+                                return this.qStr + '&sort=price_'+this.sortPrice;
+                            }else{
+                                return this.qStr + '&sort=price_0';
+                            }
                         }
                     }
                 },
