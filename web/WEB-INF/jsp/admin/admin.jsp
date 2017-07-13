@@ -192,6 +192,9 @@
             <li class="list-group-item">
                 <router-link to="/buy/manager">淘宝客管理</router-link>
             </li>
+            <li class="list-group-item">
+                <router-link to="/todo/manager">Todo</router-link>
+            </li>
         </ul>
     </script>
     <script type="text/x-template" id="blog-info-template">
@@ -473,6 +476,40 @@
                         class="btn btn-danger btn-xs" @click.prevent="deleteFile(fileName)">删除</a>
                 </li>
             </ul>
+        </div>
+    </script>
+    <script type="text/x-template" id="todo-panel-template">
+        <div class="todo-panel">
+            <table class="table table-condensed">
+                <tbody>
+                <tr>
+                    <th class="col-lg-2">操作</td>
+                    <th class="col-lg-6">标题</td>
+                    <th class="col-lg-2">日期</td>
+                    <th class="col-lg-2">状态</td>
+                </tr>
+                <tr v-for="todo in todoList">
+                    <td>
+                        <a class="btn btn-xs btn-success">完成</a>
+                        <a class="btn btn-xs btn-danger">删除</a>
+                    </td>
+                    <td>{{todo.title}}</td>
+                    <td>{{todo.createDate}}</td>
+                    <td>{{todo.state}}</td>
+                </tr>
+                </tbody>
+            </table>
+            <div>
+                <div class="form-group">
+                    <input class="form-control todo-title" name="title" placeholder="标题">
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control todo-remark" name="remark" placeholder="内容"></textarea>
+                </div>
+                <div class="form-group">
+                    <a @click.prevent="addTodo" class="btn btn-success" :class="{addBtn:disable}">添加</a>
+                </div>
+            </div>
         </div>
     </script>
     <script>
@@ -1022,6 +1059,54 @@
                     }
                     ;
 
+            var todoPanel = {
+                template:'#todo-panel-template',
+                data: function () {
+                  return {
+                      todoList:'',
+                      addBtn:true
+                  }
+                },
+                methods:{
+                    fetchData: function () {
+                        var url = '/admin/todo/list';
+                        this.$http.post(url).
+                                then(function (response) {
+                                    if (response.data.success) {
+                                        this.todoList = response.data.data.todoList;
+                                    } else {
+                                        alert(response.data.message);
+                                    }
+                                }, function (response) {
+
+                                }
+                        );
+                    },addTodo: function () {
+                        this.addBtn = false;
+                        var url = '/admin/todo/add';
+                        var title = $('.todo-title').val();
+                        var remark = $('.todo-remark').val();
+                        this.$http.post(url, {title: title,remark:remark},
+                                {
+                                    emulateJSON: true
+                                }).
+                                then(function (response) {
+                                    if (response.data.success) {
+                                        this.todoList = response.data.data.todoList;
+                                    } else {
+                                        alert(response.data.message);
+                                    }
+                                    this.addBtn = true;
+                                }, function (response) {
+
+                                }
+                        );
+                    }
+                },
+                created: function () {
+                    this.fetchData();
+                }
+            };
 
             new Vue({
                         el: "#admin-manager",
@@ -1036,7 +1121,8 @@
                             'blog-manager-panel': blogManagerPanel,
                             'buy-manager-panel': buyManagerPanel,
                             'menu-list': menuListPanel,
-                            'logged-in-user-list': loggedInUserList
+                            'logged-in-user-list': loggedInUserList,
+                            'todo-panel': todoPanel
                         },
                         router: new VueRouter({
                             routes: [
@@ -1048,7 +1134,8 @@
                                 {path: '/user/info/:username', component: userInfoPanel, name: 'userInfoPanel'},
                                 {path: '/blog/manager', component: blogManagerPanel},
                                 {path: '/search/result/:keyword', component: searchResultPanel},
-                                {path: '/buy/manager', component: buyManagerPanel}
+                                {path: '/buy/manager', component: buyManagerPanel},
+                                {path: '/todo/manager', component: todoPanel}
                             ]
                         })
                     }

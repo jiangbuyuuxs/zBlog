@@ -358,8 +358,8 @@ public class BuyServiceImpl implements BuyService {
                 Float myMoney = Float.parseFloat(myMoneyStr);
                 Long salesVolume = Long.parseLong(salesVolumeStr);
 
-                Favourable favourable = new Favourable(countNum, new java.sql.Date(favourableEndDate.getTime()), itemId, null, new java.sql.Date(favourableStartDate.getTime()), surplus, null, favourableTbkUrl, favourableTitle);
-                Item item = new Item(null, itemId, title, imageUrl, detailUrl, itemClassString, favourableTbkUrl, price, myMoney, shopName, shopType, new java.sql.Date(favourableStartDate.getTime()), new java.sql.Date(favourableEndDate.getTime()), null, null, salesVolume, favourable);
+                Favourable favourable = new Favourable(countNum, favourableEndDate, itemId, null, favourableStartDate, surplus, null, favourableTbkUrl, favourableTitle);
+                Item item = new Item(null, itemId, title, imageUrl, detailUrl, itemClassString, favourableTbkUrl, price, myMoney, shopName, shopType,favourableStartDate, favourableEndDate, null, null, salesVolume, favourable);
                 items.add(item);
             }
             return items;

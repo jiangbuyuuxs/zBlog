@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.mapper.TodoMapper">
+
+        <sql id="insert_column">
+          title,remark,create_date,state,user_id
+        </sql>
+
+        <insert id="insertTodo" parameterType="Todo">
+                insert into todo(<include refid="insert_column"></include>) values(#{title},#{remark},#{createDate},#{state},#{userId})
+        </insert>
+</mapper>
