@@ -1,5 +1,5 @@
 <%@ page pageEncoding="UTF-8" %>
-    <div class="float-nav hidden-xs">
+    <div class="float-nav hidden-xs hidden">
         <div class="list-group">
             <a class="list-group-item" href="/">首页</a>
             <a class="list-group-item" href="/cy/cyjl">成语接龙</a>
@@ -10,7 +10,21 @@
             <a class="list-group-item" href="/buy">买(vue分页)</a>
             <a class="list-group-item" href="/buy/1">买(正常分页)</a>
         </div>
+        <div class="min-float-nav-btn btn btn-danger">一</div>
     </div>
+    <div class="max-float-nav-btn btn btn-success">口</div>
+    <script>
+        $(function () {
+            $('.min-float-nav-btn').on('click', function () {
+                $('.float-nav').addClass('hidden');
+                $('.max-float-nav-btn').removeClass('hidden');
+            });
+            $('.max-float-nav-btn').on('click', function () {
+                $('.float-nav').removeClass('hidden');
+                $('.max-float-nav-btn').addClass('hidden');
+            });
+        });
+    </script>
     <div class="row copyright">
         <p>Copyright © 2016-2017 - Powered by textBlog - Hosted by Xxxx - 商务合作 - </p>
 

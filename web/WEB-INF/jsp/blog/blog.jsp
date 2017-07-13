@@ -9,6 +9,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+  <!--因为知乎有防盗链,所以如果发送referrer就直接403-->
+  <meta name="referrer" content="never">
     <title>博文显示</title>
   <%@include file="../comm/jscss.jsp" %>
   <style>
@@ -23,6 +25,11 @@
       border-radius: 4px;
       min-height: 550px;
     }
+    .highlight img {
+      display: block;
+      max-width: 100%;
+    }
+
     .blog-title{
       text-align: center;
       min-height: 60px;

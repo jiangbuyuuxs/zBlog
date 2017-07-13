@@ -54,4 +54,16 @@
     <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
         <property name="securityManager" ref="securityManager"/>
     </bean>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/user/add"/>
+            <mvc:mapping path="/admin/user/edit"/>
+            <mvc:mapping path="/admin/user/delete"/>
+            <mvc:mapping path="/admin/blog/add"/>
+            <mvc:mapping path="/admin/blog/edit"/>
+            <mvc:mapping path="/admin/blog/delete"/>
+            <bean class="cn.mrz.interceptor.RemoteInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
 </beans>

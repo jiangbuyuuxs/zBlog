@@ -4,6 +4,8 @@ import cn.mrz.pojo.User;
 import cn.mrz.service.UserService;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,8 @@ import java.util.Map;
  */
 @Controller
 public class UserController extends BaseController{
+
+    Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Resource
     private UserService userService;
@@ -47,6 +51,7 @@ public class UserController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/user/delete", produces = {"application/json;charset=UTF-8"})
     public String delUser(@RequestParam String username, @RequestParam(required = false) Integer page) {
+
         Map map = new HashMap();
         if("admin".equals(username)||"user".equals(username)){
             map.put("success", false);
@@ -111,6 +116,7 @@ public class UserController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/user/edit", produces = {"application/json;charset=UTF-8"})
     public String editUser(@RequestParam(required = false) String nickname,@RequestParam(required = false) String username) {
+
         Map map = new HashMap();
         if("admin".equals(username)||"user".equals(username)){
             map.put("success", false);

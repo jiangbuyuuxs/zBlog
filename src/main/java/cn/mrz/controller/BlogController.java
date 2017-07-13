@@ -1,6 +1,5 @@
 package cn.mrz.controller;
 
-
 import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
@@ -8,6 +7,8 @@ import cn.mrz.service.WordService;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +28,9 @@ import java.util.Map;
  */
 @Controller
 public class BlogController extends BaseController{
+
+    Logger logger = LoggerFactory.getLogger(BlogController.class);
+
     final Integer pageSize = 10;
 
     @Resource
@@ -177,6 +180,7 @@ public class BlogController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/blog/add")
     public String addBlog(Blog blog) {
+
         Date now = new Date(System.currentTimeMillis());
         blog.setCreateDate(now);
         blog.setEditDate(now);
@@ -185,6 +189,9 @@ public class BlogController extends BaseController{
         if(blog.getAuthor()==null){
             blog.setAuthor(SecurityUtils.getSubject().getPrincipal().toString());
         }
+        //图片都是外链,这个字段GG
+        blog.setImageId(0L);
+        blog.setClassType(0);
         blogService.addBlog(blog);
         final Blog blog2 = blog;
         new Thread(new Runnable() {
@@ -200,6 +207,8 @@ public class BlogController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/blog/edit")
     public String editBlog(Blog blog) {
+
+
         if (null == blog) {
             return DEFAULT_FAILED_MESSAGE;
         }
@@ -222,6 +231,7 @@ public class BlogController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/admin/blog/delete", produces = {"application/json;charset=UTF-8"})
     public String deleteBlog(@RequestParam Long id,@RequestParam(required = false) Integer page) {
+
         if(page==null)
             page = 1;
         String blogListJson = DEFAULT_FAILED_MESSAGE;

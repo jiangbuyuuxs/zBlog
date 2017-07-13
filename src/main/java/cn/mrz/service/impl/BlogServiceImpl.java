@@ -69,7 +69,9 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public List<Blog> getHotBlogList(int num) {
-        List<Visit> hotBlogVisitList = visitMapper.selectVisitList(new Page<Visit>(1, num));
+        Page<Visit> pagination = new Page<Visit>(1, num,"num");
+        pagination.setAsc(false);
+        List<Visit> hotBlogVisitList = visitMapper.selectVisitList(pagination);
         ArrayList<Blog> hotBlogList = new ArrayList<Blog>();
         for (Visit hotBlogVisit : hotBlogVisitList) {
             long blogId = hotBlogVisit.getBlogId();

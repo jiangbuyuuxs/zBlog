@@ -1,5 +1,3 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -24,10 +22,10 @@
             </div>
             <div class="page-bar" :style="{visibility:pageNum>1?'visible':'hidden'}">
                 <ul class="pagination">
-                    <li><a href="#" @click="prePage"><span>&laquo;</span></a></li>
-                    <li v-for="i in pageNum" :class="{active:i===curPage}"><a href="#" @click="changePage(i)"
+                    <li><a href="#" @click.prevent="prePage"><span>&laquo;</span></a></li>
+                    <li v-for="i in pageNum" :class="{active:i===curPage}"><a href="#" @click.prevent="changePage(i)"
                                                                               :data-page="i">{{i}}</a></li>
-                    <li><a href="#" @click="nextPage"><span>&raquo;</span></a></li>
+                    <li><a href="#" @click.prevent="nextPage"><span>&raquo;</span></a></li>
                 </ul>
             </div>
         </div>
@@ -41,7 +39,8 @@
     </script>
     <script type="text/x-template" id="hot-word-panel-template">
         <div class="blog-tag">
-            <a v-for="hotword in hotWordList" :href="'/blog/hotword/'+hotword.hashcode">{{hotword.remark}}</a>
+            <a v-for="hotword in hotWordList" :href="'/blog/hotword/'+hotword.hashcode">{{hotword.remark}}
+                <small>({{hotword.num}})</small></a>
         </div>
     </script>
 
@@ -217,7 +216,7 @@
                 </div>
                 <div class="row sp25"></div>
                 <div class="row sp25 column-title">
-                    最喜欢用的词
+                    最常出现的词
                 </div>
                 <div class="row">
                     <hot-word-panel></hot-word-panel>

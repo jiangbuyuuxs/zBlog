@@ -712,7 +712,7 @@
                             if (response.data.success) {
                                 this.$router.push('/user/manager');
                             } else {
-                                alert('更新失败');
+                                BlogTool.alert(response.data.message);
                                 this.fetchData();
                             }
                         });
@@ -727,7 +727,7 @@
                             if (response.data.success) {
                                 this.userInfo = response.data.data.userInfo;
                             } else {
-                                alert(response.data.message);
+                                BlogTool.alert(response.data.message);
                             }
                         });
                     }
@@ -769,7 +769,7 @@
                                     this.curPage = page;
                                 }, function (response) {
                                     this.loading = false;
-                                    console.log(response.message);
+                                    BlogTool.alert(response.message);
                                 });
                             },
                             deleteBlog: function (id) {
@@ -788,7 +788,7 @@
                                             this.fetchData(this.curPage - 1, false);
                                         }
                                     }, function (response) {
-                                        console.log(response.message);
+                                        BlogTool.alert(response.message);
                                     });
                                 }
                             }
