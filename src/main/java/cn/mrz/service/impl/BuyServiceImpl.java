@@ -203,17 +203,11 @@ public class BuyServiceImpl implements BuyService {
         EntityWrapper<Favourable> favourableEntityWrapper = new EntityWrapper<Favourable>();
         favourableEntityWrapper.lt("end_date", today);
         List<Favourable> favourableList = favourableMapper.selectList(favourableEntityWrapper);
-        int i = 0;
         for (Favourable favourable : favourableList) {
             favourableMapper.deleteById(favourable.getId());
             EntityWrapper<Item> itemEntityWrapper = new EntityWrapper<Item>();
             itemEntityWrapper.eq("item_id", favourable.getItemId());
             itemMapper.delete(itemEntityWrapper);
-            i++;
-            if(i==100){
-                i=0;
-
-            }
         }
         return favourableList.size();
     }

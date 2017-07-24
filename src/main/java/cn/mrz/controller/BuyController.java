@@ -307,4 +307,11 @@ public class BuyController extends BaseController {
         return "{\"success\": false,\"message\":\"删除失败\"}";
 
     }
+
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/file/clear", produces = {"application/json;charset=UTF-8"})
+    public String clearObsoleteItem() throws IOException {
+        int clearObsoleteItem = buyService.clearObsoleteItem();
+        return "{\"success\": true,\"message\":\"成功清除过期商品:" + clearObsoleteItem + "条\"}";
+    }
 }

@@ -14,6 +14,10 @@
      * @param data
      */
     function checkLogin(data) {
+        if(data.status===404){
+            alert1("请求地址无效,");
+            return false;
+        }
         var contentType = data.headers.map["Content-Type"][0];
         if (contentType && contentType.indexOf("html") != -1) {
             alert1("登录超时,或没有权限.请重新登录");

@@ -30,7 +30,7 @@ public class TodoController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/admin/todo/list", produces = {"application/json;charset=UTF-8"})
-    public String getTodoList(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer pageSize) {
+    public String getTodoList(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer pageSize,@RequestParam(required = false) Integer state) {
 
         if(page==null)
             page =1;
@@ -38,7 +38,7 @@ public class TodoController extends BaseController{
             pageSize = 10;
         Page<Todo> pagination = new Page<Todo>(page,pageSize);
 
-        pagination = todoService.list(pagination);
+        pagination = todoService.list(pagination,state);
 
         List<Todo> todoList = pagination.getRecords();
         int total = pagination.getTotal();
@@ -49,11 +49,11 @@ public class TodoController extends BaseController{
         Map map = new HashMap();
         map.put("success",true);
         map.put("data",data);
-        return JSONObject.toJSONStringWithDateFormat(map, "MM月dd E HH:mm:ss");
+        return JSONObject.toJSONStringWithDateFormat(map, "MM月dd E a");
     }
     @ResponseBody
     @RequestMapping(value = "/admin/todo/add", produces = {"application/json;charset=UTF-8"})
-    public String addTodo(@RequestParam(required = false) String title,@RequestParam(required = false) String remark) {
+    public String addTodo(@RequestParam(required = false) String title,@RequestParam(required = false) String remark,@RequestParam(required = false) Integer state) {
 
         if(title==null||"".equals(title))
             title = "新的Todo";
@@ -66,7 +66,7 @@ public class TodoController extends BaseController{
 
         Page<Todo> pagination = new Page<Todo>(1,10);
 
-        pagination = todoService.list(pagination);
+        pagination = todoService.list(pagination,state);
         List<Todo> todoList = pagination.getRecords();
         int total = pagination.getTotal();
         Map data = new HashMap();
@@ -79,4 +79,44 @@ public class TodoController extends BaseController{
         return JSONObject.toJSONStringWithDateFormat(map, "MM月dd E a");
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/admin/todo/complete", produces = {"application/json;charset=UTF-8"})
+    public String completeTodo(@RequestParam(required = false) Long id,@RequestParam(required = false) Integer state) {
+        if(id==null)
+            return DEFAULT_FAILED_MESSAGE;
+
+        todoService.complete(id);
+        Page<Todo> pagination = new Page<Todo>(1,10);
+        pagination = todoService.list(pagination,state);
+        List<Todo> todoList = pagination.getRecords();
+        int total = pagination.getTotal();
+        Map data = new HashMap();
+        data.put("todoList",todoList);
+        data.put("total",total);
+
+        Map map = new HashMap();
+        map.put("success",true);
+        map.put("data", data);
+        return JSONObject.toJSONStringWithDateFormat(map, "MM月dd E a");
+    }
+    @ResponseBody
+    @RequestMapping(value = "/admin/todo/delete", produces = {"application/json;charset=UTF-8"})
+    public String deleteTodo(@RequestParam(required = false) Long id,@RequestParam(required = false) Integer state) {
+        if(id==null)
+            return DEFAULT_FAILED_MESSAGE;
+
+        todoService.delete(id);
+        Page<Todo> pagination = new Page<Todo>(1,10);
+        pagination = todoService.list(pagination,state);
+        List<Todo> todoList = pagination.getRecords();
+        int total = pagination.getTotal();
+        Map data = new HashMap();
+        data.put("todoList",todoList);
+        data.put("total",total);
+
+        Map map = new HashMap();
+        map.put("success",true);
+        map.put("data", data);
+        return JSONObject.toJSONStringWithDateFormat(map, "MM月dd E a");
+    }
 }

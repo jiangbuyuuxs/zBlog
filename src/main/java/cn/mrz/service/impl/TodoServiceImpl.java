@@ -21,10 +21,12 @@ public class TodoServiceImpl implements TodoService {
     @Autowired
     TodoMapper todoMapper;
 
-    public Page<Todo> list(Page<Todo> pagination) {
+    public Page<Todo> list(Page<Todo> pagination,Integer state) {
         EntityWrapper<Todo> todoEntityWrapper = new EntityWrapper<Todo>();
-//        todoEntityWrapper;
         todoEntityWrapper.orderBy("create_date", false);
+        if(state!=null&&state!=2){
+            todoEntityWrapper.orderBy("create_date", false).eq("state",state);
+        }
         List<Todo> todoList = todoMapper.selectPage(pagination, todoEntityWrapper);
         pagination.setRecords(todoList);
         return pagination;
@@ -33,6 +35,15 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public void add(Todo todo) {
         Long id = todoMapper.insertTodo(todo);
+    }
+
+    @Override
+    public void complete(Long id) {
+        Todo todo = todoMapper.selectById(id);
+        if(todo==null)
+            throw new RuntimeException("没有找到这样的todo");
+        todo.setState(1);
+        todoMapper.updateById(todo);
     }
 
     @Override
@@ -47,7 +58,8 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public boolean delete(Long id) {
-        return false;
+        Integer integer = todoMapper.deleteById(id);
+        return integer==1;
     }
 }
 

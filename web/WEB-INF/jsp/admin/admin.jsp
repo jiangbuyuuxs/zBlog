@@ -14,6 +14,13 @@
     <%@include file="../comm/vue.jsp" %>
     <script type="text/javascript" src="/resources/jQuery/plug/validate/jquery.validate.js"></script>
     <script type="text/javascript" src="/resources/jQuery/plug/validate/messages_zh.js"></script>
+    <%--<script type="text/javascript" src="/resources/jQuery/plug/datetimepicker/js/bootstrap-datetimepicker.js"></script>--%>
+    <script type="text/javascript"
+            src="/resources/jQuery/plug/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript"
+            src="/resources/jQuery/plug/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"
+            charset="UTF-8"></script>
+    <link rel="stylesheet" href="/resources/jQuery/plug/datetimepicker/css/bootstrap-datetimepicker.min.css">
     <style>
         body {
             background: #76c7ce;
@@ -106,10 +113,19 @@
             background-color: #ffffff;
         }
 
+        #buyFile {
+            display: inline;
+        }
+
         .buy-file-list {
             border: 1px solid #cecece;
             border-radius: 3px;
             padding: 20px;
+        }
+
+        .buy-file-list li {
+            margin-top: 2px;
+            list-style: none;
         }
 
         .info-tab-panel, .blog-tab-panel {
@@ -131,6 +147,23 @@
 
         .edit-user-panel {
             padding: 20px;
+        }
+
+        .todo-panel {
+            min-height: 500px;
+        }
+
+        .todo-search-start-date, .todo-search-end-date {
+            cursor: hand;
+        }
+
+        .add-todo-panel {
+            width: 600px;
+            margin: 0 auto;
+        }
+
+        .todo-btn-bar {
+            padding: 0 4px 8px 4px;
         }
     </style>
     <script type="text/x-template" id="head-nav-template">
@@ -467,6 +500,7 @@
                     <input type="file" name="buyFile" id="buyFile"/>
                     <a class="btn btn-xs btn-success" @click.prevent="upload">上传</a>
                     <span class="text-danger">限制40M以内(.xls)文件</span>
+                    <a class="btn btn-xs btn-danger pull-right" @click.prevent="clear">清理过期商品</a>
                 </form>
             </div>
             <div>已完成:<span class="percent">0</span>%</div>
@@ -480,34 +514,85 @@
     </script>
     <script type="text/x-template" id="todo-panel-template">
         <div class="todo-panel">
-            <table class="table table-condensed">
-                <tbody>
-                <tr>
-                    <th class="col-lg-2">操作</td>
-                    <th class="col-lg-6">标题</td>
-                    <th class="col-lg-2">日期</td>
-                    <th class="col-lg-2">状态</td>
-                </tr>
-                <tr v-for="todo in todoList">
-                    <td>
-                        <a class="btn btn-xs btn-success">完成</a>
-                        <a class="btn btn-xs btn-danger">删除</a>
-                    </td>
-                    <td>{{todo.title}}</td>
-                    <td>{{todo.createDate}}</td>
-                    <td>{{todo.state}}</td>
-                </tr>
-                </tbody>
-            </table>
-            <div>
+            <div class="todo-btn-bar">
+                <a class="btn btn-xs btn-success btn-show-add-todo" @click.prevent="showAddTodoPanel">添加</a>
+                <a class="btn btn-xs btn-danger btn-hide-add-todo hidden" @click.prevent="hiddenAddTodoPanel">取消</a>
+
+                <div class="btn-group state-btn-group pull-right">
+                    <a class="btn btn-xs btn-danger" @click.prevent="fetchData(0)">Todo</a>
+                    <a class="btn btn-xs btn-danger" @click.prevent="fetchData(1)">完成</a>
+                    <a class="btn btn-xs btn-success" @click.prevent="fetchData(2)">全部</a>
+                </div>
+            </div>
+            <div class="todo-list">
+                <!--<form class="form-inline">
+                    <div class="form-group">
+                        <input type="text" class="form-control todo-search-title" placeholder="标题">
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group date todo-search-start-date">
+                            <input class="form-control" size="16" type="text" value="" readonly>
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group date todo-search-end-date">
+                            <input class="form-control" size="16" type="text" value="" readonly>
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" name="state" value="0" checked>Todo</label>
+                        <label><input type="checkbox" name="state" value="1" checked>完成</label>
+                    </div>
+                    <a class="btn btn-default btn-xs">检索</a>
+                </form>-->
+                <table class="table table-condensed">
+                    <tbody>
+                    <tr>
+                        <th class="col-lg-6">标题</th>
+                        <th class="col-lg-3">日期</th>
+                        <th class="col-lg-2">操作</th>
+                        <th class="col-lg-1">状态</th>
+                    </tr>
+                    <tr v-for="todo in todoList">
+                        <td v-if="todo.state==1">
+                            <del>
+                                {{todo.title}}
+                            </del>
+                        </td>
+                        <td v-else>
+                            {{todo.title}}
+                        </td>
+                        <td>{{todo.createDate}}</td>
+                        <td v-if="todo.state==1">
+                        </td>
+                        <td v-else>
+                            <a class="btn btn-xs btn-success" @click.prevent="completeTodo(todo.id)">完成</a>
+                            <a class="btn btn-xs btn-danger" @click.prevent="deleteTodo(todo.id)">删除</a>
+                        </td>
+                        <td class="text-success" v-if="todo.state==1">
+                            完成
+                        </td>
+                        <td class="text-danger" v-else>
+                            Todo
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="add-todo-panel hidden">
                 <div class="form-group">
                     <input class="form-control todo-title" name="title" placeholder="标题">
+                </div>
+                <div class="form-group">
+                    <input class="form-control todo-create-date" name="craeate_date" placeholder="日期">
                 </div>
                 <div class="form-group">
                     <textarea class="form-control todo-remark" name="remark" placeholder="内容"></textarea>
                 </div>
                 <div class="form-group">
-                    <a @click.prevent="addTodo" class="btn btn-success" :class="{addBtn:disable}">添加</a>
+                    <a @click.prevent="addTodo" class="btn btn-success" :class="{disabled:addBtn}">添加</a>
                 </div>
             </div>
         </div>
@@ -555,7 +640,7 @@
                     }
                 },
                 computed: {
-                    hasBlogResult:function () {
+                    hasBlogResult: function () {
                         return this.blogList.length != 0;
                     }
 
@@ -613,11 +698,11 @@
                         this.loading = true;
                         var url = '/admin/user/list';
                         this.$http.get(url).then(function (response) {
-                            if(response.data.success){
+                            if (response.data.success) {
                                 this.loading = false;
                                 this.userList = response.data.data.userList;
                                 this.curPage = page;
-                            }else{
+                            } else {
                                 BlogTool.alert(response.data.message);
                                 this.loading = false;
                             }
@@ -635,9 +720,9 @@
                                     page: this.curPage
                                 }
                             }).then(function (response) {
-                                if(response.data.success){
+                                if (response.data.success) {
                                     this.userList = response.data.data.userList;
-                                }else{
+                                } else {
                                     BlogTool.alert(response.data.message);
                                 }
                             }, function (response) {
@@ -1051,6 +1136,14 @@
 
                                         }
                                 );
+                            },
+                            clear: function () {
+                                //TODO 需要mask
+                                var url = '/admin/buy/file/clear';
+                                this.$http.post(url).
+                                        then(function (response) {
+                                            alert(response.data.message);
+                                        });
                             }
                         },
                         created: function () {
@@ -1060,20 +1153,23 @@
                     ;
 
             var todoPanel = {
-                template:'#todo-panel-template',
+                template: '#todo-panel-template',
                 data: function () {
-                  return {
-                      todoList:'',
-                      addBtn:true
-                  }
+                    return {
+                        todoList: [],
+                        addBtn: false,
+                        state:0
+                    }
                 },
-                methods:{
-                    fetchData: function () {
+                methods: {
+                    fetchData: function (state) {
                         var url = '/admin/todo/list';
-                        this.$http.post(url).
+                        this.$http.get(url, {params: {state: state}}).
                                 then(function (response) {
                                     if (response.data.success) {
                                         this.todoList = response.data.data.todoList;
+                                        $('.state-btn-group .btn-danger').removeClass('btn-danger').addClass('btn-success');
+                                        $('.state-btn-group .btn').eq(state).addClass('btn-danger').removeClass('btn-success')
                                     } else {
                                         alert(response.data.message);
                                     }
@@ -1081,12 +1177,26 @@
 
                                 }
                         );
-                    },addTodo: function () {
-                        this.addBtn = false;
+                    },
+                    showAddTodoPanel: function () {
+                        $('.add-todo-panel').removeClass('hidden');
+                        $('.todo-list').addClass('hidden');
+                        $('.btn-show-add-todo').addClass('hidden');
+                        $('.btn-hide-add-todo').removeClass('hidden');
+                    },
+                    hiddenAddTodoPanel: function () {
+                        $('.add-todo-panel').addClass('hidden');
+                        $('.todo-list').removeClass('hidden');
+                        $('.btn-show-add-todo').removeClass('hidden');
+                        $('.btn-hide-add-todo').addClass('hidden');
+                    },
+                    addTodo: function () {
+                        this.addBtn = true;
                         var url = '/admin/todo/add';
                         var title = $('.todo-title').val();
                         var remark = $('.todo-remark').val();
-                        this.$http.post(url, {title: title,remark:remark},
+                        var data =  {title: title, remark: remark,state:this.state}
+                        this.$http.post(url,data,
                                 {
                                     emulateJSON: true
                                 }).
@@ -1096,15 +1206,53 @@
                                     } else {
                                         alert(response.data.message);
                                     }
-                                    this.addBtn = true;
+                                    this.hiddenAddTodoPanel();
+                                    this.addBtn = false;
                                 }, function (response) {
 
                                 }
                         );
+                    },
+                    completeTodo: function (id) {
+                        var url = '/admin/todo/complete';
+                        var data ={params:{id: id,state:this.state}};
+                        this.$http.get(url, data).
+                                then(function (response) {
+                                    if (response.data.success) {
+                                        this.todoList = response.data.data.todoList;
+                                    } else {
+                                        alert(response.data.message);
+                                    }
+                                    this.hiddenAddTodoPanel();
+                                }, function (response) {
+
+                                }
+                        );
+                    },
+                    deleteTodo: function (id) {
+                        var isDelete = confirm("确定删除");
+                        if (isDelete) {
+                            var url = '/admin/todo/delete';
+                            var data = {
+                                params:{id: id,state:this.state}
+                            };
+                            this.$http.get(url, data).
+                                    then(function (response) {
+                                        if (response.data.success) {
+                                            this.todoList = response.data.data.todoList;
+                                        } else {
+                                            alert(response.data.message);
+                                        }
+                                        this.hiddenAddTodoPanel();
+                                    }, function (response) {
+
+                                    }
+                            );
+                        }
                     }
                 },
                 created: function () {
-                    this.fetchData();
+                    this.fetchData(this.state);
                 }
             };
 
