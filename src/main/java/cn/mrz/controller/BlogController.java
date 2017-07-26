@@ -1,5 +1,6 @@
 package cn.mrz.controller;
 
+import cn.mrz.mq.producer.MessageProducer;
 import cn.mrz.pojo.Blog;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +30,9 @@ import java.util.Map;
  */
 @Controller
 public class BlogController extends BaseController{
+
+    @Autowired
+    MessageProducer messageProducer;
 
     Logger logger = LoggerFactory.getLogger(BlogController.class);
 
@@ -193,21 +198,24 @@ public class BlogController extends BaseController{
         blog.setImageId(0L);
         blog.setClassType(0);
         blogService.addBlog(blog);
-        final Blog blog2 = blog;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                wordService.getBlogWords(blog2);
-            }
-        }
-        ).start();
+
+        //将要分词的博客添加到消息队列中
+        messageProducer.sendSplitWordMessage(blog);
+
+//        final Blog blog2 = blog;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                wordService.getBlogWords(blog2);
+//            }
+//        }
+//        ).start();
         return "{\"success\": true}";
     }
 
     @ResponseBody
     @RequestMapping(value = "/admin/blog/edit")
     public String editBlog(Blog blog) {
-
 
         if (null == blog) {
             return DEFAULT_FAILED_MESSAGE;
@@ -218,13 +226,17 @@ public class BlogController extends BaseController{
         }
         blog.setEditDate(new Date(System.currentTimeMillis()));
         blogService.update(blog);
-        final Blog blog2 = blog;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                wordService.getBlogWords(blog2);
-            }
-        }).start();
+
+        //将要分词的博客添加到消息队列中
+        messageProducer.sendSplitWordMessage(blog);
+
+//        final Blog blog2 = blog;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                wordService.getBlogWords(blog2);
+//            }
+//        }).start();
         return "{\"success\": true}";
     }
 

@@ -935,8 +935,6 @@
                         this.$http.get(url).then(function (response) {
                                     this.loggedInUserList = response.data.data.loggedInUserList;
                                     this.loggedInUserCount = response.data.data.loggedInUserCount;
-                                }, function (response) {
-
                                 }
                         );
                     }
@@ -968,8 +966,6 @@
                         this.$http.get(url).then(function (response) {
                                     if (response.data.success)
                                         this.userBlogList = response.data.data.userBlogList;
-                                }, function (response) {
-
                                 }
                         );
                     }
@@ -1011,8 +1007,6 @@
                                             if (response.data.success) {
                                                 this.userInfo = response.data.data.userInfo;
                                             }
-                                        }, function (response) {
-
                                         }
                                 );
                             },
@@ -1060,8 +1054,6 @@
                                 this.$http.get(url).then(function (response) {
                                             if (response.data.success)
                                                 this.fileList = response.data.data.fileList;
-                                        }, function (response) {
-
                                         }
                                 );
                                 this.$nextTick(function () {
@@ -1088,29 +1080,21 @@
                                             if (response.data.success) {
                                                 this.fileList = response.data.data.fileList;
                                             } else {
-                                                alert(response.data.message ? response.data.message : '上传失败');
+                                                alert(response.data.message);
                                             }
-                                        }, function (response) {
-
                                         }
                                 );
 
                             },
                             parseFile: function (fileName) {
                                 var url = '/admin/buy/file/parse';
-                                this.$http.post(url, {fileName: fileName},
-                                        {
-                                            emulateJSON: true
-                                        }
-                                ).
+                                this.$http.get(url, {params:{fileName: fileName}}).
                                         then(function (response) {
                                             if (response.data.success) {
                                                 alert('解析成功');
                                             } else {
-                                                alert(response.data.data.message ? response.data.data.message : '解析失败');
+                                                alert(response.data.data.message);
                                             }
-                                        }, function (response) {
-
                                         }
                                 );
                             },
@@ -1120,11 +1104,7 @@
                                     return false;
                                 }
                                 var url = '/admin/buy/file/delete';
-                                this.$http.post(url, {fileName: fileName},
-                                        {
-                                            emulateJSON: true
-                                        }
-                                ).
+                                this.$http.get(url, {params:{fileName: fileName}}).
                                         then(function (response) {
                                             if (response.data.success) {
                                                 alert(response.data.message);
@@ -1132,8 +1112,6 @@
                                             } else {
                                                 alert(response.data.message);
                                             }
-                                        }, function (response) {
-
                                         }
                                 );
                             },
@@ -1158,7 +1136,7 @@
                     return {
                         todoList: [],
                         addBtn: false,
-                        state:0
+                        state: 0
                     }
                 },
                 methods: {
@@ -1168,15 +1146,17 @@
                                 then(function (response) {
                                     if (response.data.success) {
                                         this.todoList = response.data.data.todoList;
-                                        $('.state-btn-group .btn-danger').removeClass('btn-danger').addClass('btn-success');
-                                        $('.state-btn-group .btn').eq(state).addClass('btn-danger').removeClass('btn-success')
+                                        this.changeState(state);
                                     } else {
                                         alert(response.data.message);
                                     }
-                                }, function (response) {
-
                                 }
                         );
+                    },
+                    changeState: function (state) {
+                        $('.state-btn-group .btn-danger').removeClass('btn-danger').addClass('btn-success');
+                        $('.state-btn-group .btn').eq(state).addClass('btn-danger').removeClass('btn-success');
+                        this.state = state;
                     },
                     showAddTodoPanel: function () {
                         $('.add-todo-panel').removeClass('hidden');
@@ -1195,8 +1175,8 @@
                         var url = '/admin/todo/add';
                         var title = $('.todo-title').val();
                         var remark = $('.todo-remark').val();
-                        var data =  {title: title, remark: remark,state:this.state}
-                        this.$http.post(url,data,
+                        var data = {title: title, remark: remark, state: this.state}
+                        this.$http.post(url, data,
                                 {
                                     emulateJSON: true
                                 }).
@@ -1215,7 +1195,7 @@
                     },
                     completeTodo: function (id) {
                         var url = '/admin/todo/complete';
-                        var data ={params:{id: id,state:this.state}};
+                        var data = {params: {id: id, state: this.state}};
                         this.$http.get(url, data).
                                 then(function (response) {
                                     if (response.data.success) {
@@ -1234,7 +1214,7 @@
                         if (isDelete) {
                             var url = '/admin/todo/delete';
                             var data = {
-                                params:{id: id,state:this.state}
+                                params: {id: id, state: this.state}
                             };
                             this.$http.get(url, data).
                                     then(function (response) {
