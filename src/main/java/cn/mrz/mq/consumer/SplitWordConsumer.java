@@ -26,16 +26,14 @@ public class SplitWordConsumer implements MessageListener {
     public void onMessage(Message message) {
         byte[] messageBody = message.getBody();
         try {
+            //TODO 这里的消息应该只传递blogId,通过数据库查询获取blog信息.
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(messageBody));
             Blog blog = (Blog) ois.readObject();
-            wordService.getBlogWords(blog);
-
             logger.info("收到消息,开始处理id为{}的博文分词~~~", blog.getId());
-
+            wordService.getBlogWords(blog);
         } catch (IOException e) {
 
         } catch (ClassNotFoundException e) {
-
         }
     }
 }
