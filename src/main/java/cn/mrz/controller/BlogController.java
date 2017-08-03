@@ -200,7 +200,7 @@ public class BlogController extends BaseController{
         blogService.addBlog(blog);
 
         //将要分词的博客添加到消息队列中
-        messageProducer.sendSplitWordMessage(blog);
+        messageProducer.sendSplitWordMessage(blog.getId());
 
 //        final Blog blog2 = blog;
 //        new Thread(new Runnable() {
@@ -228,7 +228,7 @@ public class BlogController extends BaseController{
         blogService.update(blog);
 
         //将要分词的博客添加到消息队列中
-        messageProducer.sendSplitWordMessage(blog);
+        messageProducer.sendSplitWordMessage(blog.getId());
 
 //        final Blog blog2 = blog;
 //        new Thread(new Runnable() {

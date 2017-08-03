@@ -504,6 +504,11 @@
                 </form>
             </div>
             <div>已完成:<span class="percent">0</span>%</div>
+            <ul class="buy-file-list" :class="{hidden:handlingFileList.length==0}">
+                <li v-for="fileName in handlingFileList">
+                    <img class="pull-left" style="width:20px;height:20px;" src="/resources/img/loading.gif">{{fileName}} <span class="bg-success">正在解析...</span>
+                </li>
+            </ul>
             <ul class="buy-file-list">
                 <li v-for="fileName in fileList">
                     {{fileName}} <a class="btn btn-success btn-xs" @click.prevent="parseFile(fileName)">解析</a> <a
@@ -1045,15 +1050,19 @@
                         data: function () {
                             return {
                                 fileList: [],
-                                uploading: false
+                                uploading: false,
+                                handlingFileList: []
                             }
                         },
                         methods: {
                             fetchData: function () {
                                 var url = '/admin/buy/file/list';
                                 this.$http.get(url).then(function (response) {
-                                            if (response.data.success)
+                                            if (response.data.success){
                                                 this.fileList = response.data.data.fileList;
+                                                this.handlingFileList = response.data.data.handlingFileList;
+                                                this.queryHandlingFileList();
+                                            }
                                         }
                                 );
                                 this.$nextTick(function () {
@@ -1090,11 +1099,9 @@
                                 var url = '/admin/buy/file/parse';
                                 this.$http.get(url, {params:{fileName: fileName}}).
                                         then(function (response) {
-                                            if (response.data.success) {
-                                                alert('解析成功');
-                                            } else {
-                                                alert(response.data.data.message);
-                                            }
+                                            BlogTool.alert('开始解析:'+fileName);
+                                            this.handlingFileList=response.data.data.handlingFileList;
+                                            this.queryHandlingFileList();
                                         }
                                 );
                             },
@@ -1122,6 +1129,20 @@
                                         then(function (response) {
                                             alert(response.data.message);
                                         });
+                            },
+                            queryHandlingFileList: function () {
+                                if(this.handlingFileList.length<1){
+                                    return;
+                                }
+                                var url = '/admin/buy/file/handling';
+                                this.$http.get(url).
+                                        then(function (response) {
+                                            if (response.data.success) {
+                                                this.handlingFileList = response.data.data.handlingFileList;
+                                            }
+                                        }
+                                );
+                                setTimeout(this.queryHandlingFileList,5000);//5s轮询
                             }
                         },
                         created: function () {

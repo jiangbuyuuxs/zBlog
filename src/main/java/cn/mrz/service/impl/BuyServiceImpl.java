@@ -1,5 +1,6 @@
 package cn.mrz.service.impl;
 
+import cn.mrz.dao.BuyDao;
 import cn.mrz.dao.ItemDao;
 import cn.mrz.mapper.FavourableMapper;
 import cn.mrz.mapper.ItemClassMapper;
@@ -42,6 +43,8 @@ public class BuyServiceImpl implements BuyService {
     FavourableMapper favourableMapper;
     @Autowired
     ItemClassMapper itemClassMapper;
+    @Autowired
+    BuyDao buyDao;
 
     @Override
     public List<String> getBuyFileList() {
@@ -97,6 +100,9 @@ public class BuyServiceImpl implements BuyService {
 
     @Override
     public boolean parseBuyFile(String buyFilePath) {
+        //将当前处理的文件放入 正在处理
+        String username = "admin";
+        final String buyFileKey = "buyFile:handling:" + username;
         try {
             List<Item> items = parseData(buyFilePath);
             int batchSize = 100;
@@ -144,12 +150,28 @@ public class BuyServiceImpl implements BuyService {
                 favourableMapper.insertFavourableList(favourableBatch);
             if (itemClassBatch.size() > 0)
                 itemClassMapper.insertItemClassList(itemClassBatch);
-
         } catch (Exception e) {
+
             e.printStackTrace();
             return false;
+        }finally{
+            //将当前处理的文件移出 正在处理 ,无法判断是否正常处理还是异常退出
+            buyDao.removeBuyFile(buyFileKey, buyFilePath);
         }
         return true;
+    }
+
+    public List<String> listHandlingBuyFile(){
+        String username = "admin";
+        final String buyFileKey = "buyFile:handling:" + username;
+        return buyDao.listBuyFile(buyFileKey);
+    }
+
+    @Override
+    public void addHandlingBuyFile(String fileName) {
+        String username = "admin";
+        final String buyFileKey = "buyFile:handling:" + username;
+        buyDao.addBuyFile(buyFileKey, fileName);
     }
 
     @Override
@@ -358,7 +380,6 @@ public class BuyServiceImpl implements BuyService {
             }
             return items;
         } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
             return null;
         }
     }

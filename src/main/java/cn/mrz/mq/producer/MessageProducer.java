@@ -17,8 +17,13 @@ public class MessageProducer {
     @Resource
     private AmqpTemplate amqpTemplate;
 
-    public void sendSplitWordMessage(Object message){
+    public void sendSplitWordMessage(Long id){
         logger.info("发送博客分词消息");
-        amqpTemplate.convertAndSend("splitWordQueueKey",message);
+        amqpTemplate.convertAndSend("splitWordQueueKey",id);
+    }
+
+    public void sendHandlerTbkExcelMessage(String message){
+        logger.info("发送处理淘宝客Excel路径消息");
+        amqpTemplate.convertAndSend("handlerExcelQueueKey",message.getBytes());
     }
 }

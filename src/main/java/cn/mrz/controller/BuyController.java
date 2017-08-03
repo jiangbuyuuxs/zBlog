@@ -3,6 +3,7 @@ package cn.mrz.controller;
 import cn.mrz.mapper.FavourableMapper;
 import cn.mrz.mapper.ItemClassMapper;
 import cn.mrz.mapper.ItemMapper;
+import cn.mrz.mq.producer.MessageProducer;
 import cn.mrz.pojo.Favourable;
 import cn.mrz.pojo.Item;
 import cn.mrz.pojo.ItemClass;
@@ -40,6 +41,9 @@ public class BuyController extends BaseController {
     private ItemMapper itemMapper;
     @Autowired
     private FavourableMapper favourableMapper;
+
+    @Autowired
+    MessageProducer messageProducer;
 
     @RequestMapping(value = "/buy")
     public String index(ModelMap map) {
@@ -248,8 +252,10 @@ public class BuyController extends BaseController {
     @RequestMapping(value = "/admin/buy/file/list", produces = {"application/json;charset=UTF-8"})
     public String getFileList() throws IOException {
         List<String> fileList = buyService.getBuyFileList();
+        List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
         Map data = new HashMap();
         data.put("fileList", fileList);
+        data.put("handlingFileList", handlingBuyFileList);
         Map map = new HashMap();
         map.put("success", true);
         map.put("data", data);
@@ -276,8 +282,10 @@ public class BuyController extends BaseController {
         boolean saveBuyFile = buyService.saveBuyFile(buyFile);
         if (saveBuyFile) {
             List<String> fileList = buyService.getBuyFileList();
+            List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
             Map data = new HashMap();
             data.put("fileList", fileList);
+            data.put("handlingFileList", handlingBuyFileList);
             Map map = new HashMap();
             map.put("success", true);
             map.put("data", data);
@@ -291,11 +299,63 @@ public class BuyController extends BaseController {
     @ResponseBody
     @RequestMapping(value = "/admin/buy/file/parse", produces = {"application/json;charset=UTF-8"})
     public String parseFile(@RequestParam String fileName) throws IOException {
-        if (buyService.parseBuyFile(fileName)) {
-            return "{\"success\": true,\"message\":\"成功解析\"}";
+        //TODO 加入消息队列
+        if(fileName!=null){
+            buyService.addHandlingBuyFile(fileName);
+            messageProducer.sendHandlerTbkExcelMessage(fileName);
         }
-        return "{\"success\": false,\"message\":\"解析失败\"}";
+        Map data = new HashMap();
+        List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
+        data.put("handlingFileList", handlingBuyFileList);
+        Map map = new HashMap();
+        map.put("success", true);
+        map.put("data", data);
+        return JSONObject.toJSONString(map);
+    }
 
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/file/handling", produces = {"application/json;charset=UTF-8"})
+    public String handling() throws IOException {
+        Map data = new HashMap();
+        List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
+        data.put("handlingFileList", handlingBuyFileList);
+        Map map = new HashMap();
+        map.put("success", true);
+        map.put("data", data);
+        return JSONObject.toJSONString(map);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/file/uploadparse", produces = {"application/json;charset=UTF-8"})
+    public String uploadFileParse(@RequestParam MultipartFile buyFile) throws IOException {
+        //上传完就直接发送解析文件消息
+
+        if (buyFile.isEmpty())
+            return "{\"success\": false,\"message\":\"请选择非空文件\"}";
+        String originalFilename = buyFile.getOriginalFilename();
+        String[] originalFilenameSplit = originalFilename.split("\\.");
+        if (originalFilenameSplit.length < 2) {
+            return "{\"success\": false,\"message\":\"请选择正确的文件\"}";
+        } else {
+            String extName = originalFilenameSplit[originalFilenameSplit.length - 1];
+            if (!"xls".equals(extName)) {
+                return "{\"success\": false,\"message\":\"请选择正确的.xls文件\"}";
+            }
+        }
+        boolean saveBuyFile = buyService.saveBuyFile(buyFile);
+        if (saveBuyFile) {
+            messageProducer.sendHandlerTbkExcelMessage(originalFilename);
+            List<String> fileList = buyService.getBuyFileList();
+            Map data = new HashMap();
+            data.put("fileList", fileList);
+            Map map = new HashMap();
+            map.put("success", true);
+            map.put("data", data);
+
+            return JSONObject.toJSONString(map);
+        } else {
+            return DEFAULT_FAILED_MESSAGE;
+        }
     }
 
     @ResponseBody

@@ -35,4 +35,8 @@ public interface BuyService {
      * @return
      */
     int clearObsoleteItem();
+
+    List<String> listHandlingBuyFile();
+
+    void addHandlingBuyFile(String fileName);
 }

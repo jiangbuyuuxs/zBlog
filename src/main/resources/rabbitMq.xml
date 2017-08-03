@@ -23,6 +23,7 @@
     <!--exclusive="false"非私有队列-->
     <!--durable="true" 重启时,重建队列-->
     <rabbit:queue name="splitWordQueue" durable="true" auto-delete="false" exclusive="false"/>
+    <rabbit:queue name="handlerExcelQueue" durable="true" auto-delete="false" exclusive="false"/>
 
     <!-- 定义direct exchange -->
     <!-- 包含一个空白字符串名称的默认交换器.当声明一个队列时,自动绑定到默认交换器,并使用队列名称作为路由键-->
@@ -30,6 +31,7 @@
     <rabbit:direct-exchange name="myExchange" durable="true" auto-delete="false">
         <rabbit:bindings>
             <rabbit:binding queue="splitWordQueue" key="splitWordQueueKey"></rabbit:binding>
+            <rabbit:binding queue="handlerExcelQueue" key="handlerExcelQueueKey"></rabbit:binding>
         </rabbit:bindings>
     </rabbit:direct-exchange>
     <!--fanout 交换器,将消息广播到多个队列上去-->
@@ -48,11 +50,13 @@
     <!--</rabbit:topic-exchange>-->
 
     <!-- 消息接收者 -->
-    <bean id="messageReceiver" class="cn.mrz.mq.consumer.SplitWordConsumer"></bean>
+    <bean id="splitWordConsumer" class="cn.mrz.mq.consumer.SplitWordConsumer"></bean>
+    <bean id="handlerExcelConsumer" class="cn.mrz.mq.consumer.HandlerExcelConsumer"></bean>
 
     <!-- queue litener  观察 监听模式 当有消息到达时会通知监听在对应的队列上的监听对象-->
     <rabbit:listener-container connection-factory="connectionFactory">
-        <rabbit:listener queues="splitWordQueue" ref="messageReceiver"/>
+        <rabbit:listener queues="splitWordQueue" ref="splitWordConsumer"/>
+        <rabbit:listener queues="handlerExcelQueue" ref="handlerExcelConsumer" method="onMessage"/>
     </rabbit:listener-container>
 
 </beans>  
