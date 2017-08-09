@@ -91,9 +91,21 @@
     </bean>
     <bean id="anyOfRolesAuthorizationFilter" class="cn.mrz.shiro.AnyOfRolesAuthorizationFilter" />
 
+    <!--记住我-->
+    <bean name="myRememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <property name="httpOnly" value="true"></property>
+        <!--10天 单位s-->
+        <property name="maxAge" value="864000"></property>
+        <property name="name" value="rememberMe"></property>
+    </bean>
+    <bean name="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cipherKey" value="#{T(org.apache.shiro.codec.Base64).decode('A63fa7DjAe3yYji44BTm1g==')}" />
+        <property name="cookie" ref="myRememberMeCookie" />
+    </bean>
     <!-- 安全管理器 -->
     <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
         <property name="realm" ref="myRealm"/>
+        <property name="rememberMeManager" ref="rememberMeManager" />
     </bean>
     <!-- Shiro过滤器 核心-->
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
@@ -117,6 +129,9 @@
                 /ajaxlogin=anon
                 /blog/**=anon
                 <!--获取博客列表-->
+                <!--user表示需要认证或者rememberMe-->
+                <!--/admin/**=user-->
+                /=user
                 <!--authc表示需要认证 没有进行身份认证是不能进行访问的-->
                 /admin/**=authc
             </value>

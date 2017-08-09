@@ -1,4 +1,5 @@
 <%@ page import="java.security.Principal" %>
+<%@ page import="org.apache.shiro.SecurityUtils" %>
 <%--
   Created by IntelliJ IDEA.
   User: Administrator
@@ -13,6 +14,7 @@
     if(userPrincipal!=null){
         username = userPrincipal.getName();
     }
+    boolean remembered = SecurityUtils.getSubject().isRemembered();
 %>
 <html>
 <head>
@@ -21,13 +23,16 @@
     <link rel="stylesheet" href="/resources/css/logon.css">
     <script>
         $(function () {
-           var logonUsername = "<%=username%>";
-            if(logonUsername!="anonymousUser"){
+           var logonUsername = "<%=username%>",remembered =<%=remembered%>;
+            if(logonUsername!='anonymousUser'&&!remembered){
                 $(".logined-username").text(logonUsername);
                 $(".logon-panel").hide();
                 $(".logined-panel").show();
             }else{
                 $(".logined-panel").hide();
+            }
+            if(!!remembered){
+                $('.remember-me-info').text('当前用户通过记住我登录,并不安全,所以需要二级验证');
             }
 
             $(".logout").one("click",function(){
@@ -69,7 +74,7 @@
                     <label for="password" class="col-sm-3 control-label">密码</label>
                     <div class="col-sm-7">
                         <input type="password" class="form-control" name="password" id="password" value="admin" placeholder="咒语">
-                        <a class="forget-pw" href="/go/forget">忘记密码</a>
+                        <a class="forget-pw" href="#"><del>忘记密码</del></a>
                     </div>
                 </div>
                 <div class="form-group hidden">
@@ -79,20 +84,23 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-offset-4 col-sm-2">
+                    <div class="col-sm-offset-4 col-sm-4">
                         <button type="submit" class="btn btn-success">登 录</button>
+                        <input name="rememberMe" type="checkbox" />记住我(10天)
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-2">
+                    <div class="col-sm-offset-2 col-sm-10">
                         <p></p>
+                        <p class="remember-me-info"></p>
                     </div>
                 </div>
+
             </form>
         </div>
         <div class="col-lg-2 right-panel">
             <div class="other-logon-list">
-                <button class="btn btn-success">其他方式登录</button>
+                <button class="btn btn-success disabled"><del>其他方式登录</del></button>
             </div>
         </div>
     </div>

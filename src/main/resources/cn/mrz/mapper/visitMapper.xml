@@ -6,7 +6,7 @@
         select * from visit
     </select>
 
-    <select id="getVisitByBlogid" resultType="Visit">
+    <select id="getVisitByBlogId" resultType="Visit">
         select *
         from visit
         where blog_id=#{blogId}

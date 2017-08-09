@@ -44,7 +44,7 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public boolean addVisit(Long blogId) {
         try {
-            Visit visit = visitMapper.getVisitByBlogid(blogId);
+            Visit visit = visitMapper.getVisitByBlogId(blogId);
             if (null == visit) {
                 visit = new Visit(blogId,1);
                 visitMapper.insert(visit);

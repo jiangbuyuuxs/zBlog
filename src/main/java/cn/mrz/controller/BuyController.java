@@ -299,7 +299,6 @@ public class BuyController extends BaseController {
     @ResponseBody
     @RequestMapping(value = "/admin/buy/file/parse", produces = {"application/json;charset=UTF-8"})
     public String parseFile(@RequestParam String fileName) throws IOException {
-        //TODO 加入消息队列
         if(fileName!=null){
             buyService.addHandlingBuyFile(fileName);
             messageProducer.sendHandlerTbkExcelMessage(fileName);

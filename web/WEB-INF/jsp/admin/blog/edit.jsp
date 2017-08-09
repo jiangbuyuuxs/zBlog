@@ -14,9 +14,14 @@
     <script type="text/javascript" charset="utf-8" src="/resources/ueditor/ueditor.all.js"></script>
     <script type="text/javascript" charset="utf-8" src="/resources/ueditor/lang/zh-cn/zh-cn.js"></script>
     <%@include file="../../comm/jscss.jsp" %>
+    <style>
+        #title{
+            width:500px;
+        }
+    </style>
     <script>
         $(function () {
-            var ue = UE.getEditor('editor',{
+            var ue = UE.getEditor('editor', {
                 toolbars: [
                     ['fullscreen', 'source', 'undo', 'redo', 'bold']
                 ]
@@ -81,25 +86,45 @@
 </head>
 <body>
 <div class="container">
-    <input type="hidden" id="blogId" class="blogId form-control" name="blogId" placeholder="编号"
-           value="${blog.id}">
-    <input type="text" id="author" class="author form-control" name="author" placeholder="username"
-           value="${blog.author}">
+    <div class="row">
+        <p>
+            写博文
+        </p>
+    </div>
+    <div class="form-inline">
+        <input type="hidden" id="blogId" class="blogId form-control" name="blogId" placeholder="编号"
+               value="${blog.id}">
+        <input type="hidden" id="author" class="author form-control" name="author" placeholder="username"
+               value="${blog.author}">
 
-    <div class="form-group">
-        <label for="classType">分类</label>
-        <input type="text" id="classType" class="classType form-control" name="classType" placeholder="类型"
-               value="${blog.classType}">
+        <div class="row">
+            <div class="col-xs-6">
+                <label for="classType">分类</label>
+                <div class="form-group">
+                    <input type="text" id="classType" class="classType form-control" name="classType" placeholder="类型"
+                           value="${blog.classType}">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <label for="title">标题</label>
+                <div class="form-group">
+                    <input type="text" id="title" class="title form-control" name="title" placeholder="标题哦"
+                           value="${blog.title}">
+                </div>
+            </div>
+            <div class="col-xs-2">
+                <input type="button" class="send button btn-success" value="发布"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-8">
+                <script id="editor" type="text/plain" style="width:800px;height:400px;"></script>
+            </div>
+        </div>
+        <script id="blogtexts" type="text/html">${blog.texts}</script>
     </div>
-    <div class="form-group">
-        <label for="title">标题</label>
-        <input type="text" id="title" class="title form-control" name="title" placeholder="标题哦" value="${blog.title}">
-    </div>
-    <div>
-        <script id="editor" type="text/plain" style="width:800px;height:400px;"></script>
-    </div>
-    <input type="button" class="send button btn-success" value="发布"/>
-    <script id="blogtexts" type="text/html">${blog.texts}</script>
 </div>
 <%@include file="../../comm/footer.jsp" %>
 </body>

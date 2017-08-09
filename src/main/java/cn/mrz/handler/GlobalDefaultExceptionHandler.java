@@ -23,8 +23,6 @@ public class GlobalDefaultExceptionHandler {
         // 如果异常使用了ResponseStatus注解，那么重新抛出该异常，Spring框架会处理该异常。
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null)
             throw e;
-
-        // 否则创建ModleAndView，处理该异常。
         ModelAndView mv = new ModelAndView();
         mv.addObject("message", "非法参数~~~");
         mv.addObject("url", req.getRequestURL());
@@ -35,12 +33,10 @@ public class GlobalDefaultExceptionHandler {
 
     @ExceptionHandler(value = RuntimeException.class)
     public ModelAndView commErrorHandler(HttpServletRequest req, Exception e) throws Exception {
-        // 如果异常使用了ResponseStatus注解，那么重新抛出该异常，Spring框架会处理该异常。
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null)
             throw e;
         String ajaxHeader = req.getHeader("X-Requested-With");
         ModelAndView mv = new ModelAndView();
-        // 否则创建ModleAndView，处理该异常。
         if(ajaxHeader==null) {
             mv.addObject("message", e.getMessage());
             mv.addObject("url", req.getRequestURL());

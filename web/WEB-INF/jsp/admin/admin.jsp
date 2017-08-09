@@ -135,7 +135,14 @@
         .blog-tab-panel > .row {
             border-bottom: 1px dashed #000000;
             margin: 0 0 5px 0;
+        }
 
+        .blog-tab-panel > .row .title {
+            width:100%;
+            display: inline-block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .tab-container {
@@ -479,8 +486,8 @@
     <script type="text/x-template" id="blog-tab-panel-template">
         <div class="blog-tab-panel tab-panel">
             <div class="row" v-for="blog of userBlogList">
-                <div class="col-lg-6">
-                    <a target="_blank" :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
+                <div class="col-lg-8">
+                    <a target="_blank" class="title" :title="blog.title" :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
                 </div>
                 <div class="col-lg-3 pull-right">
                     {{blog.createDate}}

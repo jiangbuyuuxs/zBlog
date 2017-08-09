@@ -17,7 +17,7 @@ public interface VisitMapper extends BaseMapper<Visit> {
 
     List<Visit> selectVisitList(Pagination page);
 
-    Visit getVisitByBlogid(Long blogid);
+    Visit getVisitByBlogId(Long blogId);
     int updateVisit(@Param("visit")Visit visit);
     int getAllVisitSum();
     int deleteById(Long id);

@@ -193,6 +193,17 @@
         .item-order-container{
             margin:10px 0 10px 20px;
         }
+        .go-top-btn{
+            width:50px;
+            height:50px;
+            display: block;
+            background: url("/resources/img/go-top.png") no-repeat;
+        }
+        .tool-bar{
+            position: fixed;
+            right:40px;
+            bottom:40px;
+        }
     </style>
     <script type="text/x-template" id="app">
         <div class="app">
@@ -384,7 +395,21 @@
                     'app': app
                 }
             });
-
+            $('#go-top').on('click', function () {
+                $('body').animate({
+                    scrollTop:0
+                },{
+                    duration:500,
+                    easing:'linear'
+                });
+            });
+            $(window).on('scroll', function () {
+                if($('body').scrollTop() > 0){
+                    $('.tool-bar').removeClass('hidden');
+                }else{
+                    $('.tool-bar').addClass('hidden');
+                }
+            });
         });
     </script>
 </head>
@@ -395,6 +420,11 @@
     </div>
     <app></app>
 </div>
+<ul class="tool-bar hidden">
+    <li id="go-top">
+        <a class="go-top-btn" title="回到顶部"></a>
+    </li>
+</ul>
 <%@include file="../comm/footer.jsp" %>
 </body>
 </html>

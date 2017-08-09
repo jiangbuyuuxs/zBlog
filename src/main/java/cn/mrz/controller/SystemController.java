@@ -30,7 +30,7 @@ import java.util.Map;
  * Created by Administrator on 2017/3/16.
  */
 @Controller
-public class SystemController extends BaseController{
+public class SystemController extends BaseController {
 
     @Autowired
     private BlogService blogService;
@@ -51,44 +51,52 @@ public class SystemController extends BaseController{
         data.put("blogCountNum", blogCountNum);
         data.put("visitCount", visitCount);
         Map info = new HashMap();
-        info.put("success",true);
-        info.put("data",data);
+        info.put("success", true);
+        info.put("data", data);
         return JSONObject.toJSONString(info);
     }
 
-    @RequestMapping(value = "/login",method = RequestMethod.POST)
-    public ModelAndView login(@RequestParam("username") String username, @RequestParam("password") String password, HttpServletRequest request) {
-        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ModelAndView login(@RequestParam("username") String username, @RequestParam("password") String password, @RequestParam(value = "rememberMe", required = false) Boolean rememberMe, HttpServletRequest request) {
+
         Subject subject = SecurityUtils.getSubject();
-        try {
-            subject.login(token);
-        } catch (IncorrectCredentialsException ice) {
-            // 捕获密码错误异常
-            ModelAndView mv = new ModelAndView("logon");
-            mv.addObject("errorMessage", "密码或用户名错误!");
-            return mv;
-        } catch (UnknownAccountException uae) {
-            // 捕获未知用户名异常
-            ModelAndView mv = new ModelAndView("logon");
-            mv.addObject("errorMessage", "密码或用户名错误!");
-            return mv;
-        } catch (ExcessiveAttemptsException eae) {
-            // 捕获错误登录过多的异常
-            ModelAndView mv = new ModelAndView("logon");
-            mv.addObject("errorMessage", "尝试次数过多!");
-            return mv;
-        }
-        Session session = subject.getSession();
-        session.setAttribute("username", username);
-        //获取到被拦截的页面,丢失锚信息
-        SavedRequest savedRequest = WebUtils.getSavedRequest(request);
         String url = "/";
-        if (savedRequest != null)
-            url = savedRequest.getRequestUrl();
+        if(!subject.isAuthenticated()) {//&&!subject.isRemembered()
+            if (rememberMe == null)
+                rememberMe = false;
+            UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+            token.setRememberMe(rememberMe);
+            try {
+                subject.login(token);
+            } catch (IncorrectCredentialsException ice) {
+                // 捕获密码错误异常
+                ModelAndView mv = new ModelAndView("logon");
+                mv.addObject("errorMessage", "密码或用户名错误!");
+                return mv;
+            } catch (UnknownAccountException uae) {
+                // 捕获未知用户名异常
+                ModelAndView mv = new ModelAndView("logon");
+                mv.addObject("errorMessage", "密码或用户名错误!");
+                return mv;
+            } catch (ExcessiveAttemptsException eae) {
+                // 捕获错误登录过多的异常
+                ModelAndView mv = new ModelAndView("logon");
+                mv.addObject("errorMessage", "尝试次数过多!");
+                return mv;
+            }
+            //通过记住我登录,缺少session中的部分信息
+            Session session = subject.getSession();
+            session.setAttribute("username", username);
+            //获取到被拦截的页面,丢失锚信息
+            SavedRequest savedRequest = WebUtils.getSavedRequest(request);
+            if (savedRequest != null)
+                url = savedRequest.getRequestUrl();
+        }
         return new ModelAndView("redirect:" + url);
     }
+
     @ResponseBody
-    @RequestMapping(value = "/ajaxlogin",produces = {"application/json;charset=UTF-8"})
+    @RequestMapping(value = "/ajaxlogin", produces = {"application/json;charset=UTF-8"})
     public String ajaxLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         Subject subject = SecurityUtils.getSubject();
@@ -134,29 +142,29 @@ public class SystemController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/admin/search/search", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
-    public String search(@RequestParam String keyword,@RequestParam(required = false) String subject,@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer pageSize) throws IOException {
-        if(subject==null){
-            Page<Blog> pagination = new Page<Blog>(1,10);
+    public String search(@RequestParam String keyword, @RequestParam(required = false) String subject, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize) throws IOException {
+        if (subject == null) {
+            Page<Blog> pagination = new Page<Blog>(1, 10);
             pagination = blogService.searchBlogByTitle(pagination, keyword);
             List<Blog> blogList = pagination.getRecords();
             Map data = new HashMap();
             data.put("blogList", blogList);
             data.put("dataType", "blog");
             Map info = new HashMap();
-            info.put("success",true);
-            info.put("data",data);
+            info.put("success", true);
+            info.put("data", data);
             return JSONObject.toJSONString(info);
         }
         //聚合
-        Page<Blog> pagination = new Page<Blog>(1,10);
+        Page<Blog> pagination = new Page<Blog>(1, 10);
         pagination = blogService.searchBlogByTitle(pagination, keyword);
         List<Blog> blogList = pagination.getRecords();
         Map data = new HashMap();
         data.put("blogList", blogList);
         data.put("dataType", "blog");
         Map info = new HashMap();
-        info.put("success",true);
-        info.put("data",data);
+        info.put("success", true);
+        info.put("data", data);
         return JSONObject.toJSONString(info);
     }
 
