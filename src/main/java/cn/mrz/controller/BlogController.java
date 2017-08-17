@@ -2,9 +2,11 @@ package cn.mrz.controller;
 
 import cn.mrz.mq.producer.MessageProducer;
 import cn.mrz.pojo.Blog;
+import cn.mrz.pojo.Comment;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.SecurityUtils;
@@ -60,10 +62,12 @@ public class BlogController extends BaseController{
     @RequestMapping(value = "/blog/blog/{id}")
     public String goBlogPage(ModelMap map,@PathVariable Long id) {
         Blog blog = blogService.getById(id);
+        List<Comment> commentList = blogService.getCommentByBId(id);
         if (blog == null) {
             throw new RuntimeException("没有这样的博文~~~");
         }
         map.addAttribute("blog", blog);
+        map.addAttribute("commentList", JSON.toJSONString(commentList));
         return "/blog/blog";
     }
 

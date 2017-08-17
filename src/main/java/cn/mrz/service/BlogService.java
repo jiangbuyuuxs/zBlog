@@ -1,6 +1,7 @@
 package cn.mrz.service;
 
 import cn.mrz.pojo.Blog;
+import cn.mrz.pojo.Comment;
 import cn.mrz.pojo.Word;
 import com.baomidou.mybatisplus.plugins.Page;
 
@@ -49,4 +50,6 @@ public interface BlogService extends BaseService<Blog,Long> {
      * @return
      */
     int getBlogCountNum();
+
+    List<Comment> getCommentByBId(Long bId);
 }

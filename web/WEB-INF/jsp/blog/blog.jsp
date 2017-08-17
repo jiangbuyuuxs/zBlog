@@ -64,6 +64,25 @@
           $('.tool-bar').addClass('hidden');
         }
       });
+
+      var commentJson = ${commentList};
+      var commentHtml = '';
+      for(var pos in commentJson){
+        commentHtml += createComment(commentJson[pos],0);
+      }
+      $('.comment').html(commentHtml);
+
+      function createComment(comment,level){
+        var result = '<ul><li class="comment-level-'+(level++)+'">'+comment.uId +' '+ comment.content+ ' '+comment.cTime+ ' 来自'+ comment.device;
+        if(comment.reply.length>1){
+          for(var pos in comment.reply) {
+            result += createComment(comment.reply[pos],level);
+          }
+        }
+        result +='</li></ul>'
+        return result;
+      }
+
     });
   </script>
 </head>
@@ -74,6 +93,9 @@
   <div class="main-panel">
     <h2 class="blog-title">${blog.title}<small>${blog.createDate}</small></h2>
     <div class="highlight">${blog.texts}</div>
+    <div class="comment">
+
+    </div>
   </div>
     <ul class="tool-bar hidden">
       <li id="go-top">

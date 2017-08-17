@@ -1,9 +1,11 @@
 package cn.mrz.service.impl;
 
 import cn.mrz.mapper.BlogMapper;
+import cn.mrz.mapper.CommentMapper;
 import cn.mrz.mapper.VisitMapper;
 import cn.mrz.mapper.WordMapper;
 import cn.mrz.pojo.Blog;
+import cn.mrz.pojo.Comment;
 import cn.mrz.pojo.Visit;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
@@ -30,6 +32,8 @@ public class BlogServiceImpl implements BlogService {
     private VisitMapper visitMapper;
     @Autowired
     private WordMapper wordMapper;
+    @Autowired
+    private CommentMapper commentMapper;
     @Override
     public Page<Blog> getBlogList(Page<Blog> page,boolean hasContent) {
         if (!hasContent) {
@@ -135,6 +139,11 @@ public class BlogServiceImpl implements BlogService {
         return blogMapper.selectCount();
     }
 
+    @Override
+    public List<Comment> getCommentByBId(Long bId) {
+        return commentMapper.selectCommentByBId(bId);
+    }
+
     private Blog getHotwordPart(Blog blog, String remark) {
         //截取的文章长度
         final int textsSubLength = 100;
@@ -174,6 +183,7 @@ public class BlogServiceImpl implements BlogService {
     public Blog getById(Long id) {
         return blogMapper.selectById(id);
     }
+
 
     @Deprecated
     public boolean delete(Long id) {
