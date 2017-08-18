@@ -52,4 +52,14 @@ public interface BlogService extends BaseService<Blog,Long> {
     int getBlogCountNum();
 
     List<Comment> getCommentByBId(Long bId);
+
+    /**
+     * 顶踩评论
+     * @param cId 评论id
+     * @param userId 执行人id
+     * @param direction 0踩1顶
+     * @return 顶/踩 变化数
+     */
+    int commentUpDown(Long cId, Long userId,Long direction);
+
 }

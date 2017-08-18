@@ -12,13 +12,39 @@ import java.util.List;
 public class Comment implements Serializable {
     private Long id;
     private Long uId;
+
+    private String username;
     private Long bId;
-    @JSONField(format="yyyy-MM-dd HH:mm:ss")
     private Date cTime;
     private Long device;
     private String content;
     private List<Reply> reply;
+    private Long up;
+    private Long down;
 
+    public Long getUp() {
+        return up;
+    }
+
+    public void setUp(Long up) {
+        this.up = up;
+    }
+
+    public Long getDown() {
+        return down;
+    }
+
+    public void setDown(Long down) {
+        this.down = down;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
     public List<Reply> getReply() {
         return reply;
     }

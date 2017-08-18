@@ -9,11 +9,14 @@
                 <id property="cTime" column="c_time"></id>
                 <id property="device" column="device"></id>
                 <id property="content" column="content"></id>
+                <id property="up" column="up"></id>
+                <id property="down" column="down"></id>
+                <association property="username" column="u_id" select="cn.mrz.mapper.UserMapper.findUsernameById"></association>
                 <collection property="reply" column="id" ofType="Reply" select="cn.mrz.mapper.ReplyMapper.findReplyByCId"></collection>
         </resultMap>
 
         <select id="findReplyByCId" resultMap="reply_result_map">
-                select id,u_id,c_id,c_time,device,content from comment where c_id = #{cId}
+                select id,u_id,c_id,c_time,device,content,up,down from comment where c_id = #{cId}
         </select>
 
 </mapper>

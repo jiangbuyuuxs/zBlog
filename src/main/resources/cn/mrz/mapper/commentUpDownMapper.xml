@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.mapper.CommentUpDownMapper">
+    <select id="findByCIdUserId" resultType="CommentUpDown">
+        select * from comment_up_down where c_id=#{cId} and user_id = #{userId} and direction = #{direction}
+    </select>
+
+    <insert id="addCommentUpDown" parameterType="CommentUpDown" useGeneratedKeys="true" keyProperty="id">
+        insert into comment_up_down(c_id,user_id,direction) values(#{cId},#{userId},#{direction})
+    </insert>
+</mapper>

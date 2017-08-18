@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -271,5 +272,20 @@ public class BlogController extends BaseController{
             blogListJson = JSONObject.toJSONString(map);
         }
         return blogListJson;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/blog/comment/updown", produces = {"application/json;charset=UTF-8"})
+    public String commentUp(@RequestParam Long cId,@RequestParam Long direction) {
+        String commentUpJson = DEFAULT_FAILED_MESSAGE;
+        if(cId==null)
+            return commentUpJson;
+        Long id = (Long)SecurityUtils.getSubject().getSession().getAttribute("id");
+        int result = blogService.commentUpDown(cId, id, direction);
+        HashMap map = new HashMap();
+        map.put("success",true);
+        map.put("data",result);
+        commentUpJson = JSONObject.toJSONString(map);
+        return commentUpJson;
     }
 }

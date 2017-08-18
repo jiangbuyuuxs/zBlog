@@ -1130,11 +1130,12 @@
                                 );
                             },
                             clear: function () {
-                                //TODO 需要mask
+                                BlogTool.showMask();
                                 var url = '/admin/buy/file/clear';
                                 this.$http.post(url).
                                         then(function (response) {
                                             alert(response.data.message);
+                                            BlogTool.hideMask();
                                         });
                             },
                             queryHandlingFileList: function () {
@@ -1216,6 +1217,8 @@
                                     }
                                     this.hiddenAddTodoPanel();
                                     this.addBtn = false;
+                                    $('.todo-title').val('');
+                                    $('.todo-remark').val('');
                                 }, function (response) {
 
                                 }

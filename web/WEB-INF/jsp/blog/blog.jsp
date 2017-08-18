@@ -46,6 +46,12 @@
       right:40px;
       bottom:40px;
     }
+    .comment li{
+      padding:2px 0;
+    }
+    .focus-comment{
+      background: #99dda7;
+    }
   </style>
   <script>
     $(function () {
@@ -66,21 +72,62 @@
       });
 
       var commentJson = ${commentList};
-      var commentHtml = '';
+      var commentHtml = '<ul>';
       for(var pos in commentJson){
         commentHtml += createComment(commentJson[pos],0);
       }
+      commentHtml += '</ul>';
       $('.comment').html(commentHtml);
 
-      function createComment(comment,level){
-        var result = '<ul><li class="comment-level-'+(level++)+'">'+comment.uId +' '+ comment.content+ ' '+comment.cTime+ ' 来自'+ comment.device;
-        if(comment.reply.length>1){
-          for(var pos in comment.reply) {
-            result += createComment(comment.reply[pos],level);
+      $('.comment li').on('mouseenter', function () {
+        $(this).addClass('focus-comment');
+        $(this).find('span').removeClass('hidden');
+      }).on('mouseleave', function () {
+        $(this).removeClass('focus-comment');
+        $(this).find('span').addClass('hidden');
+      });
+
+      $('.up-down-btn').on('click', function () {
+        var $self = $(this);
+        var cId = $self.attr('data-c-id');
+        var direction = $self.attr('data-direction');
+        var data = {cId:cId,direction:direction};
+        $.ajax('/blog/comment/updown',{
+          data:data,
+          success: function (data) {
+            console.log(data.data);
+            var org = Number($self.next('span').text());
+            $self.next('span').text(org+data.data);
+          },failure: function (data) {
+            console.log(data);
           }
+        });
+      });
+
+      function createComment(comment,level){
+        var result = '<li class="comment-level-' + (level++) + '">' +
+                '<a href="/user/userinfo/' + comment.uId + '" target="_blank">' + comment.username + '</a> ' + comment.content+
+                ' ' + getDescriptionLeaveNow(comment.cTime) +
+                '<span class=" hidden"> ' +
+                '<a class="up-down-btn" data-c-id="'+comment.id+'" data-direction="1" href="javascript:void;">顶</a> [<span>' + comment.up + '</span>] | ' +
+                '<a class="up-down-btn" data-c-id="'+comment.id+'" data-direction="0" href="javascript:void;">踩</a> [<span>' + comment.down + '</span>]' + ' 来自'+ BlogTool.device[comment.device]+'</span></li>';
+        result += '<ul>';
+        for(var pos in comment.reply) {
+          result += createComment(comment.reply[pos],level);
         }
-        result +='</li></ul>'
+        result +='</ul>'
         return result;
+      }
+
+      function getDescriptionLeaveNow(cTime){
+        var between = Date.now() / 1000 - cTime / 1000;
+        if (between < 3600) {
+          return (~~(between / 60)+'分钟前');
+        } else if (between < 86400) {
+          return (~~(between / 3600)+'小时前');
+        } else {
+          return (~~(between / 86400)+'天前');
+        }
       }
 
     });

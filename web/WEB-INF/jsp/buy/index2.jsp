@@ -368,8 +368,8 @@
                             var hasSortPrice = search.indexOf(priceOrderFlag);
                             //存在价格排序这个条件
                             if(hasSortPrice>-1) {
-                                var forward = search.substr(hasSortPrice + priceOrderFlag.length, 1);
-                                this.sortPrice = Math.abs(forward - 1);
+                                var direction = search.substr(hasSortPrice + priceOrderFlag.length, 1);
+                                this.sortPrice = Math.abs(direction - 1);
                                 this.sortSale = 0;
                                 //只有一个排序参数
                                 if(search.indexOf('?'+priceOrderFlag)==0)

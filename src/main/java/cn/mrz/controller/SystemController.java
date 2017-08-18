@@ -1,9 +1,12 @@
 package cn.mrz.controller;
 
+import cn.mrz.mapper.UserMapper;
 import cn.mrz.mapper.VisitMapper;
 import cn.mrz.pojo.Blog;
+import cn.mrz.pojo.User;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.BuyService;
+import cn.mrz.view.JsonView;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.shiro.SecurityUtils;
@@ -36,6 +39,8 @@ public class SystemController extends BaseController {
     private BlogService blogService;
     @Autowired
     private VisitMapper visitMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @RequestMapping(value = {"/admin/go/{page}"})
     public String goAdminPage(@PathVariable String page) {
@@ -87,6 +92,8 @@ public class SystemController extends BaseController {
             //通过记住我登录,缺少session中的部分信息
             Session session = subject.getSession();
             session.setAttribute("username", username);
+            User user = userMapper.getUserByUsername(username);
+            session.setAttribute("id", user.getId());
             //获取到被拦截的页面,丢失锚信息
             SavedRequest savedRequest = WebUtils.getSavedRequest(request);
             if (savedRequest != null)
@@ -98,6 +105,7 @@ public class SystemController extends BaseController {
     @ResponseBody
     @RequestMapping(value = "/ajaxlogin", produces = {"application/json;charset=UTF-8"})
     public String ajaxLogin(@RequestParam("username") String username, @RequestParam("password") String password) {
+        //TODO 通过JsonView,可以和上面的方法整合
         UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         Subject subject = SecurityUtils.getSubject();
         try {
@@ -115,6 +123,8 @@ public class SystemController extends BaseController {
         }
         Session session = subject.getSession();
         session.setAttribute("username", username);
+        User user = userMapper.getUserByUsername(username);
+        session.setAttribute("id", user.getId());
         return "{\"success\":true}";
     }
 

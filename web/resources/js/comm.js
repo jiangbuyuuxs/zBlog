@@ -100,4 +100,23 @@
 
     window['BlogTool']['sendMessage'] = sendMessage;
 
+    function showMask(){
+        var $maskObj = $('.mask');
+        if($maskObj.length==0){
+            $('<div class="mask"><div class="wait"></div></div>').appendTo($('body'));
+            $maskObj = $('.mask');
+        }
+        $maskObj.removeClass('hidden');
+    }
+    window['BlogTool']['showMask'] = showMask;
+
+    function hideMask(){
+        var $maskObj = $('.mask');
+        if($maskObj.length>0)
+            $maskObj.addClass('hidden');
+    }
+    window['BlogTool']['hideMask'] = hideMask;
+
+    window['BlogTool']['device'] = ['未知设备','iPhone','Android','Chrome','Firefox','safari'];
+
 })($);

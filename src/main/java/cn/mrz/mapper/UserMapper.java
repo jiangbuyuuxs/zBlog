@@ -23,4 +23,6 @@ public interface UserMapper extends BaseMapper<User> {
     Set<Role> findRoles(String username);
 
     Set<Permission> findPermissions(String username);
+
+    String findUsernameById(Long id);
 }

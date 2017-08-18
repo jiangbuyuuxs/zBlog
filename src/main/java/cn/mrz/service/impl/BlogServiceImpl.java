@@ -1,13 +1,7 @@
 package cn.mrz.service.impl;
 
-import cn.mrz.mapper.BlogMapper;
-import cn.mrz.mapper.CommentMapper;
-import cn.mrz.mapper.VisitMapper;
-import cn.mrz.mapper.WordMapper;
-import cn.mrz.pojo.Blog;
-import cn.mrz.pojo.Comment;
-import cn.mrz.pojo.Visit;
-import cn.mrz.pojo.Word;
+import cn.mrz.mapper.*;
+import cn.mrz.pojo.*;
 import cn.mrz.service.BlogService;
 import cn.mrz.utils.StringUtils;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
@@ -34,6 +28,8 @@ public class BlogServiceImpl implements BlogService {
     private WordMapper wordMapper;
     @Autowired
     private CommentMapper commentMapper;
+    @Autowired
+    private CommentUpDownMapper commentUpDownMapper;
     @Override
     public Page<Blog> getBlogList(Page<Blog> page,boolean hasContent) {
         if (!hasContent) {
@@ -142,6 +138,41 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public List<Comment> getCommentByBId(Long bId) {
         return commentMapper.selectCommentByBId(bId);
+    }
+
+    @Override
+    public int commentUpDown(Long cId, Long userId,Long direction) {
+        int result = 0;
+        CommentUpDown commentUpDown = commentUpDownMapper.findByCIdUserId(cId,userId, direction);
+        if(commentUpDown==null){
+            commentUpDown = new CommentUpDown(cId, userId, direction);
+            commentUpDownMapper.addCommentUpDown(commentUpDown);
+            result = 1;
+        }else{
+            Long flag = commentUpDown.getFlag();
+            if(flag==0){
+                commentUpDown.setFlag(1L);
+                commentUpDownMapper.updateById(commentUpDown);
+                result = 1;
+            }else if(flag==1){
+                commentUpDown.setFlag(0L);
+                commentUpDownMapper.updateById(commentUpDown);
+                result = -1;
+            }
+        }
+        //找出当前点赞的个数
+        EntityWrapper<CommentUpDown> commentUpDownEntityWrapper = new EntityWrapper<CommentUpDown>();
+        commentUpDownEntityWrapper.eq("c_id",cId);
+        commentUpDownEntityWrapper.eq("direction",direction);
+        commentUpDownEntityWrapper.eq("flag",1);
+        Long directionCount = new Long(commentUpDownMapper.selectCount(commentUpDownEntityWrapper));
+        //更新评论表
+        if(direction==1){
+            commentMapper.updateUp(directionCount, cId);
+        }else if(direction==0){
+            commentMapper.updateDown(directionCount, cId);
+        }
+        return result;
     }
 
     private Blog getHotwordPart(Blog blog, String remark) {
