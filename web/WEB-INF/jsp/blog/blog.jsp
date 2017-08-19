@@ -159,7 +159,7 @@
                         $('.reply-btn').addClass('disabled');
 
                         var cId = $(this).attr('data-c-id');
-                        $('#reply-c-id').val(cId);
+                        $('.reply-c-id').val(cId);
                         var username = $(this).attr('data-username');
                         $('.reply-to').text(username);
                         $('.to-user').removeClass('hidden');

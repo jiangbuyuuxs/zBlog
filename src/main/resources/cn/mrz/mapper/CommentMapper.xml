@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrz.mapper.CommentMapper">
+        <resultMap id="comment_result_map" type="Comment">
+                <id property="id" column="id"></id>
+                <id property="uId" column="u_id"></id>
+                <id property="bId" column="b_id"></id>
+                <id property="cTime" column="c_time"></id>
+                <id property="device" column="device"></id>
+                <id property="content" column="content"></id>
+                <id property="up" column="up"></id>
+                <id property="down" column="down"></id>
+                <association property="username" column="u_id" select="cn.mrz.mapper.UserMapper.findUsernameById"></association>
+                <collection property="reply" column="id" ofType="Reply" select="cn.mrz.mapper.ReplyMapper.findReplyByCId"></collection>
+        </resultMap>
+
+        <select id="selectCommentByBId" resultMap="comment_result_map">
+                select id,u_id,b_id,c_time,device,content,up,down from comment where b_id = #{bId}
+        </select>
+
+        <update id="updateUp">
+                update comment set up=#{up} where id=#{id}
+        </update>
+        <update id="updateDown">
+                update comment set down=#{down} where id=#{id}
+        </update>
+
+        <insert id="insertComment" parameterType="Comment" useGeneratedKeys="true" keyProperty="id">
+                insert into
+                comment(u_id,b_id,content,c_time,device)
+                values(#{uId},#{bId},#{content},#{cTime},#{device})
+        </insert>
+
+</mapper>
