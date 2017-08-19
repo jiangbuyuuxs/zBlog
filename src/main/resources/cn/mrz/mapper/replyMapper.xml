@@ -18,5 +18,9 @@
         <select id="findReplyByCId" resultMap="reply_result_map">
                 select id,u_id,c_id,c_time,device,content,up,down from comment where c_id = #{cId}
         </select>
-
+        <insert id="insertReply" parameterType="Reply" useGeneratedKeys="true" keyProperty="id">
+                insert into
+                comment(u_id,c_id,content,c_time,device)
+                values(#{uId},#{cId},#{content},#{cTime},#{device})
+        </insert>
 </mapper>

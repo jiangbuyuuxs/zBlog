@@ -30,4 +30,44 @@ public class StringUtils {
         htmlStr = m_space.replaceAll(" ");
         return htmlStr;
     }
+
+    public static String stripXSSAndSql(String value) {
+        if (value != null) {
+            // NOTE: It's highly recommended to use the ESAPI library and
+            // uncomment the following line to
+            // avoid encoded attacks.
+            // value = ESAPI.encoder().canonicalize(value);
+            // Avoid null characters
+/**         value = value.replaceAll("", "");***/
+            // Avoid anything between script tags
+            Pattern scriptPattern = Pattern.compile("<[\r\n| | ]*script[\r\n| | ]*>(.*?)</[\r\n| | ]*script[\r\n| | ]*>", Pattern.CASE_INSENSITIVE);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Avoid anything in a src="http://www.yihaomen.com/article/java/..." type of e-xpression
+            scriptPattern = Pattern.compile("src[\r\n| | ]*=[\r\n| | ]*[\\\"|\\\'](.*?)[\\\"|\\\']", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Remove any lonesome </script> tag
+            scriptPattern = Pattern.compile("</[\r\n| | ]*script[\r\n| | ]*>", Pattern.CASE_INSENSITIVE);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Remove any lonesome <script ...> tag
+            scriptPattern = Pattern.compile("<[\r\n| | ]*script(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Avoid eval(...) expressions
+            scriptPattern = Pattern.compile("eval\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Avoid e-xpression(...) expressions
+            scriptPattern = Pattern.compile("e-xpression\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Avoid javascript:... expressions
+            scriptPattern = Pattern.compile("javascript[\r\n| | ]*:[\r\n| | ]*", Pattern.CASE_INSENSITIVE);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Avoid vbscript:... expressions
+            scriptPattern = Pattern.compile("vbscript[\r\n| | ]*:[\r\n| | ]*", Pattern.CASE_INSENSITIVE);
+            value = scriptPattern.matcher(value).replaceAll("");
+            // Avoid onload= expressions
+            scriptPattern = Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+            value = scriptPattern.matcher(value).replaceAll("");
+        }
+        return value;
+    }
+
 }

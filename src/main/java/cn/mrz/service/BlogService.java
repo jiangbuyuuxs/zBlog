@@ -62,4 +62,16 @@ public interface BlogService extends BaseService<Blog,Long> {
      */
     int commentUpDown(Long cId, Long userId,Long direction);
 
+
+    /**
+     *
+     * @param uId
+     * @param bId
+     * @param content
+     * @param device
+     * @return
+     */
+    boolean newComment(Long uId, Long bId, String content,Long device);
+
+    boolean replyComment(Long uId, Long cId, String content,Long device);
 }

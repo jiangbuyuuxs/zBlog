@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,13 +30,16 @@ public class BlogServiceImpl implements BlogService {
     @Autowired
     private CommentMapper commentMapper;
     @Autowired
+    private ReplyMapper replyMapper;
+    @Autowired
     private CommentUpDownMapper commentUpDownMapper;
+
     @Override
-    public Page<Blog> getBlogList(Page<Blog> page,boolean hasContent) {
+    public Page<Blog> getBlogList(Page<Blog> page, boolean hasContent) {
         if (!hasContent) {
             page.setRecords(blogMapper.selectBlogListWithoutContent(page));
             return page;
-        }else {
+        } else {
             page.setRecords(blogMapper.selectBlogList(page));
             return page;
         }
@@ -46,7 +50,7 @@ public class BlogServiceImpl implements BlogService {
         try {
             Visit visit = visitMapper.getVisitByBlogId(blogId);
             if (null == visit) {
-                visit = new Visit(blogId,1);
+                visit = new Visit(blogId, 1);
                 visitMapper.insert(visit);
             } else {
                 visit.setNum(visit.getNum() + 1);
@@ -63,13 +67,13 @@ public class BlogServiceImpl implements BlogService {
     public void addBlog(Blog blog) {
         blogMapper.insertBlog(blog);
         long blogId = blog.getId();
-        Visit visit = new Visit(blogId,0);
+        Visit visit = new Visit(blogId, 0);
         visitMapper.insert(visit);
     }
 
     @Override
     public List<Blog> getHotBlogList(int num) {
-        Page<Visit> pagination = new Page<Visit>(1, num,"num");
+        Page<Visit> pagination = new Page<Visit>(1, num, "num");
         pagination.setAsc(false);
         List<Visit> hotBlogVisitList = visitMapper.selectVisitList(pagination);
         ArrayList<Blog> hotBlogList = new ArrayList<Blog>();
@@ -83,13 +87,13 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public int deleteBlog(Blog blog) {
-        if(blog!=null){
+        if (blog != null) {
             Long id = blog.getId();
             int deleteVisit = visitMapper.deleteById(id);
             int deleteBlog = blogMapper.deleteById(id);
             int deleteWord = wordMapper.delWordsByBlogId(id);
             return deleteBlog;
-        }else{
+        } else {
             return 0;
         }
     }
@@ -97,7 +101,7 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public List<Blog> getBlogListByWordList(List<Word> wordList) {
         List<Blog> blogList = new ArrayList<Blog>();
-        for (Word word:wordList){
+        for (Word word : wordList) {
             Blog blog = blogMapper.selectById(word.getBlogId());
             String remark = word.getRemark();
             blog = getHotwordPart(blog, remark);
@@ -107,23 +111,23 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public Page<Blog> getUserBlogList(Page<Blog> page,String author) {
+    public Page<Blog> getUserBlogList(Page<Blog> page, String author) {
         EntityWrapper<Blog> blogEntityWrapper = new EntityWrapper<Blog>();
         blogEntityWrapper
                 .setSqlSelect("id,title,create_date")
-                .where("author={0}",author)
-                .orderBy("create_date",false);
-        page.setRecords(blogMapper.selectPage(page,blogEntityWrapper));
+                .where("author={0}", author)
+                .orderBy("create_date", false);
+        page.setRecords(blogMapper.selectPage(page, blogEntityWrapper));
         return page;
     }
 
     @Override
-    public Page<Blog> searchBlogByTitle(Page<Blog> page,String keyword) {
+    public Page<Blog> searchBlogByTitle(Page<Blog> page, String keyword) {
         EntityWrapper<Blog> blogEntityWrapper = new EntityWrapper<Blog>();
         blogEntityWrapper
                 .setSqlSelect("id,title,edit_date")
-                .where("title like {0}","%"+keyword+"%")
-                .orderBy("create_date",false);
+                .where("title like {0}", "%" + keyword + "%")
+                .orderBy("create_date", false);
 
         page.setRecords(blogMapper.selectPage(page, blogEntityWrapper));
         return page;
@@ -141,20 +145,20 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public int commentUpDown(Long cId, Long userId,Long direction) {
+    public int commentUpDown(Long cId, Long userId, Long direction) {
         int result = 0;
-        CommentUpDown commentUpDown = commentUpDownMapper.findByCIdUserId(cId,userId, direction);
-        if(commentUpDown==null){
+        CommentUpDown commentUpDown = commentUpDownMapper.findByCIdUserId(cId, userId, direction);
+        if (commentUpDown == null) {
             commentUpDown = new CommentUpDown(cId, userId, direction);
             commentUpDownMapper.addCommentUpDown(commentUpDown);
             result = 1;
-        }else{
+        } else {
             Long flag = commentUpDown.getFlag();
-            if(flag==0){
+            if (flag == 0) {
                 commentUpDown.setFlag(1L);
                 commentUpDownMapper.updateById(commentUpDown);
                 result = 1;
-            }else if(flag==1){
+            } else if (flag == 1) {
                 commentUpDown.setFlag(0L);
                 commentUpDownMapper.updateById(commentUpDown);
                 result = -1;
@@ -162,17 +166,41 @@ public class BlogServiceImpl implements BlogService {
         }
         //找出当前点赞的个数
         EntityWrapper<CommentUpDown> commentUpDownEntityWrapper = new EntityWrapper<CommentUpDown>();
-        commentUpDownEntityWrapper.eq("c_id",cId);
-        commentUpDownEntityWrapper.eq("direction",direction);
-        commentUpDownEntityWrapper.eq("flag",1);
+        commentUpDownEntityWrapper.eq("c_id", cId);
+        commentUpDownEntityWrapper.eq("direction", direction);
+        commentUpDownEntityWrapper.eq("flag", 1);
         Long directionCount = new Long(commentUpDownMapper.selectCount(commentUpDownEntityWrapper));
         //更新评论表
-        if(direction==1){
+        if (direction == 1) {
             commentMapper.updateUp(directionCount, cId);
-        }else if(direction==0){
+        } else if (direction == 0) {
             commentMapper.updateDown(directionCount, cId);
         }
         return result;
+    }
+
+    @Override
+    public boolean newComment(Long uId, Long bId, String content,Long device) {
+        Comment comment = new Comment();
+        comment.setbId(bId);
+        comment.setuId(uId);
+        comment.setContent(content);
+        comment.setcTime(new Date(System.currentTimeMillis()));
+        comment.setDevice(device);
+        Integer insert = commentMapper.insertComment(comment);
+        return insert > 0;
+    }
+
+    @Override
+    public boolean replyComment(Long uId, Long cId, String content,Long device) {
+        Reply reply = new Reply();
+        reply.setcId(cId);
+        reply.setuId(uId);
+        reply.setContent(content);
+        reply.setcTime(new Date(System.currentTimeMillis()));
+        reply.setDevice(device);
+        Integer insert = replyMapper.insertReply(reply);
+        return insert > 0;
     }
 
     private Blog getHotwordPart(Blog blog, String remark) {
@@ -182,21 +210,21 @@ public class BlogServiceImpl implements BlogService {
         texts = StringUtils.removeTag(texts);
         int textsLength = texts.length();
         int indexOf = texts.indexOf(remark);
-        if(indexOf==-1){
+        if (indexOf == -1) {
             //正文部分没有热词,就显示前面100一些好了
-            if(textsLength>100){
-                texts = texts.substring(0,textsSubLength);
+            if (textsLength > 100) {
+                texts = texts.substring(0, textsSubLength);
             }
-        }else{
-            if(textsLength>textsSubLength){
-                if(indexOf<50) {
+        } else {
+            if (textsLength > textsSubLength) {
+                if (indexOf < 50) {
                     texts = texts.substring(0, textsSubLength);
-                }else if(indexOf>50){
-                    if(indexOf+50>textsLength){
+                } else if (indexOf > 50) {
+                    if (indexOf + 50 > textsLength) {
                         //并没有那么长
-                        texts =texts.substring(textsLength-textsSubLength,textsLength);
-                    }else{
-                        texts = texts.substring(indexOf-50, indexOf + 50);
+                        texts = texts.substring(textsLength - textsSubLength, textsLength);
+                    } else {
+                        texts = texts.substring(indexOf - 50, indexOf + 50);
                     }
                 }
 

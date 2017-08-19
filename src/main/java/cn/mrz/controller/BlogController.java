@@ -6,6 +6,7 @@ import cn.mrz.pojo.Comment;
 import cn.mrz.pojo.Word;
 import cn.mrz.service.BlogService;
 import cn.mrz.service.WordService;
+import cn.mrz.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -32,7 +33,7 @@ import java.util.Map;
  * Created by Administrator on 2017/4/6.
  */
 @Controller
-public class BlogController extends BaseController{
+public class BlogController extends BaseController {
 
     @Autowired
     MessageProducer messageProducer;
@@ -61,7 +62,7 @@ public class BlogController extends BaseController{
     }
 
     @RequestMapping(value = "/blog/blog/{id}")
-    public String goBlogPage(ModelMap map,@PathVariable Long id) {
+    public String goBlogPage(ModelMap map, @PathVariable Long id) {
         Blog blog = blogService.getById(id);
         List<Comment> commentList = blogService.getCommentByBId(id);
         if (blog == null) {
@@ -73,47 +74,48 @@ public class BlogController extends BaseController{
     }
 
     @RequestMapping(value = {"/blog/hotword/{hashcode}"})
-    public String goHotWordList(ModelMap map,@PathVariable String hashcode) {
+    public String goHotWordList(ModelMap map, @PathVariable String hashcode) {
         String hotWord = "";
-        Page<Word> wordsByWordHash = wordService.getWordsByWordHash(new Page<Word>(1,1), hashcode);
-        if(wordsByWordHash.getTotal()>0){
+        Page<Word> wordsByWordHash = wordService.getWordsByWordHash(new Page<Word>(1, 1), hashcode);
+        if (wordsByWordHash.getTotal() > 0) {
             Word word = wordsByWordHash.getRecords().get(0);
             hotWord = word.getRemark();
-        }else{
+        } else {
             throw new RuntimeException("没有这样的博客");
         }
-        map.addAttribute("hotWord",hotWord);
-        map.addAttribute("hashcode",hashcode);
+        map.addAttribute("hotWord", hotWord);
+        map.addAttribute("hashcode", hashcode);
         return "/blog/hotword";
     }
 
     @ResponseBody
     @RequestMapping(value = "/blog/list", produces = {"application/json;charset=UTF-8"})
-    public String getBlogList(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer pageSize,@RequestParam(required = false) String sort) {
-        if(page==null)
+    public String getBlogList(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize, @RequestParam(required = false) String sort) {
+        if (page == null)
             page = 1;
-        if(pageSize==null)
+        if (pageSize == null)
             pageSize = this.pageSize;
-        if(sort==null)
+        if (sort == null)
             sort = "create_date";
-        Page<Blog> pagination = new Page<Blog>(page, pageSize,sort);
+        Page<Blog> pagination = new Page<Blog>(page, pageSize, sort);
         pagination.setAsc(false);
         pagination = blogService.getBlogList(pagination, false);
         List<Blog> blogList = pagination.getRecords();
         Integer blogCountNum = pagination.getTotal();
         Map map = new HashMap();
-        map.put("success",true);
+        map.put("success", true);
         Map data = new HashMap();
-        data.put("blogList",blogList);
+        data.put("blogList", blogList);
         double pageNum = Math.ceil(blogCountNum.doubleValue() / pageSize.doubleValue());
-        data.put("pageNum",pageNum);
-        data.put("blogCountNum",blogCountNum);
-        map.put("data",data);
+        data.put("pageNum", pageNum);
+        data.put("blogCountNum", blogCountNum);
+        map.put("data", data);
         return JSONObject.toJSONString(map);
     }
 
     /**
      * 首页
+     *
      * @return
      */
     @ResponseBody
@@ -121,10 +123,10 @@ public class BlogController extends BaseController{
     public String getHotWordList() {
         List<Word> hotWordList = wordService.getTopHotWordList(15);
         Map map = new HashMap();
-        map.put("success",true);
+        map.put("success", true);
         Map data = new HashMap();
-        data.put("hotWordList",hotWordList);
-        map.put("data",data);
+        data.put("hotWordList", hotWordList);
+        map.put("data", data);
         return JSONObject.toJSONString(map);
     }
 
@@ -133,19 +135,19 @@ public class BlogController extends BaseController{
     public String getTopBlogList() {
         List<Blog> topBlogList = blogService.getHotBlogList(5);
         Map map = new HashMap();
-        map.put("success",true);
+        map.put("success", true);
         Map data = new HashMap();
-        data.put("topBlogList",topBlogList);
-        map.put("data",data);
+        data.put("topBlogList", topBlogList);
+        map.put("data", data);
         return JSONObject.toJSONString(map);
     }
 
     @ResponseBody
     @RequestMapping(value = {"/blog/hotword/list/{hashcode}"}, produces = {"application/json;charset=UTF-8"})
-    public String getHotWordList(@PathVariable String hashcode,@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer pageSize) {
-        if(page==null)
+    public String getHotWordList(@PathVariable String hashcode, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize) {
+        if (page == null)
             page = 1;
-        if(pageSize==null)
+        if (pageSize == null)
             pageSize = 10;
         Page<Word> pagination = wordService.getWordsByWordHash(new Page<Word>(page, pageSize), hashcode);
         List<Word> records = pagination.getRecords();
@@ -158,7 +160,7 @@ public class BlogController extends BaseController{
         double pageNum = Math.ceil(total.doubleValue() / pageSize.doubleValue());
         data.put("blogList", blogList);
         data.put("pageNum", pageNum);
-        hashMap.put("data",data);
+        hashMap.put("data", data);
         String blogListJson = JSONObject.toJSONString(hashMap);
         return blogListJson;
     }
@@ -167,9 +169,9 @@ public class BlogController extends BaseController{
     @RequestMapping(value = {"/blog/visit/{blogId}"}, produces = "application/javascript")
     public String visitBlog(@PathVariable Long blogId) {
         boolean addVisit = blogService.addVisit(blogId);
-        if(addVisit){
+        if (addVisit) {
             return "console.log(\"visit success\");";
-        }else{
+        } else {
             return "console.log(\"visit fail\");";
         }
     }
@@ -178,8 +180,8 @@ public class BlogController extends BaseController{
     @RequestMapping(value = {"/admin/blog/list/username/{username}"}, produces = {"application/json;charset=UTF-8"})
     public String getBlogListByUsername(@PathVariable String username) {
         Page<Blog> pagination = new Page<Blog>(1, 10);
-        pagination = blogService.getUserBlogList(pagination,username);
-        List<Blog> userBlogList =pagination.getRecords();
+        pagination = blogService.getUserBlogList(pagination, username);
+        List<Blog> userBlogList = pagination.getRecords();
         HashMap data = new HashMap();
         data.put("userBlogList", userBlogList);
         HashMap hashMap = new HashMap();
@@ -187,6 +189,7 @@ public class BlogController extends BaseController{
         hashMap.put("data", data);
         return JSONObject.toJSONString(hashMap);
     }
+
     @ResponseBody
     @RequestMapping(value = "/admin/blog/add")
     public String addBlog(Blog blog) {
@@ -196,7 +199,7 @@ public class BlogController extends BaseController{
         blog.setEditDate(now);
         if (blog.getTitle() == null || "".equals(blog.getTitle().trim()))
             blog.setTitle(new SimpleDateFormat("yyyy年MM月dd日HH时m分ss秒").format(now) + "写下的博客");
-        if(blog.getAuthor()==null){
+        if (blog.getAuthor() == null) {
             blog.setAuthor(SecurityUtils.getSubject().getPrincipal().toString());
         }
         //图片都是外链,这个字段GG
@@ -247,18 +250,18 @@ public class BlogController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/admin/blog/delete", produces = {"application/json;charset=UTF-8"})
-    public String deleteBlog(@RequestParam Long id,@RequestParam(required = false) Integer page) {
+    public String deleteBlog(@RequestParam Long id, @RequestParam(required = false) Integer page) {
 
-        if(page==null)
+        if (page == null)
             page = 1;
         String blogListJson = DEFAULT_FAILED_MESSAGE;
         Blog blog = new Blog();
         blog.setId(id);
         int isDelete = blogService.deleteBlog(blog);
-        if(isDelete>0){
-            Page<Blog> pagination = new Page<Blog>(page,pageSize,"create_date");
+        if (isDelete > 0) {
+            Page<Blog> pagination = new Page<Blog>(page, pageSize, "create_date");
             pagination.setAsc(false);
-            pagination= blogService.getBlogList(pagination, false);
+            pagination = blogService.getBlogList(pagination, false);
             List<Blog> blogList = pagination.getRecords();
             Integer blogCountNum = pagination.getTotal();
             double pageNum = Math.ceil(blogCountNum.doubleValue() / pageSize.doubleValue());
@@ -267,8 +270,8 @@ public class BlogController extends BaseController{
             data.put("blogCountNum", blogCountNum);
             data.put("pageNum", pageNum);
             HashMap map = new HashMap();
-            map.put("success",true);
-            map.put("data",data);
+            map.put("success", true);
+            map.put("data", data);
             blogListJson = JSONObject.toJSONString(map);
         }
         return blogListJson;
@@ -276,16 +279,42 @@ public class BlogController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/blog/comment/updown", produces = {"application/json;charset=UTF-8"})
-    public String commentUp(@RequestParam Long cId,@RequestParam Long direction) {
+    public String commentUp(@RequestParam Long cId, @RequestParam Long direction) {
         String commentUpJson = DEFAULT_FAILED_MESSAGE;
-        if(cId==null)
+        if (cId == null)
             return commentUpJson;
-        Long id = (Long)SecurityUtils.getSubject().getSession().getAttribute("id");
+        Long id = (Long) SecurityUtils.getSubject().getSession().getAttribute("id");
         int result = blogService.commentUpDown(cId, id, direction);
         HashMap map = new HashMap();
-        map.put("success",true);
-        map.put("data",result);
+        map.put("success", true);
+        map.put("data", result);
         commentUpJson = JSONObject.toJSONString(map);
         return commentUpJson;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/blog/comment/reply", produces = {"application/json;charset=UTF-8"})
+    public String commentReply(@RequestParam(required = false) Long cId, @RequestParam(required = false) Long bId, @RequestParam(required = false) String content, @RequestParam Long device) {
+        String commentReplyJson = DEFAULT_FAILED_MESSAGE;
+        //用户id
+        Long uId = (Long) SecurityUtils.getSubject().getSession().getAttribute("id");
+
+        content = StringUtils.stripXSSAndSql(content);
+
+        if ("".equals(content.trim())) {
+            return commentReplyJson;
+        }
+        boolean result = false;
+        if (cId != null) {
+            //回复评论
+            result = blogService.replyComment(uId, cId, content, device);
+        } else if (bId != null) {
+            //评论博文
+            result = blogService.newComment(uId, bId, content, device);
+        }
+        HashMap map = new HashMap();
+        map.put("success", result);
+        commentReplyJson = JSONObject.toJSONString(map);
+        return commentReplyJson;
     }
 }

@@ -17,4 +17,6 @@ public interface CommentMapper extends BaseMapper<Comment> {
 
     void updateUp(@Param("up")Long up, @Param("id")Long id);
     void updateDown(@Param("down")Long down, @Param("id")Long id);
+
+    Integer insertComment(Comment comment);
 }
