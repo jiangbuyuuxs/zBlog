@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -248,14 +245,16 @@ public class BuyController extends BaseController {
     }
 
 
+
+
     @ResponseBody
-    @RequestMapping(value = "/admin/buy/file/list", produces = {"application/json;charset=UTF-8"})
+    @RequestMapping(value = "/admin/buy/files", method = RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public String getFileList() throws IOException {
         List<String> fileList = buyService.getBuyFileList();
-        List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
+        List<String> analysisFiles = buyService.listAnalysisFiles();
         Map data = new HashMap();
         data.put("fileList", fileList);
-        data.put("handlingFileList", handlingBuyFileList);
+        data.put("analysisFiles", analysisFiles);
         Map map = new HashMap();
         map.put("success", true);
         map.put("data", data);
@@ -264,7 +263,7 @@ public class BuyController extends BaseController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/admin/buy/file/upload", produces = {"application/json;charset=UTF-8"})
+    @RequestMapping(value = "/admin/buy/files", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
     public String uploadFile(@RequestParam MultipartFile buyFile) throws IOException {
         //TODO 这个东西是先将文件上传,然后才有这些操作.所以说判断什么的不能在这里做,先于这里才可以
         if (buyFile.isEmpty())
@@ -282,7 +281,7 @@ public class BuyController extends BaseController {
         boolean saveBuyFile = buyService.saveBuyFile(buyFile);
         if (saveBuyFile) {
             List<String> fileList = buyService.getBuyFileList();
-            List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
+            List<String> handlingBuyFileList = buyService.listAnalysisFiles();
             Map data = new HashMap();
             data.put("fileList", fileList);
             data.put("handlingFileList", handlingBuyFileList);
@@ -295,82 +294,59 @@ public class BuyController extends BaseController {
             return DEFAULT_FAILED_MESSAGE;
         }
     }
-
     @ResponseBody
-    @RequestMapping(value = "/admin/buy/file/parse", produces = {"application/json;charset=UTF-8"})
-    public String parseFile(@RequestParam String fileName) throws IOException {
-        if(fileName!=null){
-            buyService.addHandlingBuyFile(fileName);
-            messageProducer.sendHandlerTbkExcelMessage(fileName);
-        }
-        Map data = new HashMap();
-        List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
-        data.put("handlingFileList", handlingBuyFileList);
-        Map map = new HashMap();
-        map.put("success", true);
-        map.put("data", data);
-        return JSONObject.toJSONString(map);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/admin/buy/file/handling", produces = {"application/json;charset=UTF-8"})
-    public String handling() throws IOException {
-        Map data = new HashMap();
-        List<String> handlingBuyFileList = buyService.listHandlingBuyFile();
-        data.put("handlingFileList", handlingBuyFileList);
-        Map map = new HashMap();
-        map.put("success", true);
-        map.put("data", data);
-        return JSONObject.toJSONString(map);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/admin/buy/file/uploadparse", produces = {"application/json;charset=UTF-8"})
-    public String uploadFileParse(@RequestParam MultipartFile buyFile) throws IOException {
-        //上传完就直接发送解析文件消息
-
-        if (buyFile.isEmpty())
-            return "{\"success\": false,\"message\":\"请选择非空文件\"}";
-        String originalFilename = buyFile.getOriginalFilename();
-        String[] originalFilenameSplit = originalFilename.split("\\.");
-        if (originalFilenameSplit.length < 2) {
-            return "{\"success\": false,\"message\":\"请选择正确的文件\"}";
-        } else {
-            String extName = originalFilenameSplit[originalFilenameSplit.length - 1];
-            if (!"xls".equals(extName)) {
-                return "{\"success\": false,\"message\":\"请选择正确的.xls文件\"}";
-            }
-        }
-        boolean saveBuyFile = buyService.saveBuyFile(buyFile);
-        if (saveBuyFile) {
-            messageProducer.sendHandlerTbkExcelMessage(originalFilename);
-            List<String> fileList = buyService.getBuyFileList();
-            Map data = new HashMap();
-            data.put("fileList", fileList);
-            Map map = new HashMap();
-            map.put("success", true);
-            map.put("data", data);
-
-            return JSONObject.toJSONString(map);
-        } else {
-            return DEFAULT_FAILED_MESSAGE;
-        }
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/admin/buy/file/delete", produces = {"application/json;charset=UTF-8"})
+    @RequestMapping(value = "/admin/buy/files",method = RequestMethod.DELETE,produces = {"application/json;charset=UTF-8"})
     public String deleteFile(@RequestParam String fileName) throws IOException {
         if (buyService.deleteBuyFile(fileName)) {
             return "{\"success\": true,\"message\":\"成功删除:" + fileName + "\"}";
         }
         return "{\"success\": false,\"message\":\"删除失败\"}";
+    }
 
+    /**
+     * 开始解析给定文件
+     * @param fileName
+     * @return
+     * @throws IOException
+     */
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/files/analysis",method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
+    public String analysisFile(@RequestParam String fileName) throws IOException {
+        if(fileName!=null){
+            messageProducer.sendHandlerTbkExcelMessage(fileName);
+            buyService.addHandlingBuyFile(fileName);
+        }
+        Map data = new HashMap();
+        List<String> analysisFiles = buyService.listAnalysisFiles();
+        data.put("analysisFiles", analysisFiles);
+        Map map = new HashMap();
+        map.put("success", true);
+        map.put("data", data);
+        return JSONObject.toJSONString(map);
+    }
+
+    /**
+     * 获取正在解析中的文件列表
+     * @return
+     * @throws IOException
+     */
+    @ResponseBody
+    @RequestMapping(value = "/admin/buy/files/analysis",method = RequestMethod.GET,produces = {"application/json;charset=UTF-8"})
+    public String analysisFiles() throws IOException {
+        Map data = new HashMap();
+        List<String> analysisFiles = buyService.listAnalysisFiles();
+        data.put("analysisFiles", analysisFiles);
+        Map map = new HashMap();
+        map.put("success", true);
+        map.put("data", data);
+        return JSONObject.toJSONString(map);
     }
 
     @ResponseBody
-    @RequestMapping(value = "/admin/buy/file/clear", produces = {"application/json;charset=UTF-8"})
-    public String clearObsoleteItem() throws IOException {
+    @RequestMapping(value = "/admin/buy/obsoleteItem",method = RequestMethod.DELETE,produces = {"application/json;charset=UTF-8"})
+    public String deleteObsoleteItem() throws IOException {
         int clearObsoleteItem = buyService.clearObsoleteItem();
         return "{\"success\": true,\"message\":\"成功清除过期商品:" + clearObsoleteItem + "条\"}";
     }
+
 }

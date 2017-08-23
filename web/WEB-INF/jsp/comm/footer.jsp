@@ -1,3 +1,4 @@
+<%@ page import="java.net.InetAddress" %>
 <%@ page pageEncoding="UTF-8" %>
     <div class="float-nav hidden-xs hidden">
         <div class="list-group">
@@ -29,6 +30,7 @@
         <p>Copyright © 2016-2017 - Powered by textBlog - Hosted by Xxxx - 商务合作 - </p>
 
         <p>最近访问人数{xxx},最后更新于2017年5月9日 20:33:50</p>
+        <p>当前服务器地址:<%=InetAddress.getLocalHost().getHostAddress()%></p>
     </div>
     <div class="logon-mask hidden">
         <%--<form id="logon-panel" class="form-horizontal hidden" action="/login" method="post">--%>

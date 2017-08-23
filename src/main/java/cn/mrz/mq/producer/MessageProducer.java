@@ -24,6 +24,11 @@ public class MessageProducer {
 
     public void sendHandlerTbkExcelMessage(String message){
         logger.info("发送处理淘宝客Excel路径消息");
-        amqpTemplate.convertAndSend("handlerExcelQueueKey",message.getBytes());
+        try{
+            amqpTemplate.convertAndSend("handlerExcelQueueKey",message.getBytes("utf-8"));
+        }catch (Exception e){
+            logger.error("发送处理淘宝客Excel路径消息失败:"+e.getLocalizedMessage());
+
+        }
     }
 }

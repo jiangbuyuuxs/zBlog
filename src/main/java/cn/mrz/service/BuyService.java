@@ -14,13 +14,14 @@ import java.util.Set;
  */
 public interface BuyService {
     String fileDictionary = "C://attach//";
+    String fileDictionary2 = "/home/attach";
     String ITEM_LIST_KEY_PREFIX = "item:list:";
     String ITEM_LIST_COUNT_KEY_PREFIX = "item:list:count:";
 
     List<String> getBuyFileList();
     boolean saveBuyFile(MultipartFile buyFile);
     boolean deleteBuyFile(String buyFilePath);
-    boolean parseBuyFile(String buyFilePath);
+    boolean parseBuyFile(String buyFilePath) throws Exception;
 
     Page<Item> getItem(Page<Item> page);
     public List<ItemClass> getItemClassByParentId(Long parentId);
@@ -36,7 +37,7 @@ public interface BuyService {
      */
     int clearObsoleteItem();
 
-    List<String> listHandlingBuyFile();
+    List<String> listAnalysisFiles();
 
     void addHandlingBuyFile(String fileName);
 }

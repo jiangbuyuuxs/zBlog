@@ -49,6 +49,7 @@
             position: fixed;
             right: 40px;
             bottom: 40px;
+            list-style: none;
         }
 
         .comment li {
@@ -97,8 +98,8 @@
                             '<a href="/user/userinfo/' + comment.uId + '" target="_blank">' + comment.username + '</a> ' + comment.content +
                             ' ' + getDescriptionLeaveNow(comment.cTime) +
                             '<span class=" hidden"> ' +
-                            '<a class="up-down-btn" data-c-id="' + comment.id + '" data-direction="1" href="javascript:void;">顶</a> [<span>' + comment.up + '</span>] | ' +
-                            '<a class="up-down-btn" data-c-id="' + comment.id + '" data-direction="0" href="javascript:void;">踩</a> [<span>' + comment.down + '</span>] ' +
+                            '<a class="up-down-btn" data-c-id="' + comment.id + '" data-direction="1" href="javascript:;">顶</a> [<span>' + comment.up + '</span>] | ' +
+                            '<a class="up-down-btn" data-c-id="' + comment.id + '" data-direction="0" href="javascript:;">踩</a> [<span>' + comment.down + '</span>] ' +
                             '<a class="go-reply-btn" data-c-id="' + comment.id + '" data-username="' + comment.username + '" href="javascript:void;">回复</a>' +
                             ' 来自' + BlogTool.device[comment.device] + '</span></li>';
                     result += '<ul>';
@@ -218,9 +219,7 @@
     </script>
 </head>
 <body class="container">
-<div>
-    <a class="btn btn-default" href="/">首页</a>
-</div>
+<%@include file="../comm/headbar.jsp"%>
 <div class="main-panel">
     <h2 class="blog-title">${blog.title}
         <small>${blog.createDate}</small>
@@ -233,7 +232,7 @@
         <div class="row">
             <div class="col-xs-offset-2 col-xs-6">
                 <div class="to-user hidden">回复 <span class="reply-to"></span>:<a class="clear-reply-to"
-                                                                                 href="javascript:void;">x</a></div>
+                                                                                 href="javascript:;">x</a></div>
                 <textarea class="reply-content" cols="73"></textarea>
             </div>
             <div class="col-xs-1">

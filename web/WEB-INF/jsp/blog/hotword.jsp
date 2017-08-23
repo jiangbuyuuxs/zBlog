@@ -104,9 +104,7 @@
     </style>
 </head>
 <body class="container">
-    <div class="head-panel">
-        <a class="btn btn-default" href="/index">首页</a>
-    </div>
+    <%@include file="../comm/headbar.jsp"%>
     <div class="main-panel">
         <div class="row">
             <blog-panel></blog-panel>

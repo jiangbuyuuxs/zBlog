@@ -99,7 +99,7 @@ public class BuyServiceImpl implements BuyService {
 
 
     @Override
-    public boolean parseBuyFile(String buyFilePath) {
+    public boolean parseBuyFile(String buyFilePath) throws Exception {
         //将当前处理的文件放入 正在处理
         String username = "admin";
         final String buyFileKey = "buyFile:handling:" + username;
@@ -150,18 +150,14 @@ public class BuyServiceImpl implements BuyService {
                 favourableMapper.insertFavourableList(favourableBatch);
             if (itemClassBatch.size() > 0)
                 itemClassMapper.insertItemClassList(itemClassBatch);
-        } catch (Exception e) {
-
-            e.printStackTrace();
-            return false;
-        }finally{
+        } finally {
             //将当前处理的文件移出 正在处理 ,无法判断是否正常处理还是异常退出
             buyDao.removeBuyFile(buyFileKey, buyFilePath);
         }
         return true;
     }
 
-    public List<String> listHandlingBuyFile(){
+    public List<String> listAnalysisFiles() {
         String username = "admin";
         final String buyFileKey = "buyFile:handling:" + username;
         return buyDao.listBuyFile(buyFileKey);
@@ -327,8 +323,8 @@ public class BuyServiceImpl implements BuyService {
 
     private List<Item> parseData(String filePath) throws Exception {
         File file = new File(fileDictionary, filePath);
-        InputStream is = new FileInputStream(file);
-        try {
+        if (file != null && file.exists()) {
+            InputStream is = new FileInputStream(file);
             POIFSFileSystem fs = new POIFSFileSystem(is);
             Workbook wb = new HSSFWorkbook(fs);
             Sheet sheet = wb.getSheetAt(0);
@@ -375,11 +371,11 @@ public class BuyServiceImpl implements BuyService {
                 Long salesVolume = Long.parseLong(salesVolumeStr);
 
                 Favourable favourable = new Favourable(countNum, favourableEndDate, itemId, null, favourableStartDate, surplus, null, favourableTbkUrl, favourableTitle);
-                Item item = new Item(null, itemId, title, imageUrl, detailUrl, itemClassString, favourableTbkUrl, price, myMoney, shopName, shopType,favourableStartDate, favourableEndDate, null, null, salesVolume, favourable);
+                Item item = new Item(null, itemId, title, imageUrl, detailUrl, itemClassString, favourableTbkUrl, price, myMoney, shopName, shopType, favourableStartDate, favourableEndDate, null, null, salesVolume, favourable);
                 items.add(item);
             }
             return items;
-        } catch (Exception e) {
+        } else {
             return null;
         }
     }

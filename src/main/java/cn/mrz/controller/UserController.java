@@ -133,8 +133,8 @@ public class UserController extends BaseController{
         return JSONObject.toJSONString(map);
     }
     @ResponseBody
-    @RequestMapping(value = "/admin/user/enabled", produces = {"application/json;charset=UTF-8"})
-    public String enabledUser(@RequestParam String username) {
+    @RequestMapping(value = "/admin/user/enabled/{username}", produces = {"application/json;charset=UTF-8"})
+    public String enabledUser(@PathVariable String username) {
         int enabled = userService.changeState(username);
         Map data = new HashMap();
         data.put("enabled", enabled);

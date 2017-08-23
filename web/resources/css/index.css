@@ -11,16 +11,10 @@ body{
     background: #353535;
 }
 
-.head-bar{
-    min-height: 50px;
-    border:none;
-    margin-bottom: 0;
-}
+
 .hide-header{
     min-height: 50px;
 }
-
-
 
 .hide-header{
     display: none;
@@ -47,21 +41,6 @@ body{
 .mobile .head-bar .nav{
     top:50px;
 }
-
-
-
-
-.head-bar .navbar-nav > li > a{
-    border-bottom: solid 4px #ffffff;
-    padding-bottom: 0;
-    height: 50px;
-}
-.head-bar .navbar-nav > li > a:hover{
-    border-bottom: solid 4px #ff5442;
-    background: rgba(206, 206, 206, 0.5);
-    color:#ffffff;
-}
-
 
 .right-panel{
     padding: 0 40px;

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -80,8 +81,8 @@ public class TodoController extends BaseController{
     }
 
     @ResponseBody
-    @RequestMapping(value = "/admin/todo/complete", produces = {"application/json;charset=UTF-8"})
-    public String completeTodo(@RequestParam(required = false) Long id,@RequestParam(required = false) Integer state) {
+    @RequestMapping(value = "/admin/todo/complete/{id}/{state}", produces = {"application/json;charset=UTF-8"})
+    public String completeTodo(@PathVariable Long id,@PathVariable Integer state) {
         if(id==null)
             return DEFAULT_FAILED_MESSAGE;
 

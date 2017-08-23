@@ -1,3 +1,20 @@
+.head-bar{
+    min-height: 50px;
+    border:none;
+    margin-bottom: 0;
+}
+
+.head-bar .navbar-nav > li > a{
+    border-bottom: solid 4px #ffffff;
+    padding-bottom: 0;
+    height: 50px;
+}
+.head-bar .navbar-nav > li > a:hover{
+    border-bottom: solid 4px #ff5442;
+    background: rgba(206, 206, 206, 0.5);
+    color:#ffffff;
+}
+
 .float-nav{
     position: fixed;
     left:2px;
@@ -73,3 +90,4 @@
     top: 50%;
     left: 50%;
 }
+

@@ -203,6 +203,7 @@
             position: fixed;
             right:40px;
             bottom:40px;
+            list-style: none;
         }
     </style>
     <script type="text/x-template" id="app">

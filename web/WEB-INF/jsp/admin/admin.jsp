@@ -138,7 +138,7 @@
         }
 
         .blog-tab-panel > .row .title {
-            width:100%;
+            width: 100%;
             display: inline-block;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -487,7 +487,8 @@
         <div class="blog-tab-panel tab-panel">
             <div class="row" v-for="blog of userBlogList">
                 <div class="col-lg-8">
-                    <a target="_blank" class="title" :title="blog.title" :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
+                    <a target="_blank" class="title" :title="blog.title"
+                       :href="'/detail/'+blog.id+'/id'">{{blog.title}}</a>
                 </div>
                 <div class="col-lg-3 pull-right">
                     {{blog.createDate}}
@@ -511,9 +512,10 @@
                 </form>
             </div>
             <div>已完成:<span class="percent">0</span>%</div>
-            <ul class="buy-file-list" :class="{hidden:handlingFileList.length==0}">
-                <li v-for="fileName in handlingFileList">
-                    <img class="pull-left" style="width:20px;height:20px;" src="/resources/img/loading.gif">{{fileName}} <span class="bg-success">正在解析...</span>
+            <ul class="buy-file-list" :class="{hidden:analysisFiles.length==0}">
+                <li v-for="fileName in analysisFiles">
+                    <img class="pull-left" style="width:20px;height:20px;" src="/resources/img/loading.gif">{{fileName}}
+                    <span class="bg-success">正在解析...</span>
                 </li>
             </ul>
             <ul class="buy-file-list">
@@ -642,7 +644,7 @@
                     fetchData: function () {
                         var keyword = $('.search-keyword').val();
                         var url = '/admin/search/search';
-                        this.$http.post(url, {
+                        this.$http.get(url, {
                             keyword: keyword,
                             page: 1,
                             pageSize: 5
@@ -726,7 +728,7 @@
                     deleteUser: function (username) {
                         if (confirm('是否删除该用户(' + username + ')')) {
                             var url = '/admin/user/delete';
-                            this.$http.get(url, {
+                            this.$http.delete(url, {
                                 params: {
                                     username: username,
                                     page: this.curPage
@@ -743,12 +745,8 @@
                         }
                     },
                     changeState: function (username, index) {
-                        var url = '/admin/user/enabled';
-                        this.$http.get(url, {
-                            params: {
-                                username: username
-                            }
-                        }).then(function (response) {
+                        var url = '/admin/user/enabled/' + username;
+                        this.$http.put(url).then(function (response) {
                             if (response.data.success)
                                 this.userList[index].enabled = response.data.data.enabled;
                             else
@@ -840,7 +838,7 @@
                             nickname: $('#nickname').val()
                         };
                         var url = '/admin/user/edit';
-                        this.$http.post(url, data, {
+                        this.$http.post(url,data, {//put需要全部信息
                             emulateJSON: true
                         }).then(function (response) {
                             if (response.data.success) {
@@ -910,7 +908,7 @@
                                 var sure = confirm('是否删除该博文(id为:' + id + ')');
                                 if (sure) {
                                     var url = '/admin/blog/delete';
-                                    this.$http.get(url, {
+                                    this.$http.delete(url, {
                                         params: {
                                             id: id,
                                             page: this.curPage
@@ -1058,17 +1056,17 @@
                             return {
                                 fileList: [],
                                 uploading: false,
-                                handlingFileList: []
+                                analysisFiles: []
                             }
                         },
                         methods: {
                             fetchData: function () {
-                                var url = '/admin/buy/file/list';
+                                var url = '/admin/buy/files';
                                 this.$http.get(url).then(function (response) {
-                                            if (response.data.success){
+                                            if (response.data.success) {
                                                 this.fileList = response.data.data.fileList;
-                                                this.handlingFileList = response.data.data.handlingFileList;
-                                                this.queryHandlingFileList();
+                                                this.analysisFiles = response.data.data.analysisFiles;
+                                                this.queryanalysisFiles();
                                             }
                                         }
                                 );
@@ -1078,7 +1076,7 @@
                             },
                             upload: function () {
                                 var formData = new FormData($('#buyFileFrom')[0]);
-                                var url = '/admin/buy/file/upload';
+                                var url = '/admin/buy/files';
                                 var percentObj = $('.percent');
                                 this.$http.post(url, formData, {
                                     progress: function (event) {
@@ -1102,23 +1100,13 @@
                                 );
 
                             },
-                            parseFile: function (fileName) {
-                                var url = '/admin/buy/file/parse';
-                                this.$http.get(url, {params:{fileName: fileName}}).
-                                        then(function (response) {
-                                            BlogTool.alert('开始解析:'+fileName);
-                                            this.handlingFileList=response.data.data.handlingFileList;
-                                            this.queryHandlingFileList();
-                                        }
-                                );
-                            },
                             deleteFile: function (fileName) {
                                 var isDel = confirm('是否删除');
                                 if (!isDel) {
                                     return false;
                                 }
-                                var url = '/admin/buy/file/delete';
-                                this.$http.get(url, {params:{fileName: fileName}}).
+                                var url = '/admin/buy/files';
+                                this.$http.delete(url, {params: {fileName: fileName}}).
                                         then(function (response) {
                                             if (response.data.success) {
                                                 alert(response.data.message);
@@ -1129,28 +1117,40 @@
                                         }
                                 );
                             },
+                            parseFile: function (fileName) {
+                                var url = '/admin/buy/files/analysis';
+                                this.$http.post(url,{fileName:fileName},{
+                                    emulateJSON: true
+                                }).
+                                        then(function (response) {
+                                            BlogTool.alert('开始解析:' + fileName);
+                                            this.analysisFiles = response.data.data.analysisFiles;
+                                            this.queryanalysisFiles();
+                                        }
+                                );
+                            },
+                            queryanalysisFiles: function () {
+                                if (this.analysisFiles.length < 1) {
+                                    return;
+                                }
+                                var url = '/admin/buy/files/analysis';
+                                this.$http.get(url).
+                                        then(function (response) {
+                                            if (response.data.success) {
+                                                this.analysisFiles = response.data.data.analysisFiles;
+                                            }
+                                        }
+                                );
+                                setTimeout(this.queryanalysisFiles, 5000);//5s轮询
+                            },
                             clear: function () {
                                 BlogTool.showMask();
-                                var url = '/admin/buy/file/clear';
-                                this.$http.post(url).
+                                var url = '/admin/buy/obsoleteItem';
+                                this.$http.delete(url).
                                         then(function (response) {
                                             alert(response.data.message);
                                             BlogTool.hideMask();
                                         });
-                            },
-                            queryHandlingFileList: function () {
-                                if(this.handlingFileList.length<1){
-                                    return;
-                                }
-                                var url = '/admin/buy/file/handling';
-                                this.$http.get(url).
-                                        then(function (response) {
-                                            if (response.data.success) {
-                                                this.handlingFileList = response.data.data.handlingFileList;
-                                            }
-                                        }
-                                );
-                                setTimeout(this.queryHandlingFileList,5000);//5s轮询
                             }
                         },
                         created: function () {
@@ -1225,9 +1225,8 @@
                         );
                     },
                     completeTodo: function (id) {
-                        var url = '/admin/todo/complete';
-                        var data = {params: {id: id, state: this.state}};
-                        this.$http.get(url, data).
+                        var url = '/admin/todo/complete/' + id + '/' + this.state;
+                        this.$http.put(url).
                                 then(function (response) {
                                     if (response.data.success) {
                                         this.todoList = response.data.data.todoList;
@@ -1247,7 +1246,7 @@
                             var data = {
                                 params: {id: id, state: this.state}
                             };
-                            this.$http.get(url, data).
+                            this.$http.delete(url, data).
                                     then(function (response) {
                                         if (response.data.success) {
                                             this.todoList = response.data.data.todoList;
