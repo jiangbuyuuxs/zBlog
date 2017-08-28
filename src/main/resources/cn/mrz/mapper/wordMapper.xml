@@ -5,8 +5,8 @@
     <select id="getWordList" resultType="Word">
         select
           remark,
-          hashcode,
-          sum(num) as num
+          any_value(hashcode),
+          any_value(sum(num)) as num
         from words
         group by remark
         order by num desc

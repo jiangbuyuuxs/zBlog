@@ -9,7 +9,7 @@
      http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd">
     <!--配置connection-factory，指定连接rabbit server参数 -->
     <rabbit:connection-factory id="connectionFactory"
-                               username="zblog" password="zblog" host="192.168.1.100" port="5672"/>
+                               username="zblog" password="zblog" host="192.168.1.105" port="5672"/>
 
     <!--定义rabbit template用于数据的接收和发送 -->
     <rabbit:template id="amqpTemplate" connection-factory="connectionFactory"

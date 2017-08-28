@@ -110,48 +110,50 @@ public class BuyServiceImpl implements BuyService {
             List<Item> itemBatch = new ArrayList<Item>();
             List<Favourable> favourableBatch = new ArrayList<Favourable>();
             List<ItemClass> itemClassBatch = new ArrayList<ItemClass>();
+            //已存在的商品类型
             List<String> itemClassTitleList = itemClassMapper.selectAllClassTitle();
-
-            for (Item item : items) {
-                //TODO 这里可以优化一下
-                int existItem = itemMapper.hasItemId(item.getItemId());
-                if (existItem < 1) {
-                    flag++;
-                    itemBatch.add(item);
-                    Favourable favourable = item.getFavourable();
-                    if (favourable != null) {
-                        favourableBatch.add(favourable);
-                    }
-                    String itemClass = item.getItemClassString();
-                    if (!itemClassTitleList.contains(itemClass)) {
-                        itemClassBatch.add(new ItemClass(itemClass));
-                        itemClassTitleList.add(itemClass);
-                    }
-                    if (flag == batchSize) {
-                        if (itemBatch.size() > 0) {
-                            itemMapper.insertItemList(itemBatch);
-                            itemBatch = new ArrayList<Item>();
+            if(items!=null) {
+                for (Item item : items) {
+                    int existItem = itemMapper.hasItemId(item.getItemId());
+                    if (existItem < 1) {
+                        flag++;
+                        itemBatch.add(item);
+                        Favourable favourable = item.getFavourable();
+                        if (favourable != null) {
+                            favourableBatch.add(favourable);
                         }
-                        if (favourableBatch.size() > 0) {
-                            favourableMapper.insertFavourableList(favourableBatch);
-                            favourableBatch = new ArrayList<Favourable>();
+                        String itemClass = item.getItemClassString();
+                        if (!itemClassTitleList.contains(itemClass)) {
+                            itemClassBatch.add(new ItemClass(itemClass));
+                            itemClassTitleList.add(itemClass);
                         }
-                        if (itemClassBatch.size() > 0) {
-                            itemClassMapper.insertItemClassList(itemClassBatch);
-                            itemClassBatch = new ArrayList<ItemClass>();
+                        if (flag == batchSize) {
+                            if (itemBatch.size() > 0) {
+                                itemMapper.insertItemList(itemBatch);
+                                itemBatch = new ArrayList<Item>();
+                            }
+                            if (favourableBatch.size() > 0) {
+                                favourableMapper.insertFavourableList(favourableBatch);
+                                favourableBatch = new ArrayList<Favourable>();
+                            }
+                            if (itemClassBatch.size() > 0) {
+                                itemClassMapper.insertItemClassList(itemClassBatch);
+                                itemClassBatch = new ArrayList<ItemClass>();
+                            }
+                            flag = 0;
                         }
-                        flag = 0;
                     }
                 }
+                if (itemBatch.size() > 0)
+                    itemMapper.insertItemList(itemBatch);
+                if (favourableBatch.size() > 0)
+                    favourableMapper.insertFavourableList(favourableBatch);
+                if (itemClassBatch.size() > 0)
+                    itemClassMapper.insertItemClassList(itemClassBatch);
+            }else{
+                return false;
             }
-            if (itemBatch.size() > 0)
-                itemMapper.insertItemList(itemBatch);
-            if (favourableBatch.size() > 0)
-                favourableMapper.insertFavourableList(favourableBatch);
-            if (itemClassBatch.size() > 0)
-                itemClassMapper.insertItemClassList(itemClassBatch);
         } finally {
-            //将当前处理的文件移出 正在处理 ,无法判断是否正常处理还是异常退出
             buyDao.removeBuyFile(buyFileKey, buyFilePath);
         }
         return true;
